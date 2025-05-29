@@ -19,7 +19,6 @@ const Auth = () => {
   // Address form state
   const [streetAddress, setStreetAddress] = useState('');
   const [city, setCity] = useState('');
-  const [stateProvince, setStateProvince] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [country, setCountry] = useState('United States');
   
@@ -45,7 +44,7 @@ const Auth = () => {
           user_id: userId,
           street_address: streetAddress,
           city,
-          state_province: stateProvince,
+          state_province: '',
           postal_code: postalCode,
           country,
         });
@@ -103,8 +102,8 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate address fields
-    if (!streetAddress || !city || !stateProvince || !postalCode) {
+    // Validate address fields (removed stateProvince from validation)
+    if (!streetAddress || !city || !postalCode) {
       toast({
         title: "Address required",
         description: "Please fill in all address fields to continue.",
@@ -280,8 +279,6 @@ const Auth = () => {
                         setStreetAddress={setStreetAddress}
                         city={city}
                         setCity={setCity}
-                        stateProvince={stateProvince}
-                        setStateProvince={setStateProvince}
                         postalCode={postalCode}
                         setPostalCode={setPostalCode}
                         country={country}

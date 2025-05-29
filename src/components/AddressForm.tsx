@@ -9,8 +9,6 @@ interface AddressFormProps {
   setStreetAddress: (value: string) => void;
   city: string;
   setCity: (value: string) => void;
-  stateProvince: string;
-  setStateProvince: (value: string) => void;
   postalCode: string;
   setPostalCode: (value: string) => void;
   country: string;
@@ -22,23 +20,11 @@ const AddressForm: React.FC<AddressFormProps> = ({
   setStreetAddress,
   city,
   setCity,
-  stateProvince,
-  setStateProvince,
   postalCode,
   setPostalCode,
   country,
   setCountry,
 }) => {
-  const usStates = [
-    'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
-    'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
-    'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
-    'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
-    'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
-    'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-  ];
-
   const countries = [
     'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Italy',
     'Spain', 'Netherlands', 'Japan', 'South Korea', 'Brazil', 'Mexico', 'Other'
@@ -82,33 +68,6 @@ const AddressForm: React.FC<AddressFormProps> = ({
             required
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="stateProvince">State/Province</Label>
-        {country === 'United States' ? (
-          <Select value={stateProvince} onValueChange={setStateProvince} required>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a state" />
-            </SelectTrigger>
-            <SelectContent>
-              {usStates.map((state) => (
-                <SelectItem key={state} value={state}>
-                  {state}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input
-            id="stateProvince"
-            type="text"
-            placeholder="State/Province"
-            value={stateProvince}
-            onChange={(e) => setStateProvince(e.target.value)}
-            required
-          />
-        )}
       </div>
 
       <div className="space-y-2">
