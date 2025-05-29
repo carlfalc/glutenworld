@@ -81,7 +81,7 @@ const Landing = () => {
     },
     {
       name: "Quarterly",
-      price: "$6.99",
+      price: "$12.99",
       duration: "3 months",
       features: [
         "Unlimited recipe conversions",
@@ -95,7 +95,7 @@ const Landing = () => {
     },
     {
       name: "Annual",
-      price: "$19.99",
+      price: "$29.99",
       duration: "12 months",
       features: [
         "Everything in Quarterly",

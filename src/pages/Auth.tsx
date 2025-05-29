@@ -81,14 +81,14 @@ const Auth = () => {
     },
     {
       name: "Quarterly",
-      price: "$6.99",
+      price: "$12.99",
       duration: "3 months",
       features: ["Unlimited recipe conversions", "Full recipe library access", "Premium community features", "Priority AI support"],
       popular: true
     },
     {
       name: "Annual",
-      price: "$19.99",
+      price: "$29.99",
       duration: "12 months",
       features: ["Everything in Quarterly", "Advanced nutrition tracking", "Custom recipe collections", "Early access to new features"],
       popular: false
