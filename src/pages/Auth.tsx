@@ -7,12 +7,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { ChefHat, Sparkles, Check } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import AddressForm from '@/components/AddressForm';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Address form state
+  const [streetAddress, setStreetAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [stateProvince, setStateProvince] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [country, setCountry] = useState('United States');
+  
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -26,6 +36,46 @@ const Auth = () => {
       navigate('/dashboard');
     }
   }, [user, navigate]);
+
+  const saveUserAddress = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_addresses')
+        .insert({
+          user_id: userId,
+          street_address: streetAddress,
+          city,
+          state_province: stateProvince,
+          postal_code: postalCode,
+          country,
+        });
+
+      if (error) {
+        console.error('Error saving user address:', error);
+        // Don't throw error here as we don't want to block signup for address issues
+      }
+    } catch (error) {
+      console.error('Error saving user address:', error);
+    }
+  };
+
+  const sendWelcomeEmail = async (email: string, fullName: string) => {
+    try {
+      const currentUrl = window.location.origin;
+      const signInUrl = `${currentUrl}/auth?tab=signin`;
+      
+      await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          email,
+          fullName,
+          signInUrl,
+        },
+      });
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+      // Don't show error to user as email is not critical for signup
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +103,17 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate address fields
+    if (!streetAddress || !city || !stateProvince || !postalCode) {
+      toast({
+        title: "Address required",
+        description: "Please fill in all address fields to continue.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     const { error } = await signUp(email, password, fullName);
     
     if (error) {
@@ -62,9 +123,20 @@ const Auth = () => {
         variant: "destructive",
       });
     } else {
+      // Get the user data to save address
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Save address information
+        await saveUserAddress(user.id);
+        
+        // Send welcome email
+        await sendWelcomeEmail(email, fullName);
+      }
+
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account.",
+        description: "Welcome to Gluten World! Check your email to verify your account and start your gluten-free journey.",
       });
     }
     
@@ -200,6 +272,23 @@ const Auth = () => {
                         minLength={6}
                       />
                     </div>
+                    
+                    <div className="border-t pt-4">
+                      <h4 className="font-medium text-foreground mb-3">Address Information</h4>
+                      <AddressForm
+                        streetAddress={streetAddress}
+                        setStreetAddress={setStreetAddress}
+                        city={city}
+                        setCity={setCity}
+                        stateProvince={stateProvince}
+                        setStateProvince={setStateProvince}
+                        postalCode={postalCode}
+                        setPostalCode={setPostalCode}
+                        country={country}
+                        setCountry={setCountry}
+                      />
+                    </div>
+                    
                     <Button
                       type="submit"
                       className="w-full bg-gluten-secondary hover:bg-gluten-secondary/90"
