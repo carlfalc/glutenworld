@@ -9,7 +9,155 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recipe_likes: {
+        Row: {
+          created_at: string
+          id: string
+          recipe_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipe_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipe_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_likes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          converted_recipe: string | null
+          cook_time: number | null
+          created_at: string
+          cuisine_type: string | null
+          difficulty_level: string | null
+          id: string
+          ingredients: Json | null
+          instructions: string[] | null
+          is_public: boolean | null
+          likes_count: number | null
+          original_recipe: string | null
+          prep_time: number | null
+          servings: number | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          converted_recipe?: string | null
+          cook_time?: number | null
+          created_at?: string
+          cuisine_type?: string | null
+          difficulty_level?: string | null
+          id?: string
+          ingredients?: Json | null
+          instructions?: string[] | null
+          is_public?: boolean | null
+          likes_count?: number | null
+          original_recipe?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          converted_recipe?: string | null
+          cook_time?: number | null
+          created_at?: string
+          cuisine_type?: string | null
+          difficulty_level?: string | null
+          id?: string
+          ingredients?: Json | null
+          instructions?: string[] | null
+          is_public?: boolean | null
+          likes_count?: number | null
+          original_recipe?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
