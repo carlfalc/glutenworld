@@ -14,8 +14,12 @@ const Landing = () => {
     if (user) {
       navigate('/dashboard');
     } else {
-      navigate('/auth');
+      navigate('/auth?tab=signup');
     }
+  };
+
+  const handleSignIn = () => {
+    navigate('/auth?tab=signin');
   };
 
   const features = [
@@ -110,16 +114,16 @@ const Landing = () => {
             <>
               <Button 
                 variant="ghost" 
-                onClick={() => navigate('/auth')}
+                onClick={handleSignIn}
                 className="text-foreground hover:text-gluten-primary"
               >
                 Sign In
               </Button>
               <Button 
-                onClick={() => navigate('/auth')}
+                onClick={handleGetStarted}
                 className="bg-gluten-primary hover:bg-gluten-primary/90"
               >
-                Get Started
+                Launch
               </Button>
             </>
           )}
