@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChefHat, Sparkles, Check, Users, BookOpen, Heart, ArrowRight } from 'lucide-react';
+import { ChefHat, Sparkles, Check, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock } from 'lucide-react';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -42,6 +42,27 @@ const Landing = () => {
       icon: <Heart className="w-8 h-8 text-gluten-primary" />,
       title: "Personalized Experience",
       description: "Get tailored recipe suggestions based on your preferences, dietary needs, and cooking skill level."
+    }
+  ];
+
+  const keyFeatures = [
+    {
+      icon: <Zap className="w-12 h-12 text-gluten-primary" />,
+      title: "Instant AI Conversion",
+      description: "Convert any recipe to gluten-free in seconds with our advanced AI technology",
+      highlight: "Save hours of research"
+    },
+    {
+      icon: <Shield className="w-12 h-12 text-gluten-primary" />,
+      title: "Safe & Tested",
+      description: "All conversions are verified by nutritionists and tested by our community",
+      highlight: "100% gluten-free guarantee"
+    },
+    {
+      icon: <Clock className="w-12 h-12 text-gluten-primary" />,
+      title: "Quick & Easy",
+      description: "Get started in minutes with our intuitive interface and step-by-step guidance",
+      highlight: "No learning curve"
     }
   ];
 
@@ -163,14 +184,50 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Key Features Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h3 className="text-4xl font-bold text-foreground mb-4">
+            Why Thousands Choose Gluten World
+          </h3>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Experience the future of gluten-free cooking with our revolutionary platform
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {keyFeatures.map((feature, index) => (
+            <Card 
+              key={index} 
+              className="text-center hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-gluten-primary/5 to-gluten-secondary/5 border-gluten-primary/20"
+            >
+              <CardHeader className="pb-4">
+                <div className="mx-auto mb-4 p-4 bg-gluten-primary/10 rounded-full w-fit">
+                  {feature.icon}
+                </div>
+                <CardTitle className="text-2xl mb-2">{feature.title}</CardTitle>
+                <div className="inline-block bg-gluten-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium mb-3">
+                  {feature.highlight}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base text-foreground/80">
+                  {feature.description}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h3 className="text-4xl font-bold text-foreground mb-4">
-            Why Choose Gluten World?
+            Complete Gluten-Free Solution
           </h3>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Our comprehensive platform makes gluten-free living easier, tastier, and more connected than ever before.
+            Everything you need to master gluten-free cooking and connect with a supportive community
           </p>
         </div>
         
