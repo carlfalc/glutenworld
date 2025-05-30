@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import ChatInterface from '@/components/ChatInterface';
 import RecipeHotlist from '@/components/RecipeHotlist';
+import CommunityShop from '@/components/CommunityShop';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Dashboard = () => {
@@ -38,7 +39,16 @@ const Dashboard = () => {
         <div className="flex-1 flex flex-col">
           <ChatInterface />
         </div>
-        <RecipeHotlist />
+        <div className="w-80 border-l border-border/50 bg-card/20 backdrop-blur-md flex flex-col">
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4">
+              <CommunityShop />
+            </div>
+            <div className="border-t border-border/50 mt-4">
+              <RecipeHotlist />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

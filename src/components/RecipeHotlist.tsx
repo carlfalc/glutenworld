@@ -1,6 +1,6 @@
 
 import { TrendingUp, Clock, Users } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 const RecipeHotlist = () => {
   const hotRecipes = [
@@ -35,20 +35,12 @@ const RecipeHotlist = () => {
       time: "3 hrs",
       difficulty: "Hard",
       trending: false
-    },
-    {
-      id: 5,
-      name: "Gluten-Free Pasta Carbonara",
-      conversions: 623,
-      time: "30 min",
-      difficulty: "Medium",
-      trending: true
     }
   ];
 
   return (
-    <div className="w-80 border-l border-border/50 bg-card/20 backdrop-blur-md">
-      <div className="p-4 border-b border-border/50">
+    <div className="p-4">
+      <div className="pb-4 border-b border-border/50">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-gluten-primary" />
           Recipe Hotlist
@@ -56,7 +48,7 @@ const RecipeHotlist = () => {
         <p className="text-sm text-muted-foreground mt-1">Most converted recipes today</p>
       </div>
       
-      <div className="p-4 space-y-3 max-h-full overflow-y-auto">
+      <div className="space-y-3 mt-4">
         {hotRecipes.map((recipe, index) => (
           <Card 
             key={recipe.id} 
@@ -100,7 +92,7 @@ const RecipeHotlist = () => {
         ))}
       </div>
       
-      <div className="p-4 border-t border-border/50">
+      <div className="mt-4 pt-4 border-t border-border/50">
         <div className="text-xs text-muted-foreground text-center">
           Updated every hour • {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </div>
