@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, Info } from 'lucide-react';
 import Header from '@/components/Header';
 import ChatInterface from '@/components/ChatInterface';
 import RecipeHotlist from '@/components/RecipeHotlist';
@@ -9,6 +9,8 @@ import CommunityShop from '@/components/CommunityShop';
 import AddRecipeSection from '@/components/AddRecipeSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 import {
   Sheet,
   SheetContent,
@@ -22,9 +24,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/auth');
+      toast({
+        title: "Authentication Required",
+        description: "You need to be logged in to create recipes and participate in the community.",
+        variant: "default",
+      });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading]);
 
   if (loading) {
     return (
@@ -35,10 +41,6 @@ const Dashboard = () => {
         </div>
       </div>
     );
-  }
-
-  if (!user) {
-    return null; // Will redirect to auth
   }
 
   const SidebarContent = () => (
@@ -56,6 +58,25 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen chat-container">
       <Header />
+      
+      {/* Authentication Nudge (if not logged in) */}
+      {!user && (
+        <div className="bg-amber-500/10 py-2 px-4 text-amber-600 border-b border-amber-500/20">
+          <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4" />
+              <span className="text-sm">Sign in to create recipes and join the community</span>
+            </div>
+            <Button 
+              size="sm" 
+              onClick={() => navigate('/auth')}
+              className="bg-amber-600 text-white hover:bg-amber-700"
+            >
+              Sign In
+            </Button>
+          </div>
+        </div>
+      )}
       
       {/* Desktop Layout */}
       <div className="hidden md:flex h-[calc(100vh-80px)]">
