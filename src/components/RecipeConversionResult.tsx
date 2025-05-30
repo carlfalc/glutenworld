@@ -1,10 +1,12 @@
 
 import { useState } from 'react';
-import { Save, ArrowLeft, Check } from 'lucide-react';
+import { Save, ArrowLeft, Check, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCreateRecipe } from '@/hooks/useRecipes';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import ShareRecipe from './ShareRecipe';
 
 interface RecipeConversionResultProps {
   convertedRecipe: string;
@@ -15,6 +17,7 @@ interface RecipeConversionResultProps {
 const RecipeConversionResult = ({ convertedRecipe, onBack, onSave }: RecipeConversionResultProps) => {
   const [saved, setSaved] = useState(false);
   const createRecipeMutation = useCreateRecipe();
+  const navigate = useNavigate();
 
   const handleSave = async () => {
     try {
@@ -49,6 +52,14 @@ const RecipeConversionResult = ({ convertedRecipe, onBack, onSave }: RecipeConve
     }
   };
 
+  const handleGoToMyRecipes = () => {
+    navigate('/my-recipes');
+  };
+
+  // Extract recipe title for sharing
+  const lines = convertedRecipe.split('\n').filter(line => line.trim());
+  const recipeTitle = lines[0]?.replace(/^\d+\.\s*/, '').replace(/^#*\s*/, '') || 'Converted Gluten-Free Recipe';
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
@@ -70,11 +81,11 @@ const RecipeConversionResult = ({ convertedRecipe, onBack, onSave }: RecipeConve
         </CardContent>
       </Card>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           onClick={handleSave}
           disabled={createRecipeMutation.isPending || saved}
-          className="flex-1 bg-gluten-primary"
+          className="bg-blue-600 text-white hover:bg-blue-700 flex-1 min-w-[140px]"
         >
           {saved ? (
             <>
@@ -86,9 +97,19 @@ const RecipeConversionResult = ({ convertedRecipe, onBack, onSave }: RecipeConve
           ) : (
             <>
               <Save className="w-4 h-4 mr-2" />
-              Save Recipe
+              Save to my recipes
             </>
           )}
+        </Button>
+        
+        <ShareRecipe recipe={convertedRecipe} title={recipeTitle} />
+        
+        <Button
+          onClick={handleGoToMyRecipes}
+          className="bg-blue-600 text-white hover:bg-blue-700 flex-1 min-w-[140px]"
+        >
+          <BookOpen className="w-4 h-4 mr-2" />
+          Go to my recipes
         </Button>
       </div>
     </div>
