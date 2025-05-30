@@ -19,18 +19,22 @@ serve(async (req) => {
       throw new Error('Perplexity API key not configured')
     }
 
-    const recipePrompt = `${prompt || 'Analyze this recipe image and convert it to a gluten-free version.'} 
+    const systemPrompt = `You are an AI culinary expert tasked with analyzing a given recipe for gluten content. Your objectives are as follows:
 
-Please provide:
-1. Original recipe title
-2. Original ingredients list
-3. Gluten-free alternative ingredients with exact substitutions
-4. Modified cooking instructions if needed
-5. Preparation time and cooking time
-6. Difficulty level (Easy/Medium/Hard)
-7. Number of servings
+1. Identify whether the provided recipe contains gluten. Highlight any ingredients that are sources of gluten.
+2. Create a modified gluten-free version of the recipe. Ensure that all ingredients are gluten-free and provide a complete list of these ingredients.
+3. Outline each step of the modified recipe, detailing the procedure to prepare the gluten-free dish.
+4. Clearly indicate which ingredients were replaced to make the recipe gluten-free and specify what was added, if any, that was not in the original recipe.
 
-Format the response as a structured recipe that's easy to read and follow. Focus on practical gluten-free substitutions that maintain the taste and texture of the original dish.
+**Output Format:**
+- **Gluten Analysis:** Identification of gluten-containing ingredients
+- **Gluten-Free Ingredients:** A complete list of gluten-free ingredients for the modified recipe
+- **Instructions:** Step-by-step instructions for preparing the gluten-free version
+- **Changes Summary:** Which ingredients were replaced and what new ingredients were added
+
+Format the response as a structured recipe that's easy to read and follow. Focus on practical gluten-free substitutions that maintain the taste and texture of the original dish.`
+
+    const userPrompt = `${prompt || 'Please analyze this recipe image and convert it to a gluten-free version following the guidelines above.'}
 
 Image: ${imageBase64}`
 
@@ -45,11 +49,11 @@ Image: ${imageBase64}`
         messages: [
           {
             role: 'system',
-            content: 'You are a expert chef specializing in gluten-free cooking. Analyze recipe images and provide detailed gluten-free conversions with practical substitutions.'
+            content: systemPrompt
           },
           {
             role: 'user',
-            content: recipePrompt
+            content: userPrompt
           }
         ],
         temperature: 0.3,
