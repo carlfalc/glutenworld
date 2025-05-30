@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Camera, FileText, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,13 +8,22 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { useCreateRecipe } from '@/hooks/useRecipes';
+import { useRecipeConversion } from '@/hooks/useRecipeConversion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import CameraCapture from '@/components/CameraCapture';
+import RecipeConversionResult from '@/components/RecipeConversionResult';
+import { toast } from '@/hooks/use-toast';
 
 const AddRecipeSection = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const [conversionResult, setConversionResult] = useState<string | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
+  
   const createRecipeMutation = useCreateRecipe();
+  const recipeConversionMutation = useRecipeConversion();
   
   const form = useForm({
     defaultValues: {
@@ -31,9 +39,62 @@ const AddRecipeSection = () => {
       await createRecipeMutation.mutateAsync(values);
       form.reset();
       setOpen(false);
+      toast({
+        title: "Recipe Added!",
+        description: "Your recipe has been saved successfully.",
+      });
     } catch (error) {
       console.error('Error creating recipe:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save recipe. Please try again.",
+        variant: "destructive",
+      });
     }
+  };
+
+  const handleImageCapture = async (imageBase64: string) => {
+    setIsConverting(true);
+    try {
+      const result = await recipeConversionMutation.mutateAsync({
+        imageBase64,
+        prompt: "Analyze this recipe image and convert it to a detailed gluten-free version with exact substitutions and instructions."
+      });
+      
+      setConversionResult(result.convertedRecipe);
+      setShowCamera(false);
+    } catch (error) {
+      console.error('Error converting recipe:', error);
+      toast({
+        title: "Conversion Error",
+        description: "Failed to convert recipe. Please try again.",
+        variant: "destructive",
+      });
+      setShowCamera(false);
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
+  const handleBackFromResult = () => {
+    setConversionResult(null);
+  };
+
+  const handleSaveFromResult = () => {
+    setConversionResult(null);
+    setOpen(false);
+  };
+
+  const handleScanClick = () => {
+    if (!user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to use the recipe scanning feature.",
+        variant: "default",
+      });
+      return;
+    }
+    setShowCamera(true);
   };
 
   return (
@@ -64,130 +125,163 @@ const AddRecipeSection = () => {
               </CardContent>
             </Card>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Add New Recipe</DialogTitle>
+              <DialogTitle>
+                {conversionResult ? 'Recipe Converted' : showCamera ? 'Scan Recipe' : 'Add New Recipe'}
+              </DialogTitle>
             </DialogHeader>
             
-            <Tabs defaultValue="manual" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-4">
-                <TabsTrigger value="manual">Manual</TabsTrigger>
-                <TabsTrigger value="scan">Scan</TabsTrigger>
-                <TabsTrigger value="upload">Upload</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="manual">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Recipe Title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter recipe title" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="original_recipe"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Recipe Details</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Paste or type your recipe here" 
-                              {...field} 
-                              rows={6}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="difficulty_level"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Difficulty</FormLabel>
-                          <div className="flex space-x-2">
-                            {['Easy', 'Medium', 'Hard'].map((level) => (
-                              <Button
-                                key={level}
-                                type="button"
-                                size="sm"
-                                variant={field.value === level ? 'default' : 'outline'}
-                                onClick={() => form.setValue('difficulty_level', level as 'Easy' | 'Medium' | 'Hard')}
-                                className={field.value === level ? 'bg-gluten-primary text-white' : ''}
-                              >
-                                {level}
-                              </Button>
-                            ))}
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="is_public"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center gap-2 space-y-0">
-                          <FormControl>
-                            <input
-                              type="checkbox"
-                              checked={field.value}
-                              onChange={(e) => form.setValue('is_public', e.target.checked)}
-                              className="h-4 w-4"
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm m-0">Make recipe public</FormLabel>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
+            {isConverting ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gluten-primary mx-auto mb-4"></div>
+                <h3 className="font-medium mb-2">Converting Recipe...</h3>
+                <p className="text-sm text-muted-foreground">AI is analyzing your recipe and creating a gluten-free version</p>
+              </div>
+            ) : conversionResult ? (
+              <RecipeConversionResult
+                convertedRecipe={conversionResult}
+                onBack={handleBackFromResult}
+                onSave={handleSaveFromResult}
+              />
+            ) : showCamera ? (
+              <CameraCapture
+                onImageCapture={handleImageCapture}
+                onClose={() => setShowCamera(false)}
+              />
+            ) : (
+              <Tabs defaultValue="manual" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 mb-4">
+                  <TabsTrigger value="manual">Manual</TabsTrigger>
+                  <TabsTrigger value="scan">Scan</TabsTrigger>
+                  <TabsTrigger value="upload">Upload</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="manual">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Recipe Title</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter recipe title" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="original_recipe"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Recipe Details</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Paste or type your recipe here" 
+                                {...field} 
+                                rows={6}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="difficulty_level"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Difficulty</FormLabel>
+                            <div className="flex space-x-2">
+                              {['Easy', 'Medium', 'Hard'].map((level) => (
+                                <Button
+                                  key={level}
+                                  type="button"
+                                  size="sm"
+                                  variant={field.value === level ? 'default' : 'outline'}
+                                  onClick={() => form.setValue('difficulty_level', level as 'Easy' | 'Medium' | 'Hard')}
+                                  className={field.value === level ? 'bg-gluten-primary text-white' : ''}
+                                >
+                                  {level}
+                                </Button>
+                              ))}
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="is_public"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center gap-2 space-y-0">
+                            <FormControl>
+                              <input
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={(e) => form.setValue('is_public', e.target.checked)}
+                                className="h-4 w-4"
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm m-0">Make recipe public</FormLabel>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-gluten-primary" 
+                        disabled={createRecipeMutation.isPending}
+                      >
+                        {createRecipeMutation.isPending ? 'Saving...' : 'Save Recipe'} <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+                
+                <TabsContent value="scan">
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="p-4 bg-gluten-primary/10 rounded-full mb-4">
+                      <Camera className="w-10 h-10 text-gluten-primary" />
+                    </div>
+                    <h3 className="font-medium mb-2">Scan a Recipe</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Position your camera over a recipe to scan it</p>
                     <Button 
-                      type="submit" 
-                      className="w-full bg-gluten-primary" 
-                      disabled={createRecipeMutation.isPending}
+                      type="button" 
+                      onClick={handleScanClick}
+                      className="bg-gluten-primary"
                     >
-                      {createRecipeMutation.isPending ? 'Saving...' : 'Save Recipe'} <ArrowRight className="ml-2 w-4 h-4" />
+                      Start Camera
                     </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-              
-              <TabsContent value="scan">
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="p-4 bg-gluten-primary/10 rounded-full mb-4">
-                    <Camera className="w-10 h-10 text-gluten-primary" />
                   </div>
-                  <h3 className="font-medium mb-2">Scan a Recipe</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Position your camera over a recipe to scan it</p>
-                  <Button type="button" className="bg-gluten-primary">Start Camera</Button>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="upload">
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="p-4 bg-gluten-primary/10 rounded-full mb-4">
-                    <FileText className="w-10 h-10 text-gluten-primary" />
+                </TabsContent>
+                
+                <TabsContent value="upload">
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="p-4 bg-gluten-primary/10 rounded-full mb-4">
+                      <FileText className="w-10 h-10 text-gluten-primary" />
+                    </div>
+                    <h3 className="font-medium mb-2">Upload a Recipe File</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Select a PDF or image file of your recipe</p>
+                    <Button 
+                      type="button" 
+                      onClick={handleScanClick}
+                      className="bg-gluten-primary"
+                    >
+                      Choose File
+                    </Button>
                   </div>
-                  <h3 className="font-medium mb-2">Upload a Recipe File</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Select a PDF or image file of your recipe</p>
-                  <Button type="button" className="bg-gluten-primary">Choose File</Button>
-                </div>
-              </TabsContent>
-            </Tabs>
+                </TabsContent>
+              </Tabs>
+            )}
           </DialogContent>
         </Dialog>
         
