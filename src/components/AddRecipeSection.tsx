@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { Camera, FileText, ArrowRight } from 'lucide-react';
+import { Camera, FileText, ArrowRight, Info } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -13,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CameraCapture from '@/components/CameraCapture';
 import RecipeConversionResult from '@/components/RecipeConversionResult';
+import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import { toast } from '@/hooks/use-toast';
 
 const AddRecipeSection = () => {
@@ -21,6 +23,7 @@ const AddRecipeSection = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [conversionResult, setConversionResult] = useState<string | null>(null);
   const [isConverting, setIsConverting] = useState(false);
+  const [showFeatureDetails, setShowFeatureDetails] = useState(false);
   
   const createRecipeMutation = useCreateRecipe();
   const recipeConversionMutation = useRecipeConversion();
@@ -100,8 +103,19 @@ const AddRecipeSection = () => {
   return (
     <div className="p-4">
       <div className="pb-4 border-b border-border/50">
-        <h2 className="text-lg font-semibold text-foreground">Add recipe or convert without Gluten</h2>
-        <p className="text-sm text-muted-foreground mt-1">Convert your favourite recipe with Gluten now without Gluten or check the ingredients in your recipe</p>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold text-foreground">Add recipe or convert without Gluten</h2>
+            <p className="text-sm text-muted-foreground mt-1">Convert your favourite recipe with Gluten now without Gluten or check the ingredients in your recipe</p>
+          </div>
+          <Button
+            onClick={() => setShowFeatureDetails(true)}
+            className="ml-4 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2"
+          >
+            <Info className="w-4 h-4" />
+            See More
+          </Button>
+        </div>
       </div>
       
       <div className="space-y-3 mt-4">
@@ -291,6 +305,11 @@ const AddRecipeSection = () => {
           </div>
         )}
       </div>
+
+      <FeatureDetailsPopup 
+        open={showFeatureDetails} 
+        onOpenChange={setShowFeatureDetails} 
+      />
     </div>
   );
 };
