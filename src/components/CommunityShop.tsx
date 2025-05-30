@@ -1,4 +1,3 @@
-
 import { Store, Star, Users, Clock, MessageCircle, Heart, Plus, Globe } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -52,7 +51,7 @@ const CommunityShop = () => {
     <div className="p-4">
       <Tabs defaultValue="community" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4 h-8">
-          <TabsTrigger value="community" className="text-xs px-2">Community</TabsTrigger>
+          <TabsTrigger value="community" className="text-xs px-2">Gluten World</TabsTrigger>
           <TabsTrigger value="shop" className="text-xs px-2">Shop</TabsTrigger>
         </TabsList>
         
@@ -60,7 +59,7 @@ const CommunityShop = () => {
           <div className="pb-2 flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
               <Users className="w-4 h-4 text-gluten-primary" />
-              Community Feed
+              Gluten World
             </h3>
             <Button
               size="sm"
@@ -72,7 +71,7 @@ const CommunityShop = () => {
           </div>
 
           <div className="text-xs text-muted-foreground mb-3">
-            Make new connections
+            Join Gluten World
           </div>
 
           {showNewPostForm && user && (
