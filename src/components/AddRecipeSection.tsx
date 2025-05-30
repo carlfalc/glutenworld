@@ -16,10 +16,10 @@ const AddRecipeSection = () => {
             <div className="flex flex-col items-center text-center space-y-3">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gluten-primary/10 rounded-full">
-                  <Barcode className="w-8 h-8 text-gluten-primary" />
+                  <Barcode className="w-6 h-6 sm:w-8 sm:h-8 text-gluten-primary" />
                 </div>
                 <div className="p-3 bg-gluten-primary/10 rounded-full">
-                  <Camera className="w-8 h-8 text-gluten-primary" />
+                  <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-gluten-primary" />
                 </div>
               </div>
               <div>

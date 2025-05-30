@@ -64,9 +64,9 @@ const CommunityShop = () => {
   return (
     <div className="p-4">
       <Tabs defaultValue="community" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="community" className="text-xs">Community</TabsTrigger>
-          <TabsTrigger value="shop" className="text-xs">Shop</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-4 h-8">
+          <TabsTrigger value="community" className="text-xs px-2">Community</TabsTrigger>
+          <TabsTrigger value="shop" className="text-xs px-2">Shop</TabsTrigger>
         </TabsList>
         
         <TabsContent value="community" className="space-y-3 mt-0">
@@ -77,36 +77,38 @@ const CommunityShop = () => {
             </h3>
           </div>
           
-          {communityPosts.map((post) => (
-            <Card 
-              key={post.id}
-              className="bg-card/30 border-border/30 hover:bg-card/50 transition-colors cursor-pointer group"
-            >
-              <CardContent className="p-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">{post.user}</span>
-                    <span className="text-xs text-muted-foreground">{post.time}</span>
-                  </div>
-                  
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {post.content}
-                  </p>
-                  
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Heart className="w-3 h-3" />
-                      <span>{post.likes}</span>
+          <div className="max-h-64 sm:max-h-80 overflow-y-auto space-y-3">
+            {communityPosts.map((post) => (
+              <Card 
+                key={post.id}
+                className="bg-card/30 border-border/30 hover:bg-card/50 transition-colors cursor-pointer group"
+              >
+                <CardContent className="p-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground truncate">{post.user}</span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{post.time}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <MessageCircle className="w-3 h-3" />
-                      <span>{post.comments}</span>
+                    
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {post.content}
+                    </p>
+                    
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Heart className="w-3 h-3" />
+                        <span>{post.likes}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MessageCircle className="w-3 h-3" />
+                        <span>{post.comments}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
         
         <TabsContent value="shop" className="space-y-3 mt-0">
@@ -117,35 +119,37 @@ const CommunityShop = () => {
             </h3>
           </div>
           
-          {shopItems.map((item) => (
-            <Card 
-              key={item.id}
-              className="bg-card/30 border-border/30 hover:bg-card/50 transition-colors cursor-pointer group"
-            >
-              <CardContent className="p-3">
-                <div className="flex gap-3">
-                  <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
-                    <Store className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-foreground group-hover:text-gluten-primary transition-colors truncate">
-                      {item.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">by {item.seller}</p>
+          <div className="max-h-64 sm:max-h-80 overflow-y-auto space-y-3">
+            {shopItems.map((item) => (
+              <Card 
+                key={item.id}
+                className="bg-card/30 border-border/30 hover:bg-card/50 transition-colors cursor-pointer group"
+              >
+                <CardContent className="p-3">
+                  <div className="flex gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                      <Store className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+                    </div>
                     
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                        <span className="text-xs text-muted-foreground">{item.rating}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-foreground group-hover:text-gluten-primary transition-colors truncate">
+                        {item.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground truncate">by {item.seller}</p>
+                      
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                          <span className="text-xs text-muted-foreground">{item.rating}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-gluten-primary">{item.price}</span>
                       </div>
-                      <span className="text-sm font-semibold text-gluten-primary">{item.price}</span>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

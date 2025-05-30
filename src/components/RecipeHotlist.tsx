@@ -48,23 +48,23 @@ const RecipeHotlist = () => {
         <p className="text-sm text-muted-foreground mt-1">Most converted recipes today</p>
       </div>
       
-      <div className="space-y-3 mt-4">
+      <div className="max-h-64 sm:max-h-80 overflow-y-auto space-y-3 mt-4">
         {hotRecipes.map((recipe, index) => (
           <Card 
             key={recipe.id} 
             className="bg-card/30 border-border/30 hover:bg-card/50 transition-colors cursor-pointer group"
           >
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-start justify-between mb-2">
-                <h3 className="text-sm font-medium text-foreground group-hover:text-gluten-primary transition-colors line-clamp-2">
+                <h3 className="text-sm font-medium text-foreground group-hover:text-gluten-primary transition-colors line-clamp-2 pr-2">
                   {recipe.name}
                 </h3>
                 {recipe.trending && (
-                  <TrendingUp className="w-4 h-4 text-gluten-primary flex-shrink-0 ml-2" />
+                  <TrendingUp className="w-4 h-4 text-gluten-primary flex-shrink-0" />
                 )}
               </div>
               
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground flex-wrap">
                 <div className="flex items-center gap-1">
                   <Users className="w-3 h-3" />
                   <span>{recipe.conversions}</span>
