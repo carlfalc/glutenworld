@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Camera, Barcode, FileText, ArrowRight } from 'lucide-react';
+import { Camera, FileText, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -39,8 +39,8 @@ const AddRecipeSection = () => {
   return (
     <div className="p-4">
       <div className="pb-4 border-b border-border/50">
-        <h2 className="text-lg font-semibold text-foreground">Add Recipe</h2>
-        <p className="text-sm text-muted-foreground mt-1">Scan or capture your recipe</p>
+        <h2 className="text-lg font-semibold text-foreground">Add recipe or convert without gluten</h2>
+        <p className="text-sm text-muted-foreground mt-1">Convert your favourite recipe with gluten now without gluten</p>
       </div>
       
       <div className="space-y-3 mt-4">
@@ -49,20 +49,15 @@ const AddRecipeSection = () => {
             <Card className="bg-card/30 border-border/30 hover:bg-card/50 transition-colors cursor-pointer group">
               <CardContent className="p-4">
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gluten-primary/10 rounded-full">
-                      <Barcode className="w-6 h-6 sm:w-8 sm:h-8 text-gluten-primary" />
-                    </div>
-                    <div className="p-3 bg-gluten-primary/10 rounded-full">
-                      <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-gluten-primary" />
-                    </div>
+                  <div className="p-3 bg-gluten-primary/10 rounded-full">
+                    <Camera className="w-8 h-8 text-gluten-primary" />
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-foreground group-hover:text-gluten-primary transition-colors">
                       Scan Recipe
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Use barcode scanner or camera
+                      Use camera to scan your recipe
                     </p>
                   </div>
                 </div>
@@ -176,8 +171,8 @@ const AddRecipeSection = () => {
                   <div className="p-4 bg-gluten-primary/10 rounded-full mb-4">
                     <Camera className="w-10 h-10 text-gluten-primary" />
                   </div>
-                  <h3 className="font-medium mb-2">Scan a Recipe Card</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Position your camera over a recipe card to scan it</p>
+                  <h3 className="font-medium mb-2">Scan a Recipe</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Position your camera over a recipe to scan it</p>
                   <Button type="button" className="bg-gluten-primary">Start Camera</Button>
                 </div>
               </TabsContent>
