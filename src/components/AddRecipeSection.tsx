@@ -308,7 +308,8 @@ const AddRecipeSection = () => {
 
       <FeatureDetailsPopup 
         open={showFeatureDetails} 
-        onOpenChange={setShowFeatureDetails} 
+        onOpenChange={setShowFeatureDetails}
+        isFromLanding={false}
       />
     </div>
   );

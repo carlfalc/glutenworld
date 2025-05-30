@@ -7,9 +7,26 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 interface FeatureDetailsPopupProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isFromLanding?: boolean;
+  onStartScanning?: () => void;
 }
 
-const FeatureDetailsPopup = ({ open, onOpenChange }: FeatureDetailsPopupProps) => {
+const FeatureDetailsPopup = ({ 
+  open, 
+  onOpenChange, 
+  isFromLanding = false,
+  onStartScanning 
+}: FeatureDetailsPopupProps) => {
+  const handleStartScanning = () => {
+    if (isFromLanding && onStartScanning) {
+      onStartScanning();
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const buttonText = isFromLanding ? 'Launch Now' : 'Start Scanning Recipes';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
@@ -97,10 +114,10 @@ const FeatureDetailsPopup = ({ open, onOpenChange }: FeatureDetailsPopupProps) =
 
             <div className="text-center mt-8">
               <Button 
-                onClick={() => onOpenChange(false)} 
+                onClick={handleStartScanning} 
                 className="bg-gluten-primary hover:bg-gluten-secondary px-8 py-3"
               >
-                Start Scanning Recipes
+                {buttonText}
               </Button>
             </div>
           </div>

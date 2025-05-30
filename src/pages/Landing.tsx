@@ -1,14 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChefHat, Sparkles, Check, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock } from 'lucide-react';
+import { ChefHat, Sparkles, Check, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock, Info } from 'lucide-react';
+import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [showFeatureDetails, setShowFeatureDetails] = useState(false);
 
   const handleGetStarted = () => {
     if (user) {
@@ -199,13 +201,25 @@ const Landing = () => {
           {keyFeatures.map((feature, index) => (
             <Card 
               key={index} 
-              className="text-center hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-gluten-primary/5 to-gluten-secondary/5 border-gluten-primary/20"
+              className="text-center hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-gluten-primary/5 to-gluten-secondary/5 border-gluten-primary/20 relative"
             >
               <CardHeader className="pb-4">
                 <div className="mx-auto mb-4 p-4 bg-gluten-primary/10 rounded-full w-fit">
                   {feature.icon}
                 </div>
-                <CardTitle className="text-2xl mb-2">{feature.title}</CardTitle>
+                <div className="flex items-center justify-between mb-2">
+                  <CardTitle className="text-2xl flex-1">{feature.title}</CardTitle>
+                  {index === 0 && (
+                    <Button
+                      onClick={() => setShowFeatureDetails(true)}
+                      className="ml-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 flex items-center gap-1"
+                      size="sm"
+                    >
+                      <Info className="w-3 h-3" />
+                      See More
+                    </Button>
+                  )}
+                </div>
                 <div className="inline-block bg-gluten-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium mb-3">
                   {feature.highlight}
                 </div>
@@ -321,6 +335,13 @@ const Landing = () => {
           <p>&copy; 2024 Gluten World. Transform your recipes, transform your life.</p>
         </div>
       </footer>
+
+      <FeatureDetailsPopup 
+        open={showFeatureDetails} 
+        onOpenChange={setShowFeatureDetails}
+        isFromLanding={true}
+        onStartScanning={handleGetStarted}
+      />
     </div>
   );
 };
