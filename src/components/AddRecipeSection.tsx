@@ -40,7 +40,7 @@ const AddRecipeSection = () => {
     <div className="p-4">
       <div className="pb-4 border-b border-border/50">
         <h2 className="text-lg font-semibold text-foreground">Add recipe or convert without Gluten</h2>
-        <p className="text-sm text-muted-foreground mt-1">Convert your favourite recipe with Gluten now without Gluten</p>
+        <p className="text-sm text-muted-foreground mt-1">Convert your favourite recipe with Gluten now without Gluten or check the ingredients in your recipe</p>
       </div>
       
       <div className="space-y-3 mt-4">
