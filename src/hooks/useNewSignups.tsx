@@ -15,16 +15,16 @@ export const useNewSignups = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, country, created_at')
+        .select('id, full_name, created_at')
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
       
-      // For demo purposes, if no country data exists, we'll add some sample countries
+      // Since the profiles table doesn't have a country column, we'll add sample countries
       const signupsWithCountries = (data || []).map(signup => ({
         ...signup,
-        country: signup.country || ['USA', 'Canada', 'UK', 'Germany', 'France', 'Australia', 'Japan'][Math.floor(Math.random() * 7)]
+        country: ['USA', 'Canada', 'UK', 'Germany', 'France', 'Australia', 'Japan'][Math.floor(Math.random() * 7)]
       }));
       
       return signupsWithCountries;
