@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,7 +26,15 @@ const AddressForm: React.FC<AddressFormProps> = ({
 }) => {
   const countries = [
     'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Italy',
-    'Spain', 'Netherlands', 'Japan', 'South Korea', 'Brazil', 'Mexico', 'Other'
+    'Spain', 'Netherlands', 'Japan', 'South Korea', 'Brazil', 'Mexico', 'Argentina', 'Chile',
+    'Colombia', 'Peru', 'Venezuela', 'Austria', 'Belgium', 'Switzerland', 'Denmark', 'Finland',
+    'Norway', 'Sweden', 'Ireland', 'Portugal', 'Greece', 'Poland', 'Czech Republic', 'Hungary',
+    'Romania', 'Bulgaria', 'Croatia', 'Slovenia', 'Slovakia', 'Estonia', 'Latvia', 'Lithuania',
+    'Russia', 'Ukraine', 'Belarus', 'China', 'India', 'Indonesia', 'Thailand', 'Vietnam',
+    'Malaysia', 'Singapore', 'Philippines', 'Taiwan', 'Hong Kong', 'New Zealand', 'South Africa',
+    'Nigeria', 'Kenya', 'Egypt', 'Morocco', 'Israel', 'Turkey', 'Saudi Arabia', 'UAE',
+    'Qatar', 'Kuwait', 'Bahrain', 'Oman', 'Jordan', 'Lebanon', 'Cyprus', 'Malta', 'Iceland',
+    'Luxembourg', 'Monaco', 'Liechtenstein', 'San Marino', 'Vatican City', 'Andorra', 'Other'
   ];
 
   return (
