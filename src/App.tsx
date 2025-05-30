@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
+import GlutenWorld from "./pages/GlutenWorld";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -26,6 +27,7 @@ const App = () => {
               <Route path="/" element={<Landing />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/gluten-world" element={<GlutenWorld />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
