@@ -37,8 +37,8 @@ const Landing = () => {
     },
     {
       icon: <Users className="w-8 h-8 text-gluten-primary" />,
-      title: "Community Support",
-      description: "Connect with fellow gluten-free enthusiasts, share experiences, and discover new favorites together."
+      title: "Gluten World",
+      description: "Our community support portal - connect with fellow gluten-free enthusiasts, share experiences, and discover new favorites together."
     },
     {
       icon: <Heart className="w-8 h-8 text-gluten-primary" />,
