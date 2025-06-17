@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, or answer any gluten-free cooking questions. What would you like to do today?",
+      text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
       isUser: false,
       timestamp: new Date(),
     }
@@ -38,6 +39,7 @@ const ChatInterface = () => {
   const [inputValue, setInputValue] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [showIngredientCamera, setShowIngredientCamera] = useState(false);
   const [conversionResult, setConversionResult] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -67,7 +69,8 @@ const ChatInterface = () => {
       const modeMessages = {
         'recipe-creator': "🍳 Recipe Creator Mode Activated! I'll help you create amazing gluten-free recipes. How many servings do you need?",
         'conversion': "🔄 Recipe Conversion Mode! Share a recipe and I'll convert it to be gluten-free.",
-        'nutrition': "🥗 Nutrition Mode! Ask me about the nutritional aspects of gluten-free ingredients and dishes."
+        'nutrition': "🥗 Nutrition Mode! Ask me about the nutritional aspects of gluten-free ingredients and dishes.",
+        'ingredient-scan': "📷 Ingredient Scan Mode! Take a photo of any ingredient label and I'll analyze it for gluten, allergens, and provide detailed nutritional information."
       };
 
       const modeMessage: Message = {
@@ -140,6 +143,36 @@ const ChatInterface = () => {
     }
   };
 
+  const handleIngredientImageCapture = async (imageBase64: string) => {
+    try {
+      const response = await contextualAI.mutateAsync({ 
+        message: `Please analyze this ingredient label image: ${imageBase64}`,
+        context: { servingSize, chatMode: 'ingredient-scan' }
+      });
+
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: response.response || "I couldn't analyze this ingredient label. Please try again with a clearer image.",
+        isUser: false,
+        timestamp: new Date(),
+        mode: 'ingredient-scan',
+      };
+
+      setMessages(prev => [...prev, aiResponse]);
+      setShowIngredientCamera(false);
+    } catch (error) {
+      console.error('Ingredient analysis error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm experiencing some technical difficulties analyzing this ingredient. Please try again.",
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setShowIngredientCamera(false);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSendMessage();
@@ -156,7 +189,7 @@ const ChatInterface = () => {
     setIsAwaitingServingSize(false);
     setMessages([{
       id: '1',
-      text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, or answer any gluten-free cooking questions. What would you like to do today?",
+      text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
       isUser: false,
       timestamp: new Date(),
     }]);
@@ -269,11 +302,14 @@ const ChatInterface = () => {
               </Button>
             </div>
           </div>
-          <MobileActionBar onCameraClick={() => setShowCamera(true)} />
+          <MobileActionBar 
+            onCameraClick={() => setShowCamera(true)} 
+            onIngredientScanClick={() => setShowIngredientCamera(true)}
+          />
         </>
       )}
 
-      {/* Camera Dialog */}
+      {/* Recipe Camera Dialog */}
       <Dialog open={showCamera} onOpenChange={setShowCamera}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -282,6 +318,19 @@ const ChatInterface = () => {
           <CameraCapture
             onImageCapture={handleImageCapture}
             onClose={() => setShowCamera(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Ingredient Camera Dialog */}
+      <Dialog open={showIngredientCamera} onOpenChange={setShowIngredientCamera}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Scan Ingredient Label</DialogTitle>
+          </DialogHeader>
+          <CameraCapture
+            onImageCapture={handleIngredientImageCapture}
+            onClose={() => setShowIngredientCamera(false)}
           />
         </DialogContent>
       </Dialog>

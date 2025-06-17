@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type ChatMode = 'general' | 'recipe-creator' | 'conversion' | 'nutrition';
+export type ChatMode = 'general' | 'recipe-creator' | 'conversion' | 'nutrition' | 'ingredient-scan';
 
 interface ChatContextType {
   chatMode: ChatMode;

@@ -6,9 +6,10 @@ import { useChatContext } from '@/contexts/ChatContext';
 
 interface MobileActionBarProps {
   onCameraClick: () => void;
+  onIngredientScanClick: () => void;
 }
 
-const MobileActionBar = ({ onCameraClick }: MobileActionBarProps) => {
+const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionBarProps) => {
   const { setChatMode, setIsAwaitingServingSize } = useChatContext();
 
   const handleRecipeCreator = () => {
@@ -20,12 +21,23 @@ const MobileActionBar = ({ onCameraClick }: MobileActionBarProps) => {
     setChatMode('conversion');
   };
 
+  const handleIngredientScan = () => {
+    setChatMode('ingredient-scan');
+    onIngredientScanClick();
+  };
+
   const actions = [
     {
       icon: <Camera className="w-5 h-5" />,
       label: "Scan & Upload",
       onClick: onCameraClick,
       color: "bg-blue-600 hover:bg-blue-700"
+    },
+    {
+      icon: <span className="text-lg">📷</span>,
+      label: "Take Photo Of Ingredients",
+      onClick: handleIngredientScan,
+      color: "bg-red-600 hover:bg-red-700"
     },
     {
       icon: <span className="text-lg">🍳</span>,
