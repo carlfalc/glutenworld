@@ -88,18 +88,18 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Mobile Layout */}
+      {/* Mobile Layout - Full Screen Chat */}
       <div className="md:hidden h-[calc(100vh-80px)] flex flex-col">
         <div className="flex-1">
           <ChatInterface />
         </div>
         
-        {/* Mobile Sidebar Trigger */}
-        <div className="fixed bottom-4 right-4 z-50">
+        {/* Mobile Sidebar Trigger - Moved to top right for better accessibility */}
+        <div className="fixed top-24 right-4 z-50 md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="bg-gluten-primary hover:bg-gluten-secondary text-white p-3 rounded-full shadow-lg transition-colors">
-                <Menu className="w-6 h-6" />
+              <button className="bg-gluten-primary/90 hover:bg-gluten-primary text-white p-2 rounded-full shadow-lg backdrop-blur-sm border border-white/20">
+                <Menu className="w-5 h-5" />
               </button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:w-80 bg-card/95 backdrop-blur-md border-border/50">
