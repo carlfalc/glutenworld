@@ -29,15 +29,9 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
   const actions = [
     {
       icon: <Camera className="w-5 h-5" />,
-      label: "Scan & Upload",
+      label: "Scan Recipe",
       onClick: onCameraClick,
       color: "bg-blue-600 hover:bg-blue-700"
-    },
-    {
-      icon: <span className="text-lg">📷</span>,
-      label: "Take Photo Of Ingredients",
-      onClick: handleIngredientScan,
-      color: "bg-red-600 hover:bg-red-700"
     },
     {
       icon: <span className="text-lg">🍳</span>,
@@ -60,17 +54,31 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 p-4 bg-card/30 backdrop-blur-md border-t border-border/50">
-      {actions.map((action, index) => (
+    <div className="bg-card/30 backdrop-blur-md border-t border-border/50">
+      {/* Main action buttons in 2x2 grid */}
+      <div className="grid grid-cols-2 gap-3 p-4">
+        {actions.map((action, index) => (
+          <Button
+            key={index}
+            onClick={action.onClick}
+            className={`${action.color} text-white flex flex-col items-center gap-2 h-16 text-xs font-medium`}
+          >
+            {action.icon}
+            {action.label}
+          </Button>
+        ))}
+      </div>
+      
+      {/* Check ingredient button - full width at bottom */}
+      <div className="px-4 pb-4">
         <Button
-          key={index}
-          onClick={action.onClick}
-          className={`${action.color} text-white flex flex-col items-center gap-2 h-16 text-xs font-medium`}
+          onClick={handleIngredientScan}
+          className="w-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 h-12 text-sm font-medium"
         >
-          {action.icon}
-          {action.label}
+          <span className="text-lg">📷</span>
+          Check ingredient
         </Button>
-      ))}
+      </div>
     </div>
   );
 };
