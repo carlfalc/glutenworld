@@ -6,6 +6,7 @@ interface Message {
   text: string;
   isUser: boolean;
   timestamp: Date;
+  image?: string;
 }
 
 interface ChatMessageProps {
@@ -29,7 +30,14 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             ? 'bg-gluten-primary text-white rounded-tr-md' 
             : 'bg-card/50 text-foreground rounded-tl-md border border-border/30'
         }`}>
-          <p className="text-sm leading-relaxed">{message.text}</p>
+          {message.image && (
+            <img 
+              src={message.image} 
+              alt="Shared image" 
+              className="w-full max-w-xs rounded-lg mb-2"
+            />
+          )}
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
         </div>
         <p className="text-xs text-muted-foreground mt-1 px-2">
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

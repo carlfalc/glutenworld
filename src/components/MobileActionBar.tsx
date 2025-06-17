@@ -29,7 +29,7 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
   const actions = [
     {
       icon: <Camera className="w-5 h-5" />,
-      label: "Scan Recipe",
+      label: "Scan/Upload Recipe",
       onClick: onCameraClick,
       color: "bg-blue-600 hover:bg-blue-700"
     },

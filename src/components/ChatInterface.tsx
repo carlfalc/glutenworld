@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import ChatMessage from './ChatMessage';
 import MobileActionBar from './MobileActionBar';
 import ServingSizeSelector from './ServingSizeSelector';
-import CameraCapture from './CameraCapture';
+import ImageCapture from './ImageCapture';
 import RecipeConversionResult from './RecipeConversionResult';
 import { useChatContext } from '@/contexts/ChatContext';
 import { useContextualAI } from '@/hooks/useContextualAI';
@@ -25,6 +25,7 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   mode?: string;
+  image?: string;
 }
 
 const ChatInterface = () => {
@@ -38,8 +39,8 @@ const ChatInterface = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
-  const [showIngredientCamera, setShowIngredientCamera] = useState(false);
+  const [showRecipeCapture, setShowRecipeCapture] = useState(false);
+  const [showIngredientCapture, setShowIngredientCapture] = useState(false);
   const [conversionResult, setConversionResult] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -131,7 +132,26 @@ const ChatInterface = () => {
     }
   };
 
-  const handleImageCapture = async (imageBase64: string) => {
+  const handleRecipeImageCapture = async (imageBase64: string, source: 'camera' | 'upload') => {
+    // Add user message with image
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: source === 'camera' ? 'I took a photo of this recipe' : 'I uploaded this recipe image',
+      isUser: true,
+      timestamp: new Date(),
+      image: imageBase64,
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Add AI acknowledgment
+    const aiAcknowledgment: Message = {
+      id: (Date.now() + 1).toString(),
+      text: "Thanks for the picture, I'll create some magic and recreate this with no gluten! 🪄✨",
+      isUser: false,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, aiAcknowledgment]);
+
     try {
       const response = await recipeConversion.mutateAsync({ 
         imageBase64,
@@ -140,10 +160,36 @@ const ChatInterface = () => {
       setConversionResult(response.convertedRecipe);
     } catch (error) {
       console.error('Recipe conversion error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        text: "I'm having trouble processing this recipe image. Please try again with a clearer photo.",
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
     }
   };
 
-  const handleIngredientImageCapture = async (imageBase64: string) => {
+  const handleIngredientImageCapture = async (imageBase64: string, source: 'camera' | 'upload') => {
+    // Add user message with image
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: source === 'camera' ? 'I took a photo of this ingredient label' : 'I uploaded this ingredient label',
+      isUser: true,
+      timestamp: new Date(),
+      image: imageBase64,
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Add AI acknowledgment
+    const aiAcknowledgment: Message = {
+      id: (Date.now() + 1).toString(),
+      text: "Thanks for the ingredient photo, let me analyze this for you! 🔍",
+      isUser: false,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, aiAcknowledgment]);
+
     try {
       const response = await contextualAI.mutateAsync({ 
         message: `Please analyze this ingredient label image: ${imageBase64}`,
@@ -151,7 +197,7 @@ const ChatInterface = () => {
       });
 
       const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
+        id: (Date.now() + 2).toString(),
         text: response.response || "I couldn't analyze this ingredient label. Please try again with a clearer image.",
         isUser: false,
         timestamp: new Date(),
@@ -159,17 +205,15 @@ const ChatInterface = () => {
       };
 
       setMessages(prev => [...prev, aiResponse]);
-      setShowIngredientCamera(false);
     } catch (error) {
       console.error('Ingredient analysis error:', error);
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: (Date.now() + 2).toString(),
         text: "I'm experiencing some technical difficulties analyzing this ingredient. Please try again.",
         isUser: false,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
-      setShowIngredientCamera(false);
     }
   };
 
@@ -303,34 +347,36 @@ const ChatInterface = () => {
             </div>
           </div>
           <MobileActionBar 
-            onCameraClick={() => setShowCamera(true)} 
-            onIngredientScanClick={() => setShowIngredientCamera(true)}
+            onCameraClick={() => setShowRecipeCapture(true)} 
+            onIngredientScanClick={() => setShowIngredientCapture(true)}
           />
         </>
       )}
 
-      {/* Recipe Camera Dialog */}
-      <Dialog open={showCamera} onOpenChange={setShowCamera}>
+      {/* Recipe Image Capture Dialog */}
+      <Dialog open={showRecipeCapture} onOpenChange={setShowRecipeCapture}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Scan & Upload Recipe</DialogTitle>
+            <DialogTitle>Scan/Upload Recipe</DialogTitle>
           </DialogHeader>
-          <CameraCapture
-            onImageCapture={handleImageCapture}
-            onClose={() => setShowCamera(false)}
+          <ImageCapture
+            type="recipe"
+            onImageCapture={handleRecipeImageCapture}
+            onClose={() => setShowRecipeCapture(false)}
           />
         </DialogContent>
       </Dialog>
 
-      {/* Ingredient Camera Dialog */}
-      <Dialog open={showIngredientCamera} onOpenChange={setShowIngredientCamera}>
+      {/* Ingredient Image Capture Dialog */}
+      <Dialog open={showIngredientCapture} onOpenChange={setShowIngredientCapture}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Scan Ingredient Label</DialogTitle>
+            <DialogTitle>Check Ingredient</DialogTitle>
           </DialogHeader>
-          <CameraCapture
+          <ImageCapture
+            type="ingredient"
             onImageCapture={handleIngredientImageCapture}
-            onClose={() => setShowIngredientCamera(false)}
+            onClose={() => setShowIngredientCapture(false)}
           />
         </DialogContent>
       </Dialog>
