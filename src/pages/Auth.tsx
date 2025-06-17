@@ -9,12 +9,14 @@ import { useToast } from '@/hooks/use-toast';
 import { ChefHat, Sparkles, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import AddressForm from '@/components/AddressForm';
+import ForgotPasswordModal from '@/components/ForgotPasswordModal';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   
   // Address form state
   const [streetAddress, setStreetAddress] = useState('');
@@ -232,6 +234,15 @@ const Auth = () => {
                         required
                       />
                     </div>
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setForgotPasswordOpen(true)}
+                        className="text-sm text-gluten-primary hover:text-gluten-secondary hover:underline"
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
                     <Button
                       type="submit"
                       className="w-full bg-gluten-primary hover:bg-gluten-primary/90"
@@ -352,6 +363,11 @@ const Auth = () => {
           ))}
         </div>
       </div>
+
+      <ForgotPasswordModal
+        open={forgotPasswordOpen}
+        onOpenChange={setForgotPasswordOpen}
+      />
     </div>
   );
 };

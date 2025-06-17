@@ -10,6 +10,7 @@ import { ChatProvider } from "@/contexts/ChatContext";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import GlutenWorld from "./pages/GlutenWorld";
 import MyRecipes from "./pages/MyRecipes";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => {
                 <Route path="/" element={<Landing />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
                 <Route path="/gluten-world" element={<GlutenWorld />} />
                 <Route path="/my-recipes" element={<MyRecipes />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
