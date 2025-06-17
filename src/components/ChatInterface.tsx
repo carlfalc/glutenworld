@@ -253,6 +253,14 @@ const ChatInterface = () => {
                 disabled={contextualAI.isPending}
               />
               <Button
+                onClick={toggleMicrophone}
+                variant="outline"
+                size="sm"
+                className={`border-border/50 hover:bg-accent/50 ${isListening ? 'bg-gluten-primary text-white' : ''}`}
+              >
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </Button>
+              <Button
                 onClick={handleSendMessage}
                 size="sm"
                 className="bg-gluten-primary hover:bg-gluten-secondary text-white px-3"

@@ -51,12 +51,41 @@
     @apply border-border;
   }
 
+  html,
+  body {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
+    /* Prevent mobile zoom on input focus */
+    font-size: 16px;
+  }
+
+  /* Mobile-first responsive design */
+  @media (max-width: 768px) {
+    html {
+      font-size: 16px;
+    }
+    
+    /* Prevent horizontal scroll */
+    body {
+      overflow-x: hidden;
+      width: 100vw;
+    }
+    
+    /* Ensure proper mobile viewport */
+    #root {
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
   }
 
   .chat-container {
     background: linear-gradient(135deg, hsl(220 13% 9%) 0%, hsl(215 25% 8%) 100%);
+    min-height: 100vh;
   }
 
   .message-bubble {
@@ -66,5 +95,23 @@
 
   .gluten-glow {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .chat-container {
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Improve touch targets */
+    button {
+      min-height: 44px;
+    }
+    
+    /* Better input handling on mobile */
+    input {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
   }
 }

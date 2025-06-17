@@ -13,10 +13,10 @@ serve(async (req) => {
 
   try {
     const { message, systemPrompt, chatMode, servingSize, context } = await req.json()
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
 
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured')
+    if (!perplexityApiKey) {
+      throw new Error('Perplexity API key not configured')
     }
 
     console.log('Processing contextual chat request:', { chatMode, servingSize, message: message.substring(0, 100) })
@@ -37,14 +37,14 @@ Remember to:
 5. Use the serving size information when creating recipes
 6. Format recipes clearly with the specified structure when in recipe-creator mode`
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
+        'Authorization': `Bearer ${perplexityApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'llama-3.1-sonar-small-128k-online',
         messages: [
           {
             role: 'system',
@@ -61,7 +61,7 @@ Remember to:
     })
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`)
+      throw new Error(`Perplexity API error: ${response.statusText}`)
     }
 
     const data = await response.json()
