@@ -23,7 +23,7 @@ const MobileActionBar = ({ onCameraClick }: MobileActionBarProps) => {
   const actions = [
     {
       icon: <Camera className="w-5 h-5" />,
-      label: "Scan Recipe",
+      label: "Scan & Upload",
       onClick: onCameraClick,
       color: "bg-blue-600 hover:bg-blue-700"
     },

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -278,7 +277,7 @@ const ChatInterface = () => {
       <Dialog open={showCamera} onOpenChange={setShowCamera}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Scan Recipe</DialogTitle>
+            <DialogTitle>Scan & Upload Recipe</DialogTitle>
           </DialogHeader>
           <CameraCapture
             onImageCapture={handleImageCapture}
