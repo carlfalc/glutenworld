@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Camera, X, Monitor } from 'lucide-react';
+import { Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChatContext } from '@/contexts/ChatContext';
 
@@ -29,15 +29,9 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
   const actions = [
     {
       icon: <Camera className="w-5 h-5" />,
-      label: "Scan/Upload Recipe",
+      label: "Scan Recipe",
       onClick: onCameraClick,
       color: "bg-blue-600 hover:bg-blue-700"
-    },
-    {
-      icon: <Monitor className="w-5 h-5" />,
-      label: "Screenshot Recipe",
-      onClick: onCameraClick,
-      color: "bg-indigo-600 hover:bg-indigo-700"
     },
     {
       icon: <span className="text-lg">🍳</span>,
@@ -50,6 +44,12 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
       label: "Convert Recipe",
       onClick: handleConversion,
       color: "bg-green-600 hover:bg-green-700"
+    },
+    {
+      icon: <span className="text-lg">📷</span>,
+      label: "Check Ingredient",
+      onClick: handleIngredientScan,
+      color: "bg-red-600 hover:bg-red-700"
     }
   ];
 
@@ -67,17 +67,6 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
             {action.label}
           </Button>
         ))}
-      </div>
-      
-      {/* Check ingredient button - full width at bottom */}
-      <div className="px-4 pb-4">
-        <Button
-          onClick={handleIngredientScan}
-          className="w-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 h-12 text-sm font-medium"
-        >
-          <span className="text-lg">📷</span>
-          Check ingredient
-        </Button>
       </div>
     </div>
   );
