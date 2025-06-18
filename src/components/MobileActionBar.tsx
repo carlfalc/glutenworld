@@ -28,39 +28,40 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
     onIngredientScanClick();
   };
 
-  const actions = [
+  // Top row actions (2x2 grid)
+  const topRowActions = [
     {
       icon: <Camera className="w-5 h-5" />,
-      label: "Scan Recipe",
+      label: "Scan/Upload Recipe",
       onClick: onCameraClick,
       color: "bg-blue-600 hover:bg-blue-700"
-    },
-    {
-      icon: <Scan className="w-5 h-5" />,
-      label: "Check Ingredient",
-      onClick: handleIngredientScan,
-      color: "bg-purple-600 hover:bg-purple-700"
     },
     {
       icon: <span className="text-lg">🍳</span>,
       label: "Recipe Creator",
       onClick: handleRecipeCreator,
-      color: "bg-gluten-primary hover:bg-gluten-secondary"
+      color: "bg-green-600 hover:bg-green-700"
+    },
+    {
+      icon: <span className="text-lg">🔄</span>,
+      label: "Convert Recipe",
+      onClick: handleConversion,
+      color: "bg-green-600 hover:bg-green-700"
     },
     {
       icon: <Heart className="w-5 h-5" />,
       label: "My Favorites",
       onClick: () => setShowFavorites(true),
-      color: "bg-red-600 hover:bg-red-700"
+      color: "bg-blue-600 hover:bg-blue-700"
     }
   ];
 
   return (
     <>
       <div className="bg-card/30 backdrop-blur-md border-t border-border/50">
-        {/* Main action buttons in 2x2 grid */}
+        {/* Top row: 2x2 grid */}
         <div className="grid grid-cols-2 gap-3 p-4">
-          {actions.map((action, index) => (
+          {topRowActions.map((action, index) => (
             <Button
               key={index}
               onClick={action.onClick}
@@ -70,6 +71,17 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
               {action.label}
             </Button>
           ))}
+        </div>
+
+        {/* Bottom row: Full width Check Ingredient button */}
+        <div className="px-4 pb-4">
+          <Button
+            onClick={handleIngredientScan}
+            className="bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 h-16 w-full text-sm font-medium"
+          >
+            <Scan className="w-5 h-5" />
+            Check Ingredient
+          </Button>
         </div>
       </div>
 
