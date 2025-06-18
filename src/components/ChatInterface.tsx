@@ -10,6 +10,7 @@ import RecipeConversionResult from './RecipeConversionResult';
 import { useChatContext } from '@/contexts/ChatContext';
 import { useContextualAI } from '@/hooks/useContextualAI';
 import { useRecipeConversion } from '@/hooks/useRecipeConversion';
+import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Dialog,
@@ -56,6 +57,16 @@ const ChatInterface = () => {
 
   const contextualAI = useContextualAI();
   const recipeConversion = useRecipeConversion();
+
+  // Voice recognition setup
+  const voiceRecognition = useVoiceRecognition({
+    onTranscript: (text) => {
+      setInputValue(text);
+    },
+    onError: (error) => {
+      console.error('Voice recognition error:', error);
+    }
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -254,11 +265,6 @@ const ChatInterface = () => {
     }
   };
 
-  const toggleMicrophone = () => {
-    setIsListening(!isListening);
-    // Voice recognition would be implemented here
-  };
-
   const resetChat = () => {
     setChatMode('general');
     setIsAwaitingServingSize(false);
@@ -345,21 +351,25 @@ const ChatInterface = () => {
                 onKeyPress={handleKeyPress}
                 placeholder="Tell me what you'd like to make or ask a gluten-free question..."
                 className="bg-input/50 border-border/50 focus:border-gluten-primary focus:ring-gluten-primary/20"
-                disabled={contextualAI.isPending}
+                disabled={contextualAI.isPending || voiceRecognition.isProcessing}
               />
             </div>
             <Button
-              onClick={toggleMicrophone}
+              onClick={voiceRecognition.toggleListening}
               variant="outline"
               size="icon"
-              className={`border-border/50 hover:bg-accent/50 ${isListening ? 'bg-gluten-primary text-white' : ''}`}
+              className={`border-border/50 hover:bg-accent/50 ${
+                voiceRecognition.isListening ? 'bg-red-500 text-white animate-pulse' : 
+                voiceRecognition.isProcessing ? 'bg-yellow-500 text-white' : ''
+              }`}
+              disabled={voiceRecognition.isProcessing}
             >
-              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              {voiceRecognition.isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </Button>
             <Button
               onClick={handleSendMessage}
               className="bg-gluten-primary hover:bg-gluten-secondary text-white"
-              disabled={!inputValue.trim() || contextualAI.isPending}
+              disabled={!inputValue.trim() || contextualAI.isPending || voiceRecognition.isProcessing}
             >
               <Send className="w-4 h-4" />
             </Button>
@@ -378,21 +388,25 @@ const ChatInterface = () => {
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything about gluten-free cooking..."
                 className="flex-1 bg-input/50 border-border/50 focus:border-gluten-primary"
-                disabled={contextualAI.isPending}
+                disabled={contextualAI.isPending || voiceRecognition.isProcessing}
               />
               <Button
-                onClick={toggleMicrophone}
+                onClick={voiceRecognition.toggleListening}
                 variant="outline"
                 size="sm"
-                className={`border-border/50 hover:bg-accent/50 ${isListening ? 'bg-gluten-primary text-white' : ''}`}
+                className={`border-border/50 hover:bg-accent/50 ${
+                  voiceRecognition.isListening ? 'bg-red-500 text-white animate-pulse' : 
+                  voiceRecognition.isProcessing ? 'bg-yellow-500 text-white' : ''
+                }`}
+                disabled={voiceRecognition.isProcessing}
               >
-                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                {voiceRecognition.isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </Button>
               <Button
                 onClick={handleSendMessage}
                 size="sm"
                 className="bg-gluten-primary hover:bg-gluten-secondary text-white px-3"
-                disabled={!inputValue.trim() || contextualAI.isPending}
+                disabled={!inputValue.trim() || contextualAI.isPending || voiceRecognition.isProcessing}
               >
                 <Send className="w-4 h-4" />
               </Button>
