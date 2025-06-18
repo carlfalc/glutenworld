@@ -12,7 +12,7 @@ import { useCreateRecipe } from '@/hooks/useRecipes';
 import { useRecipeConversion } from '@/hooks/useRecipeConversion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import CameraCapture from '@/components/CameraCapture';
+import ImageCapture from '@/components/ImageCapture';
 import RecipeConversionResult from '@/components/RecipeConversionResult';
 import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import { toast } from '@/hooks/use-toast';
@@ -20,7 +20,7 @@ import { toast } from '@/hooks/use-toast';
 const AddRecipeSection = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
+  const [showImageCapture, setShowImageCapture] = useState(false);
   const [conversionResult, setConversionResult] = useState<string | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [showFeatureDetails, setShowFeatureDetails] = useState(false);
@@ -56,7 +56,7 @@ const AddRecipeSection = () => {
     }
   };
 
-  const handleImageCapture = async (imageBase64: string) => {
+  const handleImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
     setIsConverting(true);
     try {
       const result = await recipeConversionMutation.mutateAsync({
@@ -65,7 +65,7 @@ const AddRecipeSection = () => {
       });
       
       setConversionResult(result.convertedRecipe);
-      setShowCamera(false);
+      setShowImageCapture(false);
     } catch (error) {
       console.error('Error converting recipe:', error);
       toast({
@@ -73,7 +73,7 @@ const AddRecipeSection = () => {
         description: "Failed to convert recipe. Please try again.",
         variant: "destructive",
       });
-      setShowCamera(false);
+      setShowImageCapture(false);
     } finally {
       setIsConverting(false);
     }
@@ -97,7 +97,7 @@ const AddRecipeSection = () => {
       });
       return;
     }
-    setShowCamera(true);
+    setShowImageCapture(true);
   };
 
   return (
@@ -142,7 +142,7 @@ const AddRecipeSection = () => {
           <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {conversionResult ? 'Recipe Converted' : showCamera ? 'Scan Recipe' : 'Add New Recipe'}
+                {conversionResult ? 'Recipe Converted' : showImageCapture ? 'Scan Recipe' : 'Add New Recipe'}
               </DialogTitle>
             </DialogHeader>
             
@@ -158,10 +158,11 @@ const AddRecipeSection = () => {
                 onBack={handleBackFromResult}
                 onSave={handleSaveFromResult}
               />
-            ) : showCamera ? (
-              <CameraCapture
+            ) : showImageCapture ? (
+              <ImageCapture
                 onImageCapture={handleImageCapture}
-                onClose={() => setShowCamera(false)}
+                onClose={() => setShowImageCapture(false)}
+                type="recipe"
               />
             ) : (
               <Tabs defaultValue="manual" className="w-full">
