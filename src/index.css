@@ -100,8 +100,19 @@
   /* Mobile optimizations */
   @media (max-width: 768px) {
     .chat-container {
-      height: 100vh;
-      overflow: hidden;
+      /* Remove fixed height and overflow restrictions to allow scrolling */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Enable smooth scrolling on iOS */
+    .chat-messages-container {
+      -webkit-overflow-scrolling: touch;
+      overflow-y: auto;
+      flex: 1;
+      /* Calculate height properly accounting for header, input, and action bar */
+      max-height: calc(100vh - 80px - 60px - 200px); /* header - input - action bar */
     }
     
     /* Improve touch targets */

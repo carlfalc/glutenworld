@@ -281,8 +281,8 @@ const ChatInterface = () => {
         </div>
       )}
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages Area - Updated for mobile scrolling */}
+      <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${isMobile ? 'chat-messages-container' : ''}`}>
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
@@ -328,10 +328,10 @@ const ChatInterface = () => {
         </div>
       )}
 
-      {/* Mobile Input Area */}
+      {/* Mobile Input Area - Updated positioning */}
       {isMobile && (
         <>
-          <div className="p-3 border-t border-border/50 bg-card/30 backdrop-blur-md">
+          <div className="p-3 border-t border-border/50 bg-card/30 backdrop-blur-md flex-shrink-0">
             <div className="flex gap-2 items-center">
               <Input
                 value={inputValue}
