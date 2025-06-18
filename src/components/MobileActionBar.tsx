@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Camera, X, Heart, Scan } from 'lucide-react';
+import { Camera, X, Heart, Scan, Skull } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChatContext } from '@/contexts/ChatContext';
 import FavoritesModal from '@/components/FavoritesModal';
@@ -79,6 +79,7 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
             onClick={handleIngredientScan}
             className="bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 h-16 w-full text-sm font-medium"
           >
+            <Skull className="w-5 h-5 text-yellow-400" />
             <Scan className="w-5 h-5" />
             Check Ingredient
           </Button>
