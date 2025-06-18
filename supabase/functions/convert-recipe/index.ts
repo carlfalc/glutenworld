@@ -13,11 +13,13 @@ serve(async (req) => {
 
   try {
     const { imageBase64, prompt } = await req.json()
-    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
 
-    if (!perplexityApiKey) {
-      throw new Error('Perplexity API key not configured')
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not configured')
     }
+
+    console.log('Processing recipe conversion with OpenAI Vision API')
 
     const systemPrompt = `You are an AI culinary expert tasked with analyzing a given recipe for gluten content. Your objectives are as follows:
 
@@ -34,18 +36,16 @@ serve(async (req) => {
 
 Format the response as a structured recipe that's easy to read and follow. Focus on practical gluten-free substitutions that maintain the taste and texture of the original dish.`
 
-    const userPrompt = `${prompt || 'Please analyze this recipe image and convert it to a gluten-free version following the guidelines above.'}
+    const userPrompt = prompt || 'Please analyze this recipe image and convert it to a gluten-free version following the guidelines above.'
 
-Image: ${imageBase64}`
-
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${perplexityApiKey}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-large-128k-online',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
@@ -53,23 +53,36 @@ Image: ${imageBase64}`
           },
           {
             role: 'user',
-            content: userPrompt
+            content: [
+              {
+                type: 'text',
+                text: userPrompt
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: imageBase64,
+                  detail: 'high'
+                }
+              }
+            ]
           }
         ],
         temperature: 0.3,
-        top_p: 0.9,
         max_tokens: 2000,
-        return_images: false,
-        return_related_questions: false,
       }),
     })
 
     if (!response.ok) {
-      throw new Error(`Perplexity API error: ${response.statusText}`)
+      const errorData = await response.text()
+      console.error('OpenAI API error:', errorData)
+      throw new Error(`OpenAI API error: ${response.statusText}`)
     }
 
     const data = await response.json()
     const convertedRecipe = data.choices[0].message.content
+
+    console.log('Successfully converted recipe using OpenAI Vision')
 
     return new Response(
       JSON.stringify({ convertedRecipe }),

@@ -13,10 +13,10 @@ serve(async (req) => {
 
   try {
     const { message, systemPrompt, chatMode, servingSize, context } = await req.json()
-    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
 
-    if (!perplexityApiKey) {
-      throw new Error('Perplexity API key not configured')
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not configured')
     }
 
     console.log('Processing contextual chat request:', { chatMode, servingSize, message: message.substring(0, 100) })
@@ -37,15 +37,43 @@ Remember to:
 5. Use the serving size information when creating recipes
 6. Format recipes clearly with the specified structure when in recipe-creator mode`
 
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${perplexityApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-sonar-small-128k-online',
-        messages: [
+    // Check if the message contains an image (base64 data URL)
+    const isImageMessage = message.includes('data:image/')
+    
+    let messages
+    
+    if (isImageMessage && chatMode === 'ingredient-scan') {
+      // Extract the base64 image from the message
+      const imageMatch = message.match(/data:image\/[^;]+;base64,([^"]+)/)
+      if (imageMatch) {
+        const imageBase64 = `data:image/jpeg;base64,${imageMatch[1]}`
+        const textContent = message.replace(/data:image\/[^"]+/g, '').trim()
+        
+        messages = [
+          {
+            role: 'system',
+            content: enhancedSystemPrompt
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: textContent || 'Please analyze this ingredient label image for gluten content and safety.'
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: imageBase64,
+                  detail: 'high'
+                }
+              }
+            ]
+          }
+        ]
+      } else {
+        // Fallback to text-only if image extraction fails
+        messages = [
           {
             role: 'system',
             content: enhancedSystemPrompt
@@ -54,20 +82,46 @@ Remember to:
             role: 'user',
             content: message
           }
-        ],
+        ]
+      }
+    } else {
+      // Text-only message
+      messages = [
+        {
+          role: 'system',
+          content: enhancedSystemPrompt
+        },
+        {
+          role: 'user',
+          content: message
+        }
+      ]
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: messages,
         temperature: 0.7,
         max_tokens: 2000,
       }),
     })
 
     if (!response.ok) {
-      throw new Error(`Perplexity API error: ${response.statusText}`)
+      const errorData = await response.text()
+      console.error('OpenAI API error:', errorData)
+      throw new Error(`OpenAI API error: ${response.statusText}`)
     }
 
     const data = await response.json()
     const aiResponse = data.choices[0].message.content
 
-    console.log('Successfully processed contextual chat request')
+    console.log('Successfully processed contextual chat request with OpenAI')
 
     return new Response(
       JSON.stringify({ response: aiResponse }),
