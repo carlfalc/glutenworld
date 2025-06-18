@@ -324,6 +324,56 @@ export type Database = {
         }
         Relationships: []
       }
+      user_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          product_category: string | null
+          product_description: string | null
+          product_image_url: string | null
+          product_name: string | null
+          product_scanned_at: string | null
+          recipe_id: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_category?: string | null
+          product_description?: string | null
+          product_image_url?: string | null
+          product_name?: string | null
+          product_scanned_at?: string | null
+          recipe_id?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_category?: string | null
+          product_description?: string | null
+          product_image_url?: string | null
+          product_name?: string | null
+          product_scanned_at?: string | null
+          recipe_id?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "user_recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_recipes: {
         Row: {
           converted_recipe: string | null

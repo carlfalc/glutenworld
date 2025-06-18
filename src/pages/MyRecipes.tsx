@@ -3,16 +3,19 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
+import FavoriteButton from '@/components/FavoriteButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChefHat, Search, Filter, Plus, Clock, Users, Star, BookOpen } from 'lucide-react';
+import { ChefHat, Search, Filter, Plus, Clock, Users, Star, BookOpen, Heart } from 'lucide-react';
+import { useFavorites } from '@/hooks/useFavorites';
 
 const MyRecipes = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const { data: favoritedRecipes = [] } = useFavorites('recipe');
 
   // Mock data for recipes - in a real app, this would come from your backend
   const myRecipes = [
@@ -109,9 +112,13 @@ const MyRecipes = () => {
         </div>
 
         <Tabs defaultValue="my-recipes" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="my-recipes">My Recipes ({myRecipes.length})</TabsTrigger>
             <TabsTrigger value="favorites">Favorites ({favoriteRecipes.length})</TabsTrigger>
+            <TabsTrigger value="saved-favorites">
+              <Heart className="w-4 h-4 mr-1" />
+              Saved ({favoritedRecipes.length})
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="my-recipes" className="space-y-4">
@@ -138,9 +145,15 @@ const MyRecipes = () => {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg line-clamp-2">{recipe.title}</CardTitle>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          {recipe.rating}
+                        <div className="flex items-center gap-2">
+                          <FavoriteButton 
+                            type="recipe" 
+                            itemId={recipe.id.toString()} 
+                          />
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                            {recipe.rating}
+                          </div>
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2">{recipe.description}</p>
@@ -185,9 +198,15 @@ const MyRecipes = () => {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg line-clamp-2">{recipe.title}</CardTitle>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        {recipe.rating}
+                      <div className="flex items-center gap-2">
+                        <FavoriteButton 
+                          type="recipe" 
+                          itemId={recipe.id.toString()} 
+                        />
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          {recipe.rating}
+                        </div>
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2">{recipe.description}</p>
@@ -222,6 +241,44 @@ const MyRecipes = () => {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          <TabsContent value="saved-favorites" className="space-y-4">
+            {favoritedRecipes.length === 0 ? (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No saved favorites yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Start adding recipes to your favorites to see them here
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {favoritedRecipes.map((favorite) => (
+                  <Card key={favorite.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">Saved Recipe</CardTitle>
+                        <FavoriteButton 
+                          type="recipe" 
+                          itemId={favorite.recipe_id} 
+                        />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>Saved {new Date(favorite.created_at).toLocaleDateString()}</span>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                          Gluten-Free
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
