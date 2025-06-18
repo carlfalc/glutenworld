@@ -1,287 +1,213 @@
 
-import { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, X, AlertCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Camera, Upload, Image, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ImageCaptureProps {
-  onImageCapture: (imageBase64: string, source: 'camera' | 'upload') => void;
+  onImageCapture: (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => void;
   onClose: () => void;
   type: 'recipe' | 'ingredient';
 }
 
 const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
-  const [cameraError, setCameraError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [error, setError] = useState<string>('');
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Cleanup stream when component unmounts
-  useEffect(() => {
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [stream]);
-
-  const startCamera = async () => {
-    setIsLoading(true);
-    setCameraError('');
-    
-    try {
-      console.log('Requesting camera access...');
-      
-      // First try with back camera
-      let constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      };
-
-      let mediaStream: MediaStream;
-      
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('Back camera accessed successfully');
-      } catch (backCameraError) {
-        console.log('Back camera failed, trying front camera:', backCameraError);
-        
-        // Fallback to front camera
-        constraints = {
-          video: {
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        };
-        
-        try {
-          mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-          console.log('Front camera accessed successfully');
-        } catch (frontCameraError) {
-          console.log('Front camera failed, trying basic video:', frontCameraError);
-          
-          // Last fallback - basic video
-          mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-          console.log('Basic camera accessed successfully');
-        }
-      }
-
-      console.log('Camera stream obtained, tracks:', mediaStream.getVideoTracks());
-      
-      setStream(mediaStream);
-      setShowCamera(true);
-      
-      // Wait for video element to be ready
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        
-        // Ensure video plays
-        videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded');
-          if (videoRef.current) {
-            videoRef.current.play().then(() => {
-              console.log('Video playing successfully');
-              setIsLoading(false);
-            }).catch(error => {
-              console.error('Video play failed:', error);
-              setCameraError('Failed to start video playback');
-              setIsLoading(false);
-            });
-          }
-        };
-
-        videoRef.current.onerror = (error) => {
-          console.error('Video element error:', error);
-          setCameraError('Video element failed to load');
-          setIsLoading(false);
-        };
-      }
-
-    } catch (error) {
-      console.error('Camera access error:', error);
-      setIsLoading(false);
-      
-      if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          setCameraError('Camera permission denied. Please allow camera access and try again.');
-        } else if (error.name === 'NotFoundError') {
-          setCameraError('No camera found on this device.');
-        } else if (error.name === 'NotReadableError') {
-          setCameraError('Camera is already in use by another application.');
-        } else {
-          setCameraError(`Camera error: ${error.message}`);
-        }
-      } else {
-        setCameraError('Unknown camera error occurred.');
-      }
-      
-      // Automatically fallback to file upload
-      setTimeout(() => {
-        fileInputRef.current?.click();
-      }, 2000);
-    }
-  };
-
-  const stopCamera = () => {
-    console.log('Stopping camera...');
-    if (stream) {
-      stream.getTracks().forEach(track => {
-        console.log('Stopping track:', track.label);
-        track.stop();
-      });
-      setStream(null);
-    }
-    setShowCamera(false);
-    setCameraError('');
-    setIsLoading(false);
-  };
-
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      const context = canvas.getContext('2d');
-      
-      console.log('Capturing photo, video dimensions:', video.videoWidth, 'x', video.videoHeight);
-      
-      if (video.videoWidth === 0 || video.videoHeight === 0) {
-        setCameraError('Camera feed not ready. Please wait or try again.');
-        return;
-      }
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      if (context) {
-        context.drawImage(video, 0, 0);
-        const imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
-        console.log('Photo captured successfully');
-        onImageCapture(imageBase64, 'camera');
-        stopCamera();
-        onClose();
-      }
-    }
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileCapture = (event: React.ChangeEvent<HTMLInputElement>, source: 'camera' | 'upload') => {
     const file = event.target.files?.[0];
     if (file) {
-      console.log('File selected:', file.name, file.type);
+      setIsLoading(true);
+      setError('');
+      
+      console.log(`${source} file selected:`, file.name, file.type);
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        onImageCapture(result, 'upload');
+        setIsLoading(false);
+        onImageCapture(result, source);
         onClose();
       };
+      
+      reader.onerror = () => {
+        setError('Failed to read the image file. Please try again.');
+        setIsLoading(false);
+      };
+      
       reader.readAsDataURL(file);
     }
+    
+    // Reset the input value to allow selecting the same file again
+    event.target.value = '';
   };
 
   const handleTakePhoto = () => {
-    startCamera();
+    setError('');
+    cameraInputRef.current?.click();
   };
 
   const handleUploadPhoto = () => {
+    setError('');
     fileInputRef.current?.click();
   };
 
+  const handleScreenshot = async () => {
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      // Check if the Screen Capture API is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        throw new Error('Screenshot capture is not supported on this device.');
+      }
+
+      console.log('Requesting screen capture...');
+      
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          mediaSource: 'screen'
+        }
+      });
+
+      // Create a video element to capture the frame
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.muted = true;
+
+      // Wait for video to be ready
+      video.onloadedmetadata = () => {
+        video.play().then(() => {
+          // Create canvas to capture the frame
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          
+          const context = canvas.getContext('2d');
+          if (context) {
+            context.drawImage(video, 0, 0);
+            const imageBase64 = canvas.toDataURL('image/png', 0.8);
+            
+            // Stop the stream
+            stream.getTracks().forEach(track => track.stop());
+            
+            setIsLoading(false);
+            onImageCapture(imageBase64, 'screenshot');
+            onClose();
+          }
+        });
+      };
+
+      video.onerror = () => {
+        stream.getTracks().forEach(track => track.stop());
+        throw new Error('Failed to capture screenshot');
+      };
+
+    } catch (error) {
+      console.error('Screenshot error:', error);
+      setIsLoading(false);
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Permission denied')) {
+          setError('Screenshot permission denied. Please allow screen sharing and try again.');
+        } else if (error.message.includes('not supported')) {
+          setError('Screenshot capture is not supported on this device or browser.');
+        } else {
+          setError(`Screenshot error: ${error.message}`);
+        }
+      } else {
+        setError('Failed to capture screenshot. Please try again.');
+      }
+    }
+  };
+
+  const actionText = type === 'recipe' ? 'Recipe' : 'Ingredient';
+
   return (
     <div className="space-y-4">
-      {!showCamera ? (
-        <div className="grid grid-cols-2 gap-4">
-          <Button
-            onClick={handleTakePhoto}
-            className="flex flex-col items-center gap-2 h-20 bg-gluten-primary"
-            disabled={isLoading}
-          >
-            <Camera className="w-6 h-6" />
-            <span className="text-sm">
-              {isLoading ? 'Starting...' : 'Take Photo'}
-            </span>
-          </Button>
-          
-          <Button
-            onClick={handleUploadPhoto}
-            variant="outline"
-            className="flex flex-col items-center gap-2 h-20"
-          >
-            <Upload className="w-6 h-6" />
-            <span className="text-sm">Upload Photo</span>
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="relative">
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
-                <div className="text-white text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                  <p className="text-sm">Starting camera...</p>
-                </div>
-              </div>
-            )}
-            
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full rounded-lg bg-black min-h-[200px]"
-              style={{ objectFit: 'cover' }}
-            />
-            
-            <Button
-              onClick={stopCamera}
-              variant="outline"
-              size="sm"
-              className="absolute top-2 right-2"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              onClick={capturePhoto} 
-              className="flex-1 bg-gluten-primary"
-              disabled={isLoading}
-            >
-              {type === 'recipe' ? 'Capture Recipe' : 'Capture Ingredient'}
-            </Button>
-            <Button onClick={stopCamera} variant="outline">
-              Cancel
-            </Button>
-          </div>
+      {/* Main action buttons */}
+      <div className="grid grid-cols-1 gap-3">
+        <Button
+          onClick={handleTakePhoto}
+          className="flex items-center justify-center gap-3 h-16 bg-gluten-primary hover:bg-gluten-secondary text-white"
+          disabled={isLoading}
+        >
+          <Camera className="w-6 h-6" />
+          <span className="text-base font-medium">
+            {isLoading ? 'Processing...' : `Take Photo of ${actionText}`}
+          </span>
+        </Button>
+        
+        <Button
+          onClick={handleUploadPhoto}
+          variant="outline"
+          className="flex items-center justify-center gap-3 h-16 border-2 hover:bg-accent/50"
+          disabled={isLoading}
+        >
+          <Upload className="w-6 h-6" />
+          <span className="text-base font-medium">
+            Upload {actionText} Image
+          </span>
+        </Button>
+
+        <Button
+          onClick={handleScreenshot}
+          variant="outline"
+          className="flex items-center justify-center gap-3 h-16 border-2 hover:bg-accent/50"
+          disabled={isLoading}
+        >
+          <Image className="w-6 h-6" />
+          <span className="text-base font-medium">
+            {isLoading ? 'Capturing...' : 'Take Screenshot'}
+          </span>
+        </Button>
+      </div>
+
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="flex items-center justify-center gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+          <span className="text-sm text-blue-700 font-medium">Processing...</span>
         </div>
       )}
 
       {/* Error Message */}
-      {cameraError && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+      {error && (
+        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-medium">Camera Error</p>
-            <p>{cameraError}</p>
-            <p className="mt-1 text-xs">Will automatically switch to file upload...</p>
+            <p className="font-medium">Error</p>
+            <p>{error}</p>
           </div>
         </div>
       )}
+
+      {/* Help text */}
+      <div className="text-xs text-muted-foreground space-y-1 p-3 bg-muted/30 rounded-lg">
+        <p><strong>Camera:</strong> Opens your device's camera for taking photos</p>
+        <p><strong>Upload:</strong> Select an image from your device's gallery</p>
+        <p><strong>Screenshot:</strong> Capture what's currently on your screen</p>
+      </div>
+      
+      {/* Hidden file inputs */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={(e) => handleFileCapture(e, 'camera')}
+        className="hidden"
+      />
       
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        onChange={handleFileUpload}
+        onChange={(e) => handleFileCapture(e, 'upload')}
         className="hidden"
       />
-      
-      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 };

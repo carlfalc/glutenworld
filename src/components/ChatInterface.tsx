@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -132,11 +131,18 @@ const ChatInterface = () => {
     }
   };
 
-  const handleRecipeImageCapture = async (imageBase64: string, source: 'camera' | 'upload') => {
+  const handleRecipeImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
+    // Create appropriate message based on source
+    const sourceMessages = {
+      camera: 'I took a photo of this recipe',
+      upload: 'I uploaded this recipe image',
+      screenshot: 'I captured a screenshot of this recipe'
+    };
+
     // Add user message with image
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: source === 'camera' ? 'I took a photo of this recipe' : 'I uploaded this recipe image',
+      text: sourceMessages[source],
       isUser: true,
       timestamp: new Date(),
       image: imageBase64,
@@ -170,11 +176,18 @@ const ChatInterface = () => {
     }
   };
 
-  const handleIngredientImageCapture = async (imageBase64: string, source: 'camera' | 'upload') => {
+  const handleIngredientImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
+    // Create appropriate message based on source
+    const sourceMessages = {
+      camera: 'I took a photo of this ingredient label',
+      upload: 'I uploaded this ingredient label image',
+      screenshot: 'I captured a screenshot of this ingredient label'
+    };
+
     // Add user message with image
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: source === 'camera' ? 'I took a photo of this ingredient label' : 'I uploaded this ingredient label',
+      text: sourceMessages[source],
       isUser: true,
       timestamp: new Date(),
       image: imageBase64,
