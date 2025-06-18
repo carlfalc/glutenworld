@@ -66,9 +66,7 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
       console.log('Requesting screen capture...');
       
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          mediaSource: 'screen'
-        }
+        video: true
       });
 
       // Create a video element to capture the frame
