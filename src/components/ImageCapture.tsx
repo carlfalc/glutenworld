@@ -1,6 +1,6 @@
 
 import { useState, useRef } from 'react';
-import { Camera, Upload, Image, AlertCircle } from 'lucide-react';
+import { Camera, Upload, Image, AlertCircle, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ImageCaptureProps {
@@ -60,13 +60,18 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
     try {
       // Check if the Screen Capture API is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-        throw new Error('Screenshot capture is not supported on this device.');
+        throw new Error('Screenshot capture is not supported on this device/browser.');
       }
 
       console.log('Requesting screen capture...');
       
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true
+        video: { 
+          mediaSource: 'screen',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: false
       });
 
       // Create a video element to capture the frame
@@ -74,49 +79,58 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
       video.srcObject = stream;
       video.autoplay = true;
       video.muted = true;
+      video.playsInline = true;
 
       // Wait for video to be ready
-      video.onloadedmetadata = () => {
-        video.play().then(() => {
-          // Create canvas to capture the frame
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          
-          const context = canvas.getContext('2d');
-          if (context) {
-            context.drawImage(video, 0, 0);
-            const imageBase64 = canvas.toDataURL('image/png', 0.8);
-            
-            // Stop the stream
-            stream.getTracks().forEach(track => track.stop());
-            
-            setIsLoading(false);
-            onImageCapture(imageBase64, 'screenshot');
-            onClose();
-          }
-        });
-      };
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = () => {
+          video.play().then(resolve).catch(reject);
+        };
+        video.onerror = reject;
+        
+        // Add a timeout to prevent hanging
+        setTimeout(() => reject(new Error('Video loading timeout')), 10000);
+      });
 
-      video.onerror = () => {
+      // Give a moment for the video to stabilize
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Create canvas to capture the frame
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 1920;
+      canvas.height = video.videoHeight || 1080;
+      
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(video, 0, 0);
+        const imageBase64 = canvas.toDataURL('image/png', 0.9);
+        
+        // Stop the stream
         stream.getTracks().forEach(track => track.stop());
-        throw new Error('Failed to capture screenshot');
-      };
+        
+        setIsLoading(false);
+        onImageCapture(imageBase64, 'screenshot');
+        onClose();
+      } else {
+        throw new Error('Could not get canvas context');
+      }
 
     } catch (error) {
       console.error('Screenshot error:', error);
       setIsLoading(false);
       
       if (error instanceof Error) {
-        if (error.message.includes('Permission denied')) {
+        if (error.message.includes('Permission denied') || error.message.includes('NotAllowedError')) {
           setError('Screenshot permission denied. Please allow screen sharing and try again.');
-        } else if (error.message.includes('not supported')) {
-          setError('Screenshot capture is not supported on this device or browser.');
+        } else if (error.message.includes('not supported') || error.message.includes('NotSupportedError')) {
+          setError('Screenshot capture is not supported on this device or browser. Try using the camera or upload options instead.');
+        } else if (error.message.includes('timeout')) {
+          setError('Screenshot capture timed out. Please try again.');
         } else {
           setError(`Screenshot error: ${error.message}`);
         }
       } else {
-        setError('Failed to capture screenshot. Please try again.');
+        setError('Failed to capture screenshot. Please try the camera or upload options instead.');
       }
     }
   };
@@ -153,12 +167,12 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
         <Button
           onClick={handleScreenshot}
           variant="outline"
-          className="flex items-center justify-center gap-3 h-16 border-2 hover:bg-accent/50"
+          className="flex items-center justify-center gap-3 h-16 border-2 hover:bg-accent/50 border-indigo-300 hover:border-indigo-400"
           disabled={isLoading}
         >
-          <Image className="w-6 h-6" />
+          <Monitor className="w-6 h-6" />
           <span className="text-base font-medium">
-            {isLoading ? 'Capturing...' : 'Take Screenshot'}
+            {isLoading ? 'Capturing Screenshot...' : `Screenshot ${actionText}`}
           </span>
         </Button>
       </div>
@@ -186,7 +200,10 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
       <div className="text-xs text-muted-foreground space-y-1 p-3 bg-muted/30 rounded-lg">
         <p><strong>Camera:</strong> Opens your device's camera for taking photos</p>
         <p><strong>Upload:</strong> Select an image from your device's gallery</p>
-        <p><strong>Screenshot:</strong> Capture what's currently on your screen</p>
+        <p><strong>Screenshot:</strong> Capture what's currently on your screen (works best on desktop/tablet)</p>
+        {type === 'recipe' && (
+          <p className="text-yellow-600"><strong>Tip:</strong> For recipes, screenshots work great for capturing web pages or apps!</p>
+        )}
       </div>
       
       {/* Hidden file inputs */}
