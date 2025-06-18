@@ -25,6 +25,7 @@ interface Message {
   timestamp: Date;
   mode?: string;
   image?: string;
+  convertedRecipe?: string;
 }
 
 const ChatInterface = () => {
@@ -41,6 +42,7 @@ const ChatInterface = () => {
   const [showRecipeCapture, setShowRecipeCapture] = useState(false);
   const [showIngredientCapture, setShowIngredientCapture] = useState(false);
   const [conversionResult, setConversionResult] = useState<string | null>(null);
+  const [activeConvertedRecipeId, setActiveConvertedRecipeId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -163,7 +165,23 @@ const ChatInterface = () => {
         imageBase64,
         prompt: "Please analyze this recipe and convert it to be gluten-free following the detailed format guidelines."
       });
+
+      // Create a unique ID for this converted recipe
+      const convertedRecipeMessageId = (Date.now() + 2).toString();
+      
+      // Add the converted recipe as a chat message
+      const convertedRecipeMessage: Message = {
+        id: convertedRecipeMessageId,
+        text: "Here's your converted gluten-free recipe! 🎉",
+        isUser: false,
+        timestamp: new Date(),
+        convertedRecipe: response.convertedRecipe,
+      };
+      
+      setMessages(prev => [...prev, convertedRecipeMessage]);
       setConversionResult(response.convertedRecipe);
+      setActiveConvertedRecipeId(convertedRecipeMessageId);
+      
     } catch (error) {
       console.error('Recipe conversion error:', error);
       const errorMessage: Message = {
@@ -244,6 +262,8 @@ const ChatInterface = () => {
   const resetChat = () => {
     setChatMode('general');
     setIsAwaitingServingSize(false);
+    setConversionResult(null);
+    setActiveConvertedRecipeId(null);
     setMessages([{
       id: '1',
       text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
@@ -252,12 +272,24 @@ const ChatInterface = () => {
     }]);
   };
 
+  const handleBackFromRecipe = () => {
+    setConversionResult(null);
+    setActiveConvertedRecipeId(null);
+    // The recipe message stays in chat history
+  };
+
+  const handleRecipeSaved = () => {
+    setConversionResult(null);
+    setActiveConvertedRecipeId(null);
+    // The recipe message stays in chat history
+  };
+
   if (conversionResult) {
     return (
       <RecipeConversionResult
         convertedRecipe={conversionResult}
-        onBack={() => setConversionResult(null)}
-        onSave={() => setConversionResult(null)}
+        onBack={handleBackFromRecipe}
+        onSave={handleRecipeSaved}
       />
     );
   }
@@ -284,7 +316,14 @@ const ChatInterface = () => {
       {/* Messages Area - Updated for mobile scrolling */}
       <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${isMobile ? 'chat-messages-container' : ''}`}>
         {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
+          <ChatMessage 
+            key={message.id} 
+            message={message}
+            onViewRecipe={message.convertedRecipe ? () => {
+              setConversionResult(message.convertedRecipe!);
+              setActiveConvertedRecipeId(message.id);
+            } : undefined}
+          />
         ))}
         
         {/* Serving Size Selector */}
