@@ -55,7 +55,7 @@ const Header = () => {
                       className={cn(navigationMenuTriggerStyle(), "cursor-pointer")}
                       onClick={() => navigate('/dashboard')}
                     >
-                      Dashboard
+                      Home
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
