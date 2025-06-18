@@ -45,7 +45,7 @@ Format the response as a structured recipe that's easy to read and follow. Focus
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',

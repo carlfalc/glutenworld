@@ -105,7 +105,7 @@ Remember to:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: messages,
         temperature: 0.7,
         max_tokens: 2000,
