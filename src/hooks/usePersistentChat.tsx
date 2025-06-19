@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -37,7 +36,24 @@ export const usePersistentChat = () => {
             ...msg,
             timestamp: new Date(msg.timestamp)
           }));
-          setMessages(parsedMessages);
+          
+          // Filter out any duplicate mode messages that might have been stored
+          const filteredMessages = parsedMessages.filter((msg: Message, index: number, arr: Message[]) => {
+            if (!msg.mode || msg.isUser) return true;
+            
+            // Keep only the first occurrence of each mode message
+            const firstModeIndex = arr.findIndex((m: Message) => 
+              m.mode === msg.mode && 
+              !m.isUser && 
+              m.text.includes('Mode') && 
+              (m.text.includes('Activated') || m.text.includes('Mode!'))
+            );
+            
+            return index === firstModeIndex;
+          });
+          
+          console.log('Loaded messages from storage:', parsedMessages.length, 'filtered to:', filteredMessages.length);
+          setMessages(filteredMessages);
         } catch (error) {
           console.error('Failed to parse stored chat messages:', error);
         }
@@ -49,11 +65,45 @@ export const usePersistentChat = () => {
   useEffect(() => {
     if (user && messages.length > 1) { // Don't save if only welcome message
       const userStorageKey = `${CHAT_STORAGE_KEY}_${user.id}`;
-      localStorage.setItem(userStorageKey, JSON.stringify(messages));
+      
+      // Filter out duplicate mode messages before saving
+      const messagesToSave = messages.filter((msg, index) => {
+        if (!msg.mode || msg.isUser) return true;
+        
+        // Keep only the first occurrence of each mode message
+        const firstModeIndex = messages.findIndex((m) => 
+          m.mode === msg.mode && 
+          !m.isUser && 
+          m.text.includes('Mode') && 
+          (m.text.includes('Activated') || m.text.includes('Mode!'))
+        );
+        
+        return index === firstModeIndex;
+      });
+      
+      localStorage.setItem(userStorageKey, JSON.stringify(messagesToSave));
+      console.log('Saved messages to storage:', messagesToSave.length, 'out of', messages.length);
     }
   }, [messages, user]);
 
   const addMessage = (message: Message) => {
+    console.log('Adding message:', message.id, message.text.substring(0, 50) + '...');
+    
+    // Prevent adding duplicate mode messages
+    if (message.mode && !message.isUser && message.text.includes('Mode')) {
+      const existingModeMessage = messages.find(m => 
+        m.mode === message.mode && 
+        !m.isUser && 
+        m.text.includes('Mode') && 
+        (m.text.includes('Activated') || m.text.includes('Mode!'))
+      );
+      
+      if (existingModeMessage) {
+        console.log('Preventing duplicate mode message for:', message.mode);
+        return;
+      }
+    }
+    
     setMessages(prev => [...prev, message]);
   };
 
@@ -65,6 +115,7 @@ export const usePersistentChat = () => {
       timestamp: new Date(),
     };
     
+    console.log('Clearing chat history');
     setMessages([welcomeMessage]);
     
     if (user) {

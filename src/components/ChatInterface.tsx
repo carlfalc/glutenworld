@@ -52,6 +52,7 @@ const ChatInterface = () => {
   const [activeConvertedRecipeId, setActiveConvertedRecipeId] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(true);
+  const [modeMessageSent, setModeMessageSent] = useState<string | null>(null); // Track which mode message was sent
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -66,6 +67,8 @@ const ChatInterface = () => {
 
   const contextualAI = useContextualAI();
   const recipeConversion = useRecipeConversion();
+
+  console.log('ChatInterface render - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
 
   // Voice recognition setup
   const voiceRecognition = useVoiceRecognition({
@@ -128,7 +131,15 @@ const ChatInterface = () => {
 
   // Add mode indicator message when mode changes
   useEffect(() => {
-    if (chatMode !== 'general') {
+    console.log('Mode change effect - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
+    
+    // Only add mode message if:
+    // 1. Mode is not general
+    // 2. We haven't already sent a message for this mode
+    // 3. Mode actually changed (not just a re-render)
+    if (chatMode !== 'general' && modeMessageSent !== chatMode) {
+      console.log('Adding mode indicator message for:', chatMode);
+      
       const modeMessages = {
         'recipe-creator': "🍳 Recipe Creator Mode Activated! I'll help you create amazing gluten-free recipes. How many servings do you need?",
         'conversion': "🔄 Recipe Conversion Mode! Share a recipe and I'll convert it to be gluten-free.",
@@ -137,7 +148,7 @@ const ChatInterface = () => {
       };
 
       const modeMessage: Message = {
-        id: Date.now().toString(),
+        id: `mode-${chatMode}-${Date.now()}`,
         text: modeMessages[chatMode],
         isUser: false,
         timestamp: new Date(),
@@ -145,12 +156,21 @@ const ChatInterface = () => {
       };
 
       addMessage(modeMessage);
+      setModeMessageSent(chatMode); // Mark this mode as having sent its message
 
       if (chatMode === 'recipe-creator') {
         setIsAwaitingServingSize(true);
       }
     }
-  }, [chatMode, setIsAwaitingServingSize, addMessage]);
+  }, [chatMode, modeMessageSent, addMessage, setIsAwaitingServingSize]);
+
+  // Reset mode message tracking when mode changes to general
+  useEffect(() => {
+    if (chatMode === 'general') {
+      console.log('Resetting mode message tracking - switched to general mode');
+      setModeMessageSent(null);
+    }
+  }, [chatMode]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -195,21 +215,31 @@ const ChatInterface = () => {
   };
 
   const parseIngredientAnalysis = (text: string) => {
+    console.log('Parsing ingredient analysis from text:', text.substring(0, 200) + '...');
+    
     // Try to parse structured ingredient analysis from AI response
     const lines = text.split('\n');
     let analysis: any = null;
     
     // Look for structured data patterns in the response
-    if (text.includes('Product:') || text.includes('Safety Rating:') || text.includes('Gluten Status:')) {
+    if (text.includes('Product:') || text.includes('Safety Rating:') || text.includes('Gluten Status:') || 
+        text.includes('PRODUCT IDENTIFICATION:') || text.includes('GLUTEN STATUS:') || text.includes('INGREDIENT ANALYSIS')) {
+      
       analysis = {
-        productName: extractValue(text, 'Product:') || 'Unknown Product',
+        productName: extractValue(text, 'Product Name:') || extractValue(text, 'Product:') || 'Unknown Product',
         analysis: text,
-        safetyRating: extractValue(text, 'Safety Rating:'),
-        glutenStatus: extractValue(text, 'Gluten Status:'),
-        dairyStatus: extractValue(text, 'Dairy Status:'),
-        veganStatus: extractValue(text, 'Vegan Status:'),
+        safetyRating: extractValue(text, 'Safety Rating:') || extractValue(text, 'Celiac Safety Level:'),
+        glutenStatus: extractValue(text, 'Gluten Status:') || extractValue(text, 'GLUTEN STATUS:'),
+        dairyStatus: extractValue(text, 'Dairy Status:') || extractValue(text, 'DAIRY STATUS:'),
+        veganStatus: extractValue(text, 'Vegan Status:') || extractValue(text, 'VEGAN STATUS:'),
         allergenWarnings: extractAllergens(text),
+        productCategory: extractValue(text, 'Product Type:') || extractValue(text, 'Category:'),
+        productDescription: extractValue(text, 'Brand:'),
       };
+      
+      console.log('Parsed ingredient analysis:', analysis);
+    } else {
+      console.log('No structured ingredient analysis found in response');
     }
     
     return analysis;
@@ -218,11 +248,11 @@ const ChatInterface = () => {
   const extractValue = (text: string, key: string): string | undefined => {
     const regex = new RegExp(`${key}\\s*([^\\n]+)`, 'i');
     const match = text.match(regex);
-    return match ? match[1].trim() : undefined;
+    return match ? match[1].trim().replace(/^[•\-\*]\s*/, '') : undefined;
   };
 
   const extractAllergens = (text: string): string[] => {
-    const allergenMatch = text.match(/Allergens?[:\s]+([^\n]+)/i);
+    const allergenMatch = text.match(/(?:Allergens?|Contains|May Contain)[:\s]+([^\n]+)/i);
     if (allergenMatch) {
       return allergenMatch[1].split(',').map(a => a.trim()).filter(a => a);
     }
@@ -287,6 +317,8 @@ const ChatInterface = () => {
   };
 
   const handleIngredientImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
+    console.log('Handling ingredient image capture, source:', source);
+    
     const sourceMessages = {
       camera: 'I took a photo of this ingredient label',
       upload: 'I uploaded this ingredient label image',
@@ -311,10 +343,13 @@ const ChatInterface = () => {
     addMessage(aiAcknowledgment);
 
     try {
+      console.log('Sending ingredient analysis request to AI...');
       const response = await contextualAI.mutateAsync({ 
         message: `Please analyze this ingredient label image: ${imageBase64}`,
         context: { servingSize, chatMode: 'ingredient-scan' }
       });
+
+      console.log('Received AI response for ingredient analysis:', response.response?.substring(0, 200) + '...');
 
       const analysisData = parseIngredientAnalysis(response.response || '');
       
@@ -327,6 +362,7 @@ const ChatInterface = () => {
         ingredientAnalysis: analysisData,
       };
 
+      console.log('Adding AI response with ingredient analysis:', !!analysisData);
       addMessage(aiResponse);
     } catch (error) {
       console.error('Ingredient analysis error:', error);
@@ -347,10 +383,12 @@ const ChatInterface = () => {
   };
 
   const resetChat = () => {
+    console.log('Resetting chat - clearing mode and messages');
     setChatMode('general');
     setIsAwaitingServingSize(false);
     setConversionResult(null);
     setActiveConvertedRecipeId(null);
+    setModeMessageSent(null); // Reset mode message tracking
     clearChatHistory();
   };
 
