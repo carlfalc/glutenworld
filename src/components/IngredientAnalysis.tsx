@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Heart, HeartIcon, Shield, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,7 +31,7 @@ const IngredientAnalysis = ({
   productImageUrl
 }: IngredientAnalysisProps) => {
   const addToFavorites = useAddToFavorites();
-  const { data: isFavorite } = useIsFavorite('product', undefined, productName);
+  const { data: isFavorite } = useIsFavorite('product', productName, undefined);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveToFavorites = async () => {

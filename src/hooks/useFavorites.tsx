@@ -119,11 +119,11 @@ export const useRemoveFromFavorites = () => {
   });
 };
 
-export const useIsFavorite = (type: 'recipe' | 'product', itemId?: string, productName?: string) => {
+export const useIsFavorite = (type: 'recipe' | 'product', productName?: string, itemId?: string) => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['is-favorite', user?.id, type, itemId, productName],
+    queryKey: ['is-favorite', user?.id, type, productName, itemId],
     queryFn: async () => {
       if (!user) return false;
       
