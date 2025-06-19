@@ -14,6 +14,12 @@ export interface UserFavorite {
   product_image_url?: string;
   product_category?: string;
   product_scanned_at?: string;
+  product_analysis?: string;
+  safety_rating?: string;
+  allergen_warnings?: string[];
+  gluten_status?: string;
+  dairy_status?: string;
+  vegan_status?: string;
   created_at: string;
   updated_at: string;
 }

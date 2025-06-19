@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { useContextualAI } from '@/hooks/useContextualAI';
 import { useRecipeConversion } from '@/hooks/useRecipeConversion';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePersistentChat } from '@/hooks/usePersistentChat';
 import {
   Dialog,
   DialogContent,
@@ -27,17 +29,22 @@ interface Message {
   mode?: string;
   image?: string;
   convertedRecipe?: string;
+  ingredientAnalysis?: {
+    productName: string;
+    analysis: string;
+    safetyRating?: string;
+    allergenWarnings?: string[];
+    glutenStatus?: string;
+    dairyStatus?: string;
+    veganStatus?: string;
+    productCategory?: string;
+    productDescription?: string;
+    productImageUrl?: string;
+  };
 }
 
 const ChatInterface = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
-      isUser: false,
-      timestamp: new Date(),
-    }
-  ]);
+  const { messages, setMessages, addMessage, clearChatHistory } = usePersistentChat();
   const [inputValue, setInputValue] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [showRecipeCapture, setShowRecipeCapture] = useState(false);
@@ -94,13 +101,13 @@ const ChatInterface = () => {
         mode: chatMode,
       };
 
-      setMessages(prev => [...prev, modeMessage]);
+      addMessage(modeMessage);
 
       if (chatMode === 'recipe-creator') {
         setIsAwaitingServingSize(true);
       }
     }
-  }, [chatMode, setIsAwaitingServingSize]);
+  }, [chatMode, setIsAwaitingServingSize, addMessage]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -113,7 +120,7 @@ const ChatInterface = () => {
       mode: chatMode,
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    addMessage(userMessage);
     const currentInput = inputValue;
     setInputValue('');
 
@@ -131,7 +138,7 @@ const ChatInterface = () => {
         mode: chatMode,
       };
 
-      setMessages(prev => [...prev, aiResponse]);
+      addMessage(aiResponse);
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage: Message = {
@@ -140,8 +147,43 @@ const ChatInterface = () => {
         isUser: false,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      addMessage(errorMessage);
     }
+  };
+
+  const parseIngredientAnalysis = (text: string) => {
+    // Try to parse structured ingredient analysis from AI response
+    const lines = text.split('\n');
+    let analysis: any = null;
+    
+    // Look for structured data patterns in the response
+    if (text.includes('Product:') || text.includes('Safety Rating:') || text.includes('Gluten Status:')) {
+      analysis = {
+        productName: extractValue(text, 'Product:') || 'Unknown Product',
+        analysis: text,
+        safetyRating: extractValue(text, 'Safety Rating:'),
+        glutenStatus: extractValue(text, 'Gluten Status:'),
+        dairyStatus: extractValue(text, 'Dairy Status:'),
+        veganStatus: extractValue(text, 'Vegan Status:'),
+        allergenWarnings: extractAllergens(text),
+      };
+    }
+    
+    return analysis;
+  };
+
+  const extractValue = (text: string, key: string): string | undefined => {
+    const regex = new RegExp(`${key}\\s*([^\\n]+)`, 'i');
+    const match = text.match(regex);
+    return match ? match[1].trim() : undefined;
+  };
+
+  const extractAllergens = (text: string): string[] => {
+    const allergenMatch = text.match(/Allergens?[:\s]+([^\n]+)/i);
+    if (allergenMatch) {
+      return allergenMatch[1].split(',').map(a => a.trim()).filter(a => a);
+    }
+    return [];
   };
 
   const handleRecipeImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
@@ -152,7 +194,6 @@ const ChatInterface = () => {
       screenshot: 'I captured a screenshot of this recipe'
     };
 
-    // Add user message with image
     const userMessage: Message = {
       id: Date.now().toString(),
       text: sourceMessages[source],
@@ -160,16 +201,15 @@ const ChatInterface = () => {
       timestamp: new Date(),
       image: imageBase64,
     };
-    setMessages(prev => [...prev, userMessage]);
+    addMessage(userMessage);
 
-    // Add AI acknowledgment
     const aiAcknowledgment: Message = {
       id: (Date.now() + 1).toString(),
       text: "Thanks for the picture, I'll create some magic and recreate this with no gluten! 🪄✨",
       isUser: false,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, aiAcknowledgment]);
+    addMessage(aiAcknowledgment);
 
     try {
       const response = await recipeConversion.mutateAsync({ 
@@ -177,10 +217,8 @@ const ChatInterface = () => {
         prompt: "Please analyze this recipe and convert it to be gluten-free following the detailed format guidelines."
       });
 
-      // Create a unique ID for this converted recipe
       const convertedRecipeMessageId = (Date.now() + 2).toString();
       
-      // Add the converted recipe as a chat message
       const convertedRecipeMessage: Message = {
         id: convertedRecipeMessageId,
         text: "Here's your converted gluten-free recipe! 🎉",
@@ -189,7 +227,7 @@ const ChatInterface = () => {
         convertedRecipe: response.convertedRecipe,
       };
       
-      setMessages(prev => [...prev, convertedRecipeMessage]);
+      addMessage(convertedRecipeMessage);
       setConversionResult(response.convertedRecipe);
       setActiveConvertedRecipeId(convertedRecipeMessageId);
       
@@ -201,19 +239,17 @@ const ChatInterface = () => {
         isUser: false,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      addMessage(errorMessage);
     }
   };
 
   const handleIngredientImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
-    // Create appropriate message based on source
     const sourceMessages = {
       camera: 'I took a photo of this ingredient label',
       upload: 'I uploaded this ingredient label image',
       screenshot: 'I captured a screenshot of this ingredient label'
     };
 
-    // Add user message with image
     const userMessage: Message = {
       id: Date.now().toString(),
       text: sourceMessages[source],
@@ -221,16 +257,15 @@ const ChatInterface = () => {
       timestamp: new Date(),
       image: imageBase64,
     };
-    setMessages(prev => [...prev, userMessage]);
+    addMessage(userMessage);
 
-    // Add AI acknowledgment
     const aiAcknowledgment: Message = {
       id: (Date.now() + 1).toString(),
       text: "Thanks for the ingredient photo, let me analyze this for you! 🔍",
       isUser: false,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, aiAcknowledgment]);
+    addMessage(aiAcknowledgment);
 
     try {
       const response = await contextualAI.mutateAsync({ 
@@ -238,15 +273,18 @@ const ChatInterface = () => {
         context: { servingSize, chatMode: 'ingredient-scan' }
       });
 
+      const analysisData = parseIngredientAnalysis(response.response || '');
+      
       const aiResponse: Message = {
         id: (Date.now() + 2).toString(),
         text: response.response || "I couldn't analyze this ingredient label. Please try again with a clearer image.",
         isUser: false,
         timestamp: new Date(),
         mode: 'ingredient-scan',
+        ingredientAnalysis: analysisData,
       };
 
-      setMessages(prev => [...prev, aiResponse]);
+      addMessage(aiResponse);
     } catch (error) {
       console.error('Ingredient analysis error:', error);
       const errorMessage: Message = {
@@ -255,7 +293,7 @@ const ChatInterface = () => {
         isUser: false,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      addMessage(errorMessage);
     }
   };
 
@@ -270,24 +308,17 @@ const ChatInterface = () => {
     setIsAwaitingServingSize(false);
     setConversionResult(null);
     setActiveConvertedRecipeId(null);
-    setMessages([{
-      id: '1',
-      text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
-      isUser: false,
-      timestamp: new Date(),
-    }]);
+    clearChatHistory();
   };
 
   const handleBackFromRecipe = () => {
     setConversionResult(null);
     setActiveConvertedRecipeId(null);
-    // The recipe message stays in chat history
   };
 
   const handleRecipeSaved = () => {
     setConversionResult(null);
     setActiveConvertedRecipeId(null);
-    // The recipe message stays in chat history
   };
 
   if (conversionResult) {
@@ -319,7 +350,7 @@ const ChatInterface = () => {
         </div>
       )}
 
-      {/* Messages Area - Updated for mobile scrolling */}
+      {/* Messages Area */}
       <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${isMobile ? 'chat-messages-container' : ''}`}>
         {messages.map((message) => (
           <ChatMessage 
@@ -377,7 +408,7 @@ const ChatInterface = () => {
         </div>
       )}
 
-      {/* Mobile Input Area - Updated positioning */}
+      {/* Mobile Input Area */}
       {isMobile && (
         <>
           <div className="p-3 border-t border-border/50 bg-card/30 backdrop-blur-md flex-shrink-0">

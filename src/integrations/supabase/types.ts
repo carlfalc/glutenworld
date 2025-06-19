@@ -326,43 +326,61 @@ export type Database = {
       }
       user_favorites: {
         Row: {
+          allergen_warnings: string[] | null
           created_at: string
+          dairy_status: string | null
+          gluten_status: string | null
           id: string
+          product_analysis: string | null
           product_category: string | null
           product_description: string | null
           product_image_url: string | null
           product_name: string | null
           product_scanned_at: string | null
           recipe_id: string | null
+          safety_rating: string | null
           type: string
           updated_at: string
           user_id: string
+          vegan_status: string | null
         }
         Insert: {
+          allergen_warnings?: string[] | null
           created_at?: string
+          dairy_status?: string | null
+          gluten_status?: string | null
           id?: string
+          product_analysis?: string | null
           product_category?: string | null
           product_description?: string | null
           product_image_url?: string | null
           product_name?: string | null
           product_scanned_at?: string | null
           recipe_id?: string | null
+          safety_rating?: string | null
           type: string
           updated_at?: string
           user_id: string
+          vegan_status?: string | null
         }
         Update: {
+          allergen_warnings?: string[] | null
           created_at?: string
+          dairy_status?: string | null
+          gluten_status?: string | null
           id?: string
+          product_analysis?: string | null
           product_category?: string | null
           product_description?: string | null
           product_image_url?: string | null
           product_name?: string | null
           product_scanned_at?: string | null
           recipe_id?: string | null
+          safety_rating?: string | null
           type?: string
           updated_at?: string
           user_id?: string
+          vegan_status?: string | null
         }
         Relationships: [
           {

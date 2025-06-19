@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
-import { Heart, Clock, Users, Star, Package, Trash2 } from 'lucide-react';
+import { Heart, Clock, Users, Star, Package, Trash2, Shield, AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useFavorites, useRemoveFromFavorites } from '@/hooks/useFavorites';
 
 interface FavoritesModalProps {
@@ -21,9 +22,41 @@ const FavoritesModal = ({ open, onOpenChange }: FavoritesModalProps) => {
     removeFromFavorites.mutate(favoriteId);
   };
 
+  const getSafetyIcon = (rating?: string) => {
+    switch (rating?.toLowerCase()) {
+      case 'safe':
+        return <Shield className="w-4 h-4 text-green-500" />;
+      case 'caution':
+        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      case 'unsafe':
+        return <AlertTriangle className="w-4 h-4 text-red-500" />;
+      default:
+        return <Shield className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusBadge = (status?: string, type: string) => {
+    if (!status) return null;
+    
+    const colorMap: { [key: string]: string } = {
+      'gluten-free': 'bg-green-100 text-green-800',
+      'contains-gluten': 'bg-red-100 text-red-800',
+      'dairy-free': 'bg-blue-100 text-blue-800',
+      'contains-dairy': 'bg-red-100 text-red-800',
+      'vegan': 'bg-green-100 text-green-800',
+      'not-vegan': 'bg-yellow-100 text-yellow-800',
+    };
+
+    return (
+      <Badge className={`${colorMap[status] || 'bg-gray-100 text-gray-800'} text-xs mr-1 mb-1`}>
+        {type}: {status.replace('-', ' ')}
+      </Badge>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-red-500" />
@@ -93,12 +126,13 @@ const FavoritesModal = ({ open, onOpenChange }: FavoritesModalProps) => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {productFavorites.map((favorite) => (
                   <Card key={favorite.id} className="hover:shadow-md transition-shadow">
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-sm line-clamp-1">
+                        <CardTitle className="text-base line-clamp-1 flex items-center gap-2">
+                          {favorite.safety_rating && getSafetyIcon(favorite.safety_rating)}
                           {favorite.product_name}
                         </CardTitle>
                         <Button
@@ -111,24 +145,72 @@ const FavoritesModal = ({ open, onOpenChange }: FavoritesModalProps) => {
                         </Button>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0">
+                    <CardContent className="pt-0 space-y-3">
                       {favorite.product_description && (
-                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                        <p className="text-sm text-muted-foreground line-clamp-2">
                           {favorite.product_description}
                         </p>
                       )}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      
+                      {/* Status Badges */}
+                      <div className="flex flex-wrap gap-1">
+                        {getStatusBadge(favorite.gluten_status, 'Gluten')}
+                        {getStatusBadge(favorite.dairy_status, 'Dairy')}
+                        {getStatusBadge(favorite.vegan_status, 'Vegan')}
+                        {favorite.product_category && (
+                          <Badge variant="outline" className="text-xs">
+                            {favorite.product_category}
+                          </Badge>
+                        )}
+                        {favorite.safety_rating && (
+                          <Badge 
+                            className={`text-xs ${
+                              favorite.safety_rating.toLowerCase() === 'safe' 
+                                ? 'bg-green-100 text-green-800'
+                                : favorite.safety_rating.toLowerCase() === 'caution'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {favorite.safety_rating}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Allergen Warnings */}
+                      {favorite.allergen_warnings && favorite.allergen_warnings.length > 0 && (
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium text-yellow-700 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Allergen Warnings:
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {favorite.allergen_warnings.map((warning, index) => (
+                              <Badge key={index} variant="destructive" className="text-xs">
+                                {warning}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Analysis Preview */}
+                      {favorite.product_analysis && (
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium text-muted-foreground">Analysis:</div>
+                          <p className="text-xs text-muted-foreground line-clamp-3">
+                            {favorite.product_analysis}
+                          </p>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
                         <span>
                           {favorite.product_scanned_at 
                             ? `Scanned ${new Date(favorite.product_scanned_at).toLocaleDateString()}`
                             : `Added ${new Date(favorite.created_at).toLocaleDateString()}`
                           }
                         </span>
-                        {favorite.product_category && (
-                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                            {favorite.product_category}
-                          </span>
-                        )}
                       </div>
                     </CardContent>
                   </Card>

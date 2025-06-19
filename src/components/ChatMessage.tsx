@@ -1,6 +1,7 @@
 
 import { Clock, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import IngredientAnalysis from './IngredientAnalysis';
 
 interface Message {
   id: string;
@@ -10,6 +11,18 @@ interface Message {
   mode?: string;
   image?: string;
   convertedRecipe?: string;
+  ingredientAnalysis?: {
+    productName: string;
+    analysis: string;
+    safetyRating?: string;
+    allergenWarnings?: string[];
+    glutenStatus?: string;
+    dairyStatus?: string;
+    veganStatus?: string;
+    productCategory?: string;
+    productDescription?: string;
+    productImageUrl?: string;
+  };
 }
 
 interface ChatMessageProps {
@@ -56,6 +69,13 @@ const ChatMessage = ({ message, onViewRecipe }: ChatMessageProps) => {
         <div className="whitespace-pre-wrap leading-relaxed">
           {message.text}
         </div>
+        
+        {/* Ingredient Analysis Display */}
+        {message.ingredientAnalysis && (
+          <div className="mt-3 pt-3 border-t border-border/20">
+            <IngredientAnalysis {...message.ingredientAnalysis} />
+          </div>
+        )}
         
         {/* Converted recipe view button */}
         {message.convertedRecipe && onViewRecipe && (
