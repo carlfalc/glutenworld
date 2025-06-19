@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff, X } from 'lucide-react';
+import { Send, Mic, MicOff, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ChatMessage from './ChatMessage';
@@ -51,7 +50,10 @@ const ChatInterface = () => {
   const [showIngredientCapture, setShowIngredientCapture] = useState(false);
   const [conversionResult, setConversionResult] = useState<string | null>(null);
   const [activeConvertedRecipeId, setActiveConvertedRecipeId] = useState<string | null>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
   const { 
@@ -75,13 +77,54 @@ const ChatInterface = () => {
     }
   });
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  // Check if user is near bottom of chat
+  const checkScrollPosition = () => {
+    if (!messagesContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    const threshold = 100; // pixels from bottom
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    const nearBottom = distanceFromBottom <= threshold;
+    
+    setIsNearBottom(nearBottom);
+    setShowScrollButton(!nearBottom && messages.length > 3);
   };
 
+  // Smart scroll to bottom - only if user is near bottom
+  const scrollToBottom = (force = false) => {
+    if (force || isNearBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Force scroll to bottom (for button click)
+  const forceScrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setShowScrollButton(false);
+  };
+
+  // Handle scroll events
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      checkScrollPosition();
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [messages.length]);
+
+  // Only auto-scroll when messages change if user is near bottom
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Initial scroll position check
+  useEffect(() => {
+    checkScrollPosition();
+  }, []);
 
   // Add mode indicator message when mode changes
   useEffect(() => {
@@ -351,7 +394,10 @@ const ChatInterface = () => {
       )}
 
       {/* Messages Area */}
-      <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${isMobile ? 'chat-messages-container' : ''}`}>
+      <div 
+        ref={messagesContainerRef}
+        className={`flex-1 overflow-y-auto p-4 space-y-4 relative ${isMobile ? 'chat-messages-container' : ''}`}
+      >
         {messages.map((message) => (
           <ChatMessage 
             key={message.id} 
@@ -369,6 +415,19 @@ const ChatInterface = () => {
         )}
         
         <div ref={messagesEndRef} />
+
+        {/* Scroll to Bottom Button */}
+        {showScrollButton && (
+          <div className="fixed bottom-20 right-6 z-10">
+            <Button
+              onClick={forceScrollToBottom}
+              size="sm"
+              className="rounded-full bg-gluten-primary hover:bg-gluten-secondary text-white shadow-lg"
+            >
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Input Area - Desktop */}
