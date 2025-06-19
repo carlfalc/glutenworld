@@ -51,7 +51,7 @@ const FeatureDetailsPopup = ({
                 Save hours of research
               </div>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Convert any recipe to gluten-free AND scan ingredient labels for precise gluten information - all powered by advanced AI technology
+                Convert any recipe to gluten-free AND scan ingredient labels for precise gluten, dairy, allergen information - all powered by advanced AI technology
               </p>
             </div>
 
@@ -99,7 +99,7 @@ const FeatureDetailsPopup = ({
                   <h3 className="text-xl font-semibold text-gray-900">Label Scanning</h3>
                 </div>
                 <p className="text-gray-600 mb-4">
-                  Instantly scan product labels to get precise gluten information and make informed purchasing decisions with confidence.
+                  Instantly scan product labels to get precise gluten, dairy, allergen information and make informed purchasing decisions with confidence.
                 </p>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div className="p-3">
@@ -156,15 +156,15 @@ const FeatureDetailsPopup = ({
                   <ul className="space-y-2 text-gray-600 text-sm">
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Instant gluten detection in ingredient lists</span>
+                      <span>Instant gluten, dairy, and allergen detection in ingredient lists</span>
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Hidden gluten source identification and warnings</span>
+                      <span>Vegan ingredient identification and comprehensive analysis</span>
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                      <span>Clear safety rating with detailed explanations</span>
+                      <span>Clear safety rating with detailed explanations for all dietary needs</span>
                     </li>
                     <li className="flex items-start">
                       <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
