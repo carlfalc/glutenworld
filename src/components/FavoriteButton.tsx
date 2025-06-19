@@ -25,7 +25,7 @@ const FavoriteButton = ({
   className = "",
   size = "sm" 
 }: FavoriteButtonProps) => {
-  const { data: isFavorite } = useIsFavorite(type, itemId, productName);
+  const { data: isFavorite } = useIsFavorite(type, { itemId, productName });
   const { data: favorites = [] } = useFavorites(type);
   const addToFavorites = useAddToFavorites();
   const removeFromFavorites = useRemoveFromFavorites();

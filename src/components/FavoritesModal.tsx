@@ -22,8 +22,8 @@ const FavoritesModal = ({ open, onOpenChange }: FavoritesModalProps) => {
     removeFromFavorites.mutate(favoriteId);
   };
 
-  const getSafetyIcon = (rating?: string) => {
-    switch (rating?.toLowerCase()) {
+  const getSafetyIcon = (rating: string = '') => {
+    switch (rating.toLowerCase()) {
       case 'safe':
         return <Shield className="w-4 h-4 text-green-500" />;
       case 'caution':
@@ -35,7 +35,7 @@ const FavoritesModal = ({ open, onOpenChange }: FavoritesModalProps) => {
     }
   };
 
-  const getStatusBadge = (status?: string, type: string) => {
+  const getStatusBadge = (status: string = '', type: string) => {
     if (!status) return null;
     
     const colorMap: { [key: string]: string } = {

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Heart, HeartIcon, Shield, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,8 +61,8 @@ const IngredientAnalysis = ({
     }
   };
 
-  const getSafetyIcon = (rating?: string) => {
-    switch (rating?.toLowerCase()) {
+  const getSafetyIcon = (rating: string = '') => {
+    switch (rating.toLowerCase()) {
       case 'safe':
         return <CheckCircle className="w-5 h-5 text-green-500" />;
       case 'caution':
@@ -73,7 +74,7 @@ const IngredientAnalysis = ({
     }
   };
 
-  const getStatusBadge = (status?: string, type: string) => {
+  const getStatusBadge = (status: string = '', type: string) => {
     if (!status) return null;
     
     const colorMap: { [key: string]: string } = {
