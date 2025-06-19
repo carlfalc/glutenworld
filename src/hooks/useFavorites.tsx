@@ -119,11 +119,11 @@ export const useRemoveFromFavorites = () => {
   });
 };
 
-export const useIsFavorite = (type: 'recipe' | 'product', productName?: string, itemId?: string) => {
+export const useIsFavorite = (type: 'recipe' | 'product', identifier: { productName?: string; itemId?: string }) => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['is-favorite', user?.id, type, productName, itemId],
+    queryKey: ['is-favorite', user?.id, type, identifier.productName, identifier.itemId],
     queryFn: async () => {
       if (!user) return false;
       
@@ -133,10 +133,10 @@ export const useIsFavorite = (type: 'recipe' | 'product', productName?: string, 
         .eq('user_id', user.id)
         .eq('type', type);
 
-      if (type === 'recipe' && itemId) {
-        query = query.eq('recipe_id', itemId);
-      } else if (type === 'product' && productName) {
-        query = query.eq('product_name', productName);
+      if (type === 'recipe' && identifier.itemId) {
+        query = query.eq('recipe_id', identifier.itemId);
+      } else if (type === 'product' && identifier.productName) {
+        query = query.eq('product_name', identifier.productName);
       } else {
         return false;
       }
@@ -146,6 +146,6 @@ export const useIsFavorite = (type: 'recipe' | 'product', productName?: string, 
       if (error && error.code !== 'PGRST116') throw error;
       return !!data;
     },
-    enabled: !!user && ((type === 'recipe' && !!itemId) || (type === 'product' && !!productName)),
+    enabled: !!user && ((type === 'recipe' && !!identifier.itemId) || (type === 'product' && !!identifier.productName)),
   });
 };

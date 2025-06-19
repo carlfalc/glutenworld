@@ -31,7 +31,7 @@ const IngredientAnalysis = ({
   productImageUrl
 }: IngredientAnalysisProps) => {
   const addToFavorites = useAddToFavorites();
-  const { data: isFavorite } = useIsFavorite('product', productName, undefined);
+  const { data: isFavorite } = useIsFavorite('product', { productName });
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveToFavorites = async () => {
