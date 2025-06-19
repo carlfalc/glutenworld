@@ -159,6 +159,8 @@ const Landing = () => {
           <h2 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
             Transform Any Recipe to
             <span className="text-gluten-primary"> Gluten-Free</span>
+            <br />
+            <span className="text-foreground">& Scan Labels to Get Precise Information</span>
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Navigate the tricky world of gluten-laden products with confidence. 
