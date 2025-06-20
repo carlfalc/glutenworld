@@ -1,8 +1,9 @@
 
 import { useState, useRef } from 'react';
-import { Camera, Upload, Image, AlertCircle, Smartphone, HelpCircle } from 'lucide-react';
+import { Camera, Upload, Image, AlertCircle, Smartphone, HelpCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useImageHandler } from '@/hooks/useImageHandler';
 
 interface ImageCaptureProps {
   onImageCapture: (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => void;
@@ -11,34 +12,36 @@ interface ImageCaptureProps {
 }
 
 const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [showScreenshotHelp, setShowScreenshotHelp] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { processImage, compressImage, isProcessing } = useImageHandler({
+    maxSize: 10 * 1024 * 1024, // 10MB max
+    quality: 0.8
+  });
 
-  const handleFileCapture = (event: React.ChangeEvent<HTMLInputElement>, source: 'camera' | 'upload') => {
+  const handleFileCapture = async (event: React.ChangeEvent<HTMLInputElement>, source: 'camera' | 'upload') => {
     const file = event.target.files?.[0];
-    if (file) {
-      setIsLoading(true);
-      setError('');
+    if (!file) return;
+
+    setError('');
+    console.log(`${source} file selected:`, file.name, file.type, `${Math.round(file.size/1024)}KB`);
+    
+    try {
+      // For larger files or when quality is important, compress the image
+      const shouldCompress = file.size > 2 * 1024 * 1024; // Compress if larger than 2MB
+      const imageBase64 = shouldCompress 
+        ? await compressImage(file, 0.8)
+        : await processImage(file);
       
-      console.log(`${source} file selected:`, file.name, file.type);
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setIsLoading(false);
-        onImageCapture(result, source);
-        onClose();
-      };
-      
-      reader.onerror = () => {
-        setError('Failed to read the image file. Please try again.');
-        setIsLoading(false);
-      };
-      
-      reader.readAsDataURL(file);
+      console.log(`Image processed successfully for ${source}`);
+      onImageCapture(imageBase64, source);
+      onClose();
+    } catch (error) {
+      console.error('Image processing error:', error);
+      setError('Failed to process the image. Please try again with a different image.');
     }
     
     // Reset the input value to allow selecting the same file again
@@ -74,11 +77,15 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
         <Button
           onClick={handleTakePhoto}
           className="flex items-center justify-center gap-3 h-16 bg-gluten-primary hover:bg-gluten-secondary text-white"
-          disabled={isLoading}
+          disabled={isProcessing}
         >
-          <Camera className="w-6 h-6" />
+          {isProcessing ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : (
+            <Camera className="w-6 h-6" />
+          )}
           <span className="text-base font-medium">
-            {isLoading ? 'Processing...' : `Take Photo of ${actionText}`}
+            {isProcessing ? 'Processing...' : `Take Photo of ${actionText}`}
           </span>
         </Button>
         
@@ -86,14 +93,26 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
           onClick={handleUploadPhoto}
           variant="outline"
           className="flex items-center justify-center gap-3 h-16 border-2 hover:bg-accent/50"
-          disabled={isLoading}
+          disabled={isProcessing}
         >
-          <Upload className="w-6 h-6" />
+          {isProcessing ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : (
+            <Upload className="w-6 h-6" />
+          )}
           <span className="text-base font-medium">
             Upload {actionText} Image
           </span>
         </Button>
       </div>
+
+      {/* Processing indicator */}
+      {isProcessing && (
+        <div className="flex items-center justify-center gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
+          <span className="text-sm text-blue-700 font-medium">Processing image...</span>
+        </div>
+      )}
 
       {/* Screenshot Help Section */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -132,14 +151,6 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
         </div>
       </div>
 
-      {/* Loading indicator */}
-      {isLoading && (
-        <div className="flex items-center justify-center gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-          <span className="text-sm text-blue-700 font-medium">Processing...</span>
-        </div>
-      )}
-
       {/* Error Message */}
       {error && (
         <Alert variant="destructive">
@@ -157,6 +168,7 @@ const ImageCapture = ({ onImageCapture, onClose, type }: ImageCaptureProps) => {
         {type === 'recipe' && (
           <p className="text-yellow-600"><strong>Tip:</strong> Take a screenshot of recipes from websites or apps, then upload it here!</p>
         )}
+        <p className="text-green-600"><strong>Note:</strong> Images are automatically optimized for better performance</p>
       </div>
       
       {/* Hidden file inputs */}

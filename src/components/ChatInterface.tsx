@@ -52,7 +52,7 @@ const ChatInterface = () => {
   const [activeConvertedRecipeId, setActiveConvertedRecipeId] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(true);
-  const [modeMessageSent, setModeMessageSent] = useState<string | null>(null); // Track which mode message was sent
+  const [modeMessageSent, setModeMessageSent] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -69,6 +69,7 @@ const ChatInterface = () => {
   const recipeConversion = useRecipeConversion();
 
   console.log('ChatInterface render - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
+  console.log('Messages count:', messages.length);
 
   // Voice recognition setup
   const voiceRecognition = useVoiceRecognition({
@@ -85,7 +86,7 @@ const ChatInterface = () => {
     if (!messagesContainerRef.current) return;
     
     const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-    const threshold = 100; // pixels from bottom
+    const threshold = 100;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     const nearBottom = distanceFromBottom <= threshold;
     
@@ -133,10 +134,6 @@ const ChatInterface = () => {
   useEffect(() => {
     console.log('Mode change effect - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
     
-    // Only add mode message if:
-    // 1. Mode is not general
-    // 2. We haven't already sent a message for this mode
-    // 3. Mode actually changed (not just a re-render)
     if (chatMode !== 'general' && modeMessageSent !== chatMode) {
       console.log('Adding mode indicator message for:', chatMode);
       
@@ -156,7 +153,7 @@ const ChatInterface = () => {
       };
 
       addMessage(modeMessage);
-      setModeMessageSent(chatMode); // Mark this mode as having sent its message
+      setModeMessageSent(chatMode);
 
       if (chatMode === 'recipe-creator') {
         setIsAwaitingServingSize(true);
@@ -183,6 +180,7 @@ const ChatInterface = () => {
       mode: chatMode,
     };
 
+    console.log('Adding user message:', userMessage);
     addMessage(userMessage);
     const currentInput = inputValue;
     setInputValue('');
@@ -201,6 +199,7 @@ const ChatInterface = () => {
         mode: chatMode,
       };
 
+      console.log('Adding AI response:', aiResponse);
       addMessage(aiResponse);
     } catch (error) {
       console.error('Chat error:', error);
@@ -217,11 +216,9 @@ const ChatInterface = () => {
   const parseIngredientAnalysis = (text: string) => {
     console.log('Parsing ingredient analysis from text:', text.substring(0, 200) + '...');
     
-    // Try to parse structured ingredient analysis from AI response
     const lines = text.split('\n');
     let analysis: any = null;
     
-    // Look for structured data patterns in the response
     if (text.includes('Product:') || text.includes('Safety Rating:') || text.includes('Gluten Status:') || 
         text.includes('PRODUCT IDENTIFICATION:') || text.includes('GLUTEN STATUS:') || text.includes('INGREDIENT ANALYSIS')) {
       
@@ -260,7 +257,8 @@ const ChatInterface = () => {
   };
 
   const handleRecipeImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
-    // Create appropriate message based on source
+    console.log('Recipe image captured:', source, 'Image size:', imageBase64.length);
+    
     const sourceMessages = {
       camera: 'I took a photo of this recipe',
       upload: 'I uploaded this recipe image',
@@ -273,8 +271,12 @@ const ChatInterface = () => {
       isUser: true,
       timestamp: new Date(),
       image: imageBase64,
+      mode: chatMode,
     };
+    
+    console.log('Adding recipe image message with image data:', !!userMessage.image);
     addMessage(userMessage);
+    setShowRecipeCapture(false);
 
     const aiAcknowledgment: Message = {
       id: (Date.now() + 1).toString(),
@@ -317,7 +319,7 @@ const ChatInterface = () => {
   };
 
   const handleIngredientImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
-    console.log('Handling ingredient image capture, source:', source);
+    console.log('Ingredient image captured:', source, 'Image size:', imageBase64.length);
     
     const sourceMessages = {
       camera: 'I took a photo of this ingredient label',
@@ -331,8 +333,12 @@ const ChatInterface = () => {
       isUser: true,
       timestamp: new Date(),
       image: imageBase64,
+      mode: chatMode,
     };
+    
+    console.log('Adding ingredient image message with image data:', !!userMessage.image);
     addMessage(userMessage);
+    setShowIngredientCapture(false);
 
     const aiAcknowledgment: Message = {
       id: (Date.now() + 1).toString(),
@@ -388,7 +394,7 @@ const ChatInterface = () => {
     setIsAwaitingServingSize(false);
     setConversionResult(null);
     setActiveConvertedRecipeId(null);
-    setModeMessageSent(null); // Reset mode message tracking
+    setModeMessageSent(null);
     clearChatHistory();
   };
 
@@ -436,16 +442,19 @@ const ChatInterface = () => {
         ref={messagesContainerRef}
         className={`flex-1 overflow-y-auto p-4 space-y-4 relative ${isMobile ? 'chat-messages-container' : ''}`}
       >
-        {messages.map((message) => (
-          <ChatMessage 
-            key={message.id} 
-            message={message}
-            onViewRecipe={message.convertedRecipe ? () => {
-              setConversionResult(message.convertedRecipe!);
-              setActiveConvertedRecipeId(message.id);
-            } : undefined}
-          />
-        ))}
+        {messages.map((message) => {
+          console.log('Rendering message:', message.id, 'Has image:', !!message.image);
+          return (
+            <ChatMessage 
+              key={message.id} 
+              message={message}
+              onViewRecipe={message.convertedRecipe ? () => {
+                setConversionResult(message.convertedRecipe!);
+                setActiveConvertedRecipeId(message.id);
+              } : undefined}
+            />
+          );
+        })}
         
         {/* Serving Size Selector */}
         {isAwaitingServingSize && chatMode === 'recipe-creator' && (

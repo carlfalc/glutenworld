@@ -1,5 +1,5 @@
 
-import { Clock, Eye } from 'lucide-react';
+import { Clock, Eye, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import IngredientAnalysis from './IngredientAnalysis';
 
@@ -35,6 +35,9 @@ const ChatMessage = ({ message, onViewRecipe }: ChatMessageProps) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Debug log for image display
+  console.log(`Message ${message.id} - Has image:`, !!message.image, 'Image length:', message.image?.length || 0);
+
   return (
     <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`}>
       <div
@@ -53,15 +56,31 @@ const ChatMessage = ({ message, onViewRecipe }: ChatMessageProps) => {
           </div>
         )}
         
-        {/* Image display */}
+        {/* Image display with enhanced debugging and error handling */}
         {message.image && (
           <div className="mb-3">
-            <img 
-              src={message.image} 
-              alt="Uploaded content" 
-              className="max-w-full h-auto rounded-lg border border-border/20"
-              style={{ maxHeight: '300px' }}
-            />
+            <div className="flex items-center gap-2 mb-2 text-xs opacity-70">
+              <ImageIcon className="w-3 h-3" />
+              <span>Image attached</span>
+            </div>
+            <div className="relative">
+              <img 
+                src={message.image} 
+                alt="Uploaded content" 
+                className="max-w-full h-auto rounded-lg border border-border/20 shadow-sm"
+                style={{ maxHeight: '300px', objectFit: 'contain' }}
+                loading="lazy"
+                onLoad={() => console.log(`Image loaded successfully for message ${message.id}`)}
+                onError={(e) => {
+                  console.error(`Image failed to load for message ${message.id}:`, e);
+                  console.error('Image src:', message.image?.substring(0, 100) + '...');
+                }}
+              />
+              {/* Image overlay with size info for debugging */}
+              <div className="absolute top-1 right-1 bg-black/50 text-white text-xs px-1 rounded">
+                {Math.round((message.image.length * 3/4) / 1024)}KB
+              </div>
+            </div>
           </div>
         )}
         

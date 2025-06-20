@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -53,6 +54,14 @@ export const usePersistentChat = () => {
           });
           
           console.log('Loaded messages from storage:', parsedMessages.length, 'filtered to:', filteredMessages.length);
+          
+          // Log image data for debugging
+          filteredMessages.forEach(msg => {
+            if (msg.image) {
+              console.log(`Message ${msg.id} has image data:`, msg.image.length, 'characters');
+            }
+          });
+          
           setMessages(filteredMessages);
         } catch (error) {
           console.error('Failed to parse stored chat messages:', error);
@@ -81,13 +90,32 @@ export const usePersistentChat = () => {
         return index === firstModeIndex;
       });
       
-      localStorage.setItem(userStorageKey, JSON.stringify(messagesToSave));
-      console.log('Saved messages to storage:', messagesToSave.length, 'out of', messages.length);
+      // Log storage operation
+      const imagesCount = messagesToSave.filter(msg => msg.image).length;
+      console.log(`Saving ${messagesToSave.length} messages to storage (${imagesCount} with images)`);
+      
+      try {
+        localStorage.setItem(userStorageKey, JSON.stringify(messagesToSave));
+        console.log('Messages saved successfully to storage');
+      } catch (error) {
+        console.error('Failed to save messages to storage:', error);
+        // If storage is full, try to save without images
+        const messagesWithoutImages = messagesToSave.map(msg => ({
+          ...msg,
+          image: undefined
+        }));
+        try {
+          localStorage.setItem(userStorageKey, JSON.stringify(messagesWithoutImages));
+          console.log('Messages saved without images due to storage constraints');
+        } catch (fallbackError) {
+          console.error('Failed to save messages even without images:', fallbackError);
+        }
+      }
     }
   }, [messages, user]);
 
   const addMessage = (message: Message) => {
-    console.log('Adding message:', message.id, message.text.substring(0, 50) + '...');
+    console.log('Adding message:', message.id, message.text.substring(0, 50) + '...', 'Has image:', !!message.image);
     
     // Prevent adding duplicate mode messages
     if (message.mode && !message.isUser && message.text.includes('Mode')) {
