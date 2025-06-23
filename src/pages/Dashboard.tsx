@@ -7,6 +7,7 @@ import ChatInterface from '@/components/ChatInterface';
 import RecipeHotlist from '@/components/RecipeHotlist';
 import CommunityShop from '@/components/CommunityShop';
 import AddRecipeSection from '@/components/AddRecipeSection';
+import SubscriptionStatus from '@/components/SubscriptionStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -44,12 +45,13 @@ const Dashboard = () => {
   }
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full space-y-6">
+      {user && <SubscriptionStatus />}
       <AddRecipeSection />
-      <div className="border-t border-border/50">
+      <div className="border-t border-border/50 pt-6">
         <CommunityShop />
       </div>
-      <div className="border-t border-border/50 mt-4">
+      <div className="border-t border-border/50 pt-6">
         <RecipeHotlist />
       </div>
     </div>
@@ -83,8 +85,10 @@ const Dashboard = () => {
         <div className="flex-1 flex flex-col">
           <ChatInterface />
         </div>
-        <div className="w-80 border-l border-border/50 bg-card/20 backdrop-blur-md">
-          <SidebarContent />
+        <div className="w-80 border-l border-border/50 bg-card/20 backdrop-blur-md overflow-y-auto">
+          <div className="p-4">
+            <SidebarContent />
+          </div>
         </div>
       </div>
 
@@ -102,8 +106,10 @@ const Dashboard = () => {
                 <Menu className="w-5 h-5" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:w-80 bg-card/95 backdrop-blur-md border-border/50">
-              <SidebarContent />
+            <SheetContent side="right" className="w-full sm:w-80 bg-card/95 backdrop-blur-md border-border/50 overflow-y-auto">
+              <div className="p-4">
+                <SidebarContent />
+              </div>
             </SheetContent>
           </Sheet>
         </div>

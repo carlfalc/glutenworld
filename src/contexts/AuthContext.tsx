@@ -30,20 +30,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Check subscription status when user signs in
+        if (event === 'SIGNED_IN' && session) {
+          console.log('User signed in, checking subscription status...');
+          try {
+            await supabase.functions.invoke('check-subscription', {
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            });
+          } catch (error) {
+            console.error('Failed to check subscription on sign in:', error);
+          }
+        }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('Initial session:', session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Check subscription status for existing session
+      if (session) {
+        console.log('Existing session found, checking subscription status...');
+        try {
+          await supabase.functions.invoke('check-subscription', {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          });
+        } catch (error) {
+          console.error('Failed to check subscription on load:', error);
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -63,7 +91,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await su
+abase.auth.signInWithPassword({
       email,
       password,
     });

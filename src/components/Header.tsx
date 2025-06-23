@@ -1,5 +1,5 @@
 
-import { ChefHat, Sparkles, User, LogOut, Settings } from 'lucide-react';
+import { ChefHat, Sparkles, User, LogOut, Settings, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,11 +18,13 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const Header = () => {
   const { user, signOut } = useAuth();
+  const { subscribed } = useSubscription();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -74,6 +76,15 @@ const Header = () => {
                       My Recipes
                     </NavigationMenuLink>
                   </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink
+                      className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1", subscribed ? "text-gluten-primary" : "")}
+                      onClick={() => navigate('/subscription')}
+                    >
+                      {subscribed && <Crown className="w-4 h-4" />}
+                      Subscription
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
 
@@ -88,6 +99,10 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => navigate('/subscription')}>
+                    <Crown className="w-4 h-4 mr-2" />
+                    Subscription
+                  </DropdownMenuItem>
                   <DropdownMenuItem>
                     <User className="w-4 h-4 mr-2" />
                     Profile
