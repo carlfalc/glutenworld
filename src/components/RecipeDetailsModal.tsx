@@ -17,7 +17,12 @@ interface RecipeDetailsModalProps {
 }
 
 const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps) => {
-  console.log('Modal render called with:', { recipe: !!recipe, isOpen, recipeTitle: recipe?.title });
+  console.log('🟡 Modal render called with:', { 
+    recipe: !!recipe, 
+    isOpen, 
+    recipeTitle: recipe?.title,
+    recipeData: recipe 
+  });
   
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
@@ -28,14 +33,16 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
   const { toast } = useToast();
 
   if (!recipe) {
-    console.log('No recipe provided to modal');
+    console.log('🔴 No recipe provided to modal');
     return null;
   }
   
   if (!isOpen) {
-    console.log('Modal not open');
+    console.log('🔴 Modal not open');
     return null;
   }
+
+  console.log('🟢 Modal will render with recipe:', recipe.title);
 
   const handleAddToMyRecipes = async () => {
     try {
@@ -76,6 +83,8 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
 
   const totalTime = recipe.cook_time ? (recipe.prep_time || 0) + recipe.cook_time : (recipe.prep_time || 0);
 
+  console.log('🟢 About to render Dialog JSX');
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -84,6 +93,12 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
         </DialogHeader>
         
         <div className="space-y-6">
+          <div className="bg-red-500 text-white p-4 rounded">
+            <h2>DEBUG: Modal is rendering!</h2>
+            <p>Recipe: {recipe.title}</p>
+            <p>Ingredients type: {typeof recipe.ingredients}</p>
+            <p>Instructions type: {typeof recipe.instructions}</p>
+          </div>
           {/* Recipe Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-2 text-sm">
