@@ -27,6 +27,17 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
 
   if (!recipe || !isOpen) return null;
 
+  // Debug log to see recipe data structure
+  console.log('Recipe data in modal:', {
+    title: recipe.title,
+    ingredients: recipe.ingredients,
+    instructions: recipe.instructions,
+    hasIngredients: !!recipe.ingredients,
+    hasInstructions: !!recipe.instructions && recipe.instructions.length > 0,
+    ingredientsType: typeof recipe.ingredients,
+    instructionsType: typeof recipe.instructions
+  });
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Easy':
@@ -135,8 +146,11 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
   const totalTime = recipe.cook_time ? (recipe.prep_time || 0) + recipe.cook_time : (recipe.prep_time || 0);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
-      <div className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-4xl max-h-[90vh] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="sr-only">{recipe.title}</DialogTitle>
+        </DialogHeader>
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -322,8 +336,8 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
