@@ -59,11 +59,22 @@ export const useRecipeSearch = () => {
     setLoading(true);
     console.log('🔍 Starting search with:', { query, filters, page, pageSize });
     
+    // Test basic connectivity first
+    console.log('🔍 Testing basic connectivity...');
     try {
+      const testQuery = await supabase.from('recipes').select('count').single();
+      console.log('🔍 Basic connectivity test:', testQuery);
+    } catch (testError) {
+      console.error('🔍 Basic connectivity failed:', testError);
+    }
+    
+    try {
+      console.log('🔍 Building query for recipes table...');
       let queryBuilder = supabase
         .from('recipes')
         .select('*', { count: 'exact' })
         .eq('is_public', true);
+      console.log('🔍 Base query built successfully');
 
       // Text search across title and converted_recipe
       if (query.trim()) {
@@ -107,7 +118,12 @@ export const useRecipeSearch = () => {
 
       const { data, error, count } = await queryBuilder;
       
-      console.log('🔍 Search results:', { data: data?.length, error, count });
+      console.log('🔍 Search results:', { 
+        dataLength: data?.length, 
+        error: error?.message || error, 
+        count,
+        actualData: data?.slice(0, 3) // Log first 3 recipes for debugging
+      });
 
       if (error) {
         console.error('Search error:', error);
