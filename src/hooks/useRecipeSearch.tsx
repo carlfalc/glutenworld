@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -50,7 +50,7 @@ export const useRecipeSearch = () => {
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const { toast } = useToast();
 
-  const searchRecipes = async (
+  const searchRecipes = useCallback(async (
     query: string = '',
     filters: SearchFilters = {},
     page: number = 1,
@@ -127,9 +127,9 @@ export const useRecipeSearch = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const populateDatabase = async () => {
+  const populateDatabase = useCallback(async () => {
     try {
       const response = await fetch(`https://hfuyqkcbpkrcragnyTDV.supabase.co/functions/v1/populate-recipes`, {
         method: 'POST',
@@ -158,7 +158,7 @@ export const useRecipeSearch = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
   return {
     searchRecipes,

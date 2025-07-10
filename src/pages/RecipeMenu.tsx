@@ -30,9 +30,9 @@ const RecipeMenu = () => {
         console.log('Populating database with recipes...');
         await populateDatabase();
         setHasPopulated(true);
+        // Load initial recipes after population
+        await searchRecipes('', {}, 1, 12);
       }
-      // Load initial recipes
-      await searchRecipes('', {}, 1, 12);
     };
     
     initializeData();
