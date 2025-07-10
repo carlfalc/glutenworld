@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Users, ChefHat, Heart, Plus } from 'lucide-react';
+import { Clock, Users, ChefHat, Heart, Plus, X } from 'lucide-react';
 import { DatabaseRecipe } from '@/hooks/useRecipeSearch';
 import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite } from '@/hooks/useFavorites';
 import { useCreateRecipe } from '@/hooks/useRecipes';
@@ -25,7 +25,7 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
   const rateRecipeMutation = useRateRecipe();
   const { toast } = useToast();
 
-  if (!recipe) return null;
+  if (!recipe || !isOpen) return null;
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -41,13 +41,17 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
   };
 
   const handleFavoriteToggle = async () => {
-    if (isFav) {
-      removeFromFavoritesMutation.mutate(recipe.id);
-    } else {
-      addToFavoritesMutation.mutate({
-        type: 'recipe',
-        recipe_id: recipe.id,
-      });
+    try {
+      if (isFav) {
+        removeFromFavoritesMutation.mutate(recipe.id);
+      } else {
+        addToFavoritesMutation.mutate({
+          type: 'recipe',
+          recipe_id: recipe.id,
+        });
+      }
+    } catch (error) {
+      console.error('Favorite toggle error:', error);
     }
   };
 
@@ -79,6 +83,7 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
         description: "Recipe has been added to your collection!",
       });
     } catch (error) {
+      console.error('Add to recipes error:', error);
       toast({
         title: "Error",
         description: "Failed to add recipe to your collection.",
@@ -88,7 +93,11 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
   };
 
   const handleRatingChange = (rating: number) => {
-    rateRecipeMutation.mutate({ recipeId: recipe.id, rating });
+    try {
+      rateRecipeMutation.mutate({ recipeId: recipe.id, rating });
+    } catch (error) {
+      console.error('Rating change error:', error);
+    }
   };
 
   const getDietaryLabels = () => {
@@ -126,25 +135,26 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
   const totalTime = recipe.cook_time ? (recipe.prep_time || 0) + recipe.cook_time : (recipe.prep_time || 0);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <DialogTitle className="text-2xl mb-2">{recipe.title}</DialogTitle>
-              <div className="flex items-center gap-2 mb-4">
-                {recipe.difficulty_level && (
-                  <Badge className={getDifficultyColor(recipe.difficulty_level)}>
-                    {recipe.difficulty_level}
-                  </Badge>
-                )}
-                {recipe.cuisine_type && (
-                  <Badge variant="secondary">
-                    {recipe.cuisine_type}
-                  </Badge>
-                )}
-              </div>
+    <div className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
+      <div className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-4xl max-h-[90vh] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h2 className="text-2xl font-semibold leading-none tracking-tight mb-2">{recipe.title}</h2>
+            <div className="flex items-center gap-2 mb-4">
+              {recipe.difficulty_level && (
+                <Badge className={getDifficultyColor(recipe.difficulty_level)}>
+                  {recipe.difficulty_level}
+                </Badge>
+              )}
+              {recipe.cuisine_type && (
+                <Badge variant="secondary">
+                  {recipe.cuisine_type}
+                </Badge>
+              )}
             </div>
+          </div>
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
@@ -155,8 +165,16 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
             >
               <Heart className={`h-5 w-5 ${isFav ? 'fill-current' : ''}`} />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-        </DialogHeader>
+        </div>
 
         <div className="space-y-6">
           {/* Star Rating */}
@@ -165,7 +183,7 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
               rating={userRating?.rating || 0}
               onRatingChange={handleRatingChange}
               interactive={true}
-              size="lg"
+              size="md"
             />
             <div className="text-sm text-muted-foreground">
               Rate this recipe
@@ -197,52 +215,6 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
             ))}
           </div>
 
-          {/* Nutrition Highlights */}
-          {recipe.calories_per_serving && (
-            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg p-4 border border-primary/20">
-              <div className="text-sm font-medium text-primary uppercase tracking-wide flex items-center gap-2 mb-3">
-                <ChefHat className="h-4 w-4" />
-                Nutrition Highlights
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <div className="flex justify-between bg-background/50 rounded p-3">
-                  <span className="text-muted-foreground">Calories:</span>
-                  <span className="font-bold text-primary">{recipe.calories_per_serving}</span>
-                </div>
-                {recipe.protein_g && (
-                  <div className="flex justify-between bg-background/50 rounded p-3">
-                    <span className="text-muted-foreground">Protein:</span>
-                    <span className="font-bold text-primary">{recipe.protein_g}g</span>
-                  </div>
-                )}
-                {recipe.carbs_g && (
-                  <div className="flex justify-between bg-background/50 rounded p-3">
-                    <span className="text-muted-foreground">Carbs:</span>
-                    <span className="font-bold text-primary">{recipe.carbs_g}g</span>
-                  </div>
-                )}
-                {recipe.fat_g && (
-                  <div className="flex justify-between bg-background/50 rounded p-3">
-                    <span className="text-muted-foreground">Fat:</span>
-                    <span className="font-bold text-primary">{recipe.fat_g}g</span>
-                  </div>
-                )}
-                {recipe.fiber_g && (
-                  <div className="flex justify-between bg-background/50 rounded p-3">
-                    <span className="text-muted-foreground">Fiber:</span>
-                    <span className="font-bold text-primary">{recipe.fiber_g}g</span>
-                  </div>
-                )}
-                {recipe.sodium_mg && (
-                  <div className="flex justify-between bg-background/50 rounded p-3">
-                    <span className="text-muted-foreground">Sodium:</span>
-                    <span className="font-bold text-primary">{recipe.sodium_mg}mg</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Recipe Description */}
           {(recipe.converted_recipe || recipe.original_recipe) && (
             <div className="space-y-2">
@@ -250,44 +222,6 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
               <p className="text-muted-foreground leading-relaxed">
                 {recipe.converted_recipe || recipe.original_recipe}
               </p>
-            </div>
-          )}
-
-          {/* Ingredients */}
-          {recipe.ingredients && (
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Ingredients</h3>
-              <div className="bg-muted/30 rounded-lg p-4">
-                {Array.isArray(recipe.ingredients) ? (
-                  <ul className="space-y-1">
-                    {recipe.ingredients.map((ingredient, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className="text-primary">•</span>
-                        <span>{ingredient}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>{JSON.stringify(recipe.ingredients)}</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Instructions */}
-          {recipe.instructions && recipe.instructions.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Instructions</h3>
-              <div className="space-y-3">
-                {recipe.instructions.map((instruction, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
-                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
-                      {index + 1}
-                    </div>
-                    <p className="flex-1">{instruction}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
@@ -304,8 +238,8 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
