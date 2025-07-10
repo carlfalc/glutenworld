@@ -306,9 +306,9 @@ const AddRecipeSection = () => {
           <Button
             onClick={fixRecipeConsistency}
             disabled={isFixing}
-            className="w-full mt-3 bg-amber-600 hover:bg-amber-700 text-white"
+            className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {isFixing ? 'Fixing Recipe Consistency...' : 'Fix Recipe Consistency'}
+            {isFixing ? 'AI is Fixing Recipe Consistency...' : 'Fix Recipe Consistency with AI'}
           </Button>
         )}
         

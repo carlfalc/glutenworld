@@ -7,24 +7,22 @@ export const useRecipeConsistencyFix = () => {
   const { toast } = useToast()
 
   const fixRecipeConsistency = async () => {
-    console.log('=== Fix recipe consistency button clicked! ===')
+    console.log('=== AI Recipe consistency fix starting! ===')
     
     try {
       console.log('Setting isFixing to true...')
       setIsFixing(true)
-      console.log('isFixing set to true successfully')
       
-      console.log('About to invoke fix-recipe-consistency function...')
+      console.log('Invoking ai-recipe-fix function with AI...')
       
-      // Test if the function exists first
-      const { data, error } = await supabase.functions.invoke('fix-recipe-consistency', {
-        body: JSON.stringify({ test: true }),
+      const { data, error } = await supabase.functions.invoke('ai-recipe-fix', {
+        body: JSON.stringify({}),
         headers: {
           'Content-Type': 'application/json',
         }
       })
       
-      console.log('Function invocation completed')
+      console.log('AI function completed:', { data, error })
       
       console.log('Raw function response:', { data, error, status: 'received' })
       
