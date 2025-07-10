@@ -75,28 +75,11 @@ export const useRecipeSearch = () => {
           `title.ilike.%${query}%,converted_recipe.ilike.%${query}%,original_recipe.ilike.%${query}%`
         );
       } else if (filters.category && filters.category !== 'all') {
-        // Category filter only (no text search)
+        // Category filter based on cuisine_type
         console.log('🔍 Applying category filter only:', filters.category);
-        
-        switch (filters.category.toLowerCase()) {
-          case 'breakfast':
-            queryBuilder = queryBuilder.or(
-              `title.ilike.%pancake%,title.ilike.%breakfast%,title.ilike.%bowl%`
-            );
-            break;
-          case 'lunch':
-          case 'dinner':
-            queryBuilder = queryBuilder.or(
-              `title.ilike.%chicken%,title.ilike.%beef%,title.ilike.%stir%,title.ilike.%meatball%,cuisine_type.ilike.%mediterranean%,cuisine_type.ilike.%italian%,cuisine_type.ilike.%asian%`
-            );
-            break;
-          case 'snacks':
-            queryBuilder = queryBuilder.eq('difficulty_level', 'Easy');
-            break;
-          default:
-            // For 'all' or unrecognized categories, don't add any filters
-            break;
-        }
+        // Capitalize first letter to match database format
+        const categoryName = filters.category.charAt(0).toUpperCase() + filters.category.slice(1);
+        queryBuilder = queryBuilder.eq('cuisine_type', categoryName);
       }
       // If no query and no category filter, just get all recipes (no additional WHERE clause)
       
