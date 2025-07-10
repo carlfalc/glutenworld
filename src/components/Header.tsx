@@ -1,5 +1,5 @@
 
-import { ChefHat, Sparkles, User, LogOut, Settings, Crown, Menu } from 'lucide-react';
+import { ChefHat, Sparkles, User, LogOut, Settings, Crown, AlignJustify } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -111,8 +111,12 @@ const Header = () => {
               {isMobile && (
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-gluten-primary">
-                      <Menu className="w-6 h-6" />
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="bg-gluten-primary/10 border-gluten-primary/20 text-gluten-primary hover:bg-gluten-primary/20 hover:text-gluten-primary shadow-sm"
+                    >
+                      <AlignJustify className="w-5 h-5" />
                     </Button>
                   </SheetTrigger>
                   <SheetContent side="right" className="w-80">
