@@ -68,6 +68,11 @@ export default {
 					secondary: '#059669',
 					dark: '#064E3B',
 					light: '#A7F3D0',
+				},
+				brand: {
+					blue: '#3B82F6',
+					'blue-dark': '#1E40AF',
+					'blue-light': '#DBEAFE',
 				}
 			},
 			borderRadius: {

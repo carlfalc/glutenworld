@@ -114,7 +114,7 @@ const Header = () => {
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="bg-gluten-primary/10 border-gluten-primary/20 text-gluten-primary hover:bg-gluten-primary/20 hover:text-gluten-primary shadow-sm"
+                      className="bg-brand-blue/10 border-brand-blue/20 text-brand-blue hover:bg-brand-blue/20 hover:text-brand-blue-dark shadow-sm"
                     >
                       <AlignJustify className="w-5 h-5" />
                     </Button>
