@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import RecipeCard from '@/components/RecipeCard';
 import { Coffee, Apple, Utensils, Moon, Search, X } from 'lucide-react';
+import herbCrustedChickenImg from '@/assets/herb-crusted-chicken.jpg';
+import stuffedBellPeppersImg from '@/assets/stuffed-bell-peppers.jpg';
 
 // Sample recipe data - this would eventually come from Supabase
 const recipeData = {
@@ -183,7 +185,7 @@ const recipeData = {
     {
       id: '9',
       title: 'Stuffed Bell Peppers',
-      image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400',
+      image: stuffedBellPeppersImg,
       difficulty: 'Hard' as const,
       prepTime: 30,
       cookTime: 45,
@@ -194,7 +196,7 @@ const recipeData = {
     {
       id: '17',
       title: 'Herb-Crusted Chicken',
-      image: 'https://images.unsplash.com/photo-1517022812141-23620dba5c23?w=400',
+      image: herbCrustedChickenImg,
       difficulty: 'Medium' as const,
       prepTime: 10,
       cookTime: 25,
