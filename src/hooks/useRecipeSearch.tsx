@@ -56,8 +56,8 @@ export const useRecipeSearch = () => {
     page: number = 1,
     pageSize: number = 12
   ) => {
-    setLoading(true);
     console.log('🔍 Starting search with:', { query, filters, page, pageSize });
+    setLoading(true);
     
     try {
       console.log('🔍 Building query for recipes table...');
@@ -162,7 +162,7 @@ export const useRecipeSearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast]); // Add toast back but it shouldn't cause infinite loops now
 
   const populateDatabase = useCallback(async () => {
     try {
