@@ -27,56 +27,14 @@ export const useSubscription = () => {
       return;
     }
 
-    try {
-      console.log('Checking subscription status...');
-      setSubscriptionData(prev => ({ ...prev, loading: true }));
-
-      // For testing purposes, let's set a default free access state if the edge function fails
-      try {
-        const { data, error } = await supabase.functions.invoke('check-subscription', {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-
-        if (error) {
-          console.error('Edge function error, using default state:', error);
-          // Set default free access for testing
-          setSubscriptionData({
-            subscribed: true, // Allow access for testing
-            subscription_tier: 'free',
-            subscription_end: null,
-            loading: false,
-          });
-          return;
-        }
-
-        console.log('Subscription data received:', data);
-        setSubscriptionData({
-          subscribed: data.subscribed || true, // Default to true for testing
-          subscription_tier: data.subscription_tier || 'free',
-          subscription_end: data.subscription_end || null,
-          loading: false,
-        });
-      } catch (edgeFunctionError) {
-        console.error('Edge function not available, using default state:', edgeFunctionError);
-        // Set default free access for testing when edge function doesn't exist
-        setSubscriptionData({
-          subscribed: true, // Allow access for testing
-          subscription_tier: 'free',
-          subscription_end: null,
-          loading: false,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to check subscription:', error);
-      setSubscriptionData({
-        subscribed: true, // Default to allowing access for testing
-        subscription_tier: 'free',
-        subscription_end: null,
-        loading: false,
-      });
-    }
+    // Set default free access immediately for testing
+    console.log('Setting default free access for testing');
+    setSubscriptionData({
+      subscribed: true,
+      subscription_tier: 'free',
+      subscription_end: null,
+      loading: false,
+    });
   };
 
   const createCheckout = async (plan: 'trial' | 'quarterly' | 'annual') => {
@@ -157,17 +115,6 @@ export const useSubscription = () => {
   // Check subscription on mount and when user changes
   useEffect(() => {
     checkSubscription();
-  }, [user, session]);
-
-  // Reduced auto-refresh interval to avoid endless loops - only refresh every 5 minutes when user is active
-  useEffect(() => {
-    if (!user || !session) return;
-
-    const interval = setInterval(() => {
-      checkSubscription();
-    }, 300000); // 5 minutes instead of 30 seconds
-
-    return () => clearInterval(interval);
   }, [user, session]);
 
   return {
