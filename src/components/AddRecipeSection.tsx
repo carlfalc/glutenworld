@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import ImageCapture from '@/components/ImageCapture';
 import RecipeConversionResult from '@/components/RecipeConversionResult';
 import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
+import { useRecipeConsistencyFix } from '@/hooks/useRecipeConsistencyFix';
 import { toast } from '@/hooks/use-toast';
 
 const AddRecipeSection = () => {
@@ -27,6 +28,7 @@ const AddRecipeSection = () => {
   
   const createRecipeMutation = useCreateRecipe();
   const recipeConversionMutation = useRecipeConversion();
+  const { fixRecipeConsistency, isFixing } = useRecipeConsistencyFix();
   
   const form = useForm({
     defaultValues: {
@@ -299,6 +301,16 @@ const AddRecipeSection = () => {
             )}
           </DialogContent>
         </Dialog>
+        
+        {user?.email === 'admin@glutenworld.com' && (
+          <Button
+            onClick={fixRecipeConsistency}
+            disabled={isFixing}
+            className="w-full mt-3 bg-amber-600 hover:bg-amber-700 text-white"
+          >
+            {isFixing ? 'Fixing Recipe Consistency...' : 'Fix Recipe Consistency (Admin)'}
+          </Button>
+        )}
         
         {!user && (
           <div className="text-xs text-center text-muted-foreground mt-4">
