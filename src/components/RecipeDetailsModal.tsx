@@ -17,6 +17,8 @@ interface RecipeDetailsModalProps {
 }
 
 const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps) => {
+  console.log('Modal render called with:', { recipe: !!recipe, isOpen, recipeTitle: recipe?.title });
+  
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
   const createRecipeMutation = useCreateRecipe();
@@ -25,7 +27,15 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
   const rateRecipeMutation = useRateRecipe();
   const { toast } = useToast();
 
-  if (!recipe || !isOpen) return null;
+  if (!recipe) {
+    console.log('No recipe provided to modal');
+    return null;
+  }
+  
+  if (!isOpen) {
+    console.log('Modal not open');
+    return null;
+  }
 
   // Debug log to see recipe data structure
   console.log('Recipe data in modal:', {
