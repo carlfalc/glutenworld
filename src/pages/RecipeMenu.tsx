@@ -44,7 +44,7 @@ const RecipeMenu = () => {
       searchRecipes(searchQuery, filters, 1, 12);
       setCurrentPage(1);
     }
-  }, [searchQuery, activeCategory, hasPopulated, searchRecipes]);
+  }, [searchQuery, activeCategory, hasPopulated]);
 
   const clearSearch = () => {
     setSearchQuery('');
