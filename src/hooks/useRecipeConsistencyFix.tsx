@@ -7,11 +7,14 @@ export const useRecipeConsistencyFix = () => {
   const { toast } = useToast()
 
   const fixRecipeConsistency = async () => {
-    console.log('Fix recipe consistency button clicked!')
-    setIsFixing(true)
+    console.log('=== Fix recipe consistency button clicked! ===')
     
     try {
-      console.log('Invoking fix-recipe-consistency function...')
+      console.log('Setting isFixing to true...')
+      setIsFixing(true)
+      console.log('isFixing set to true successfully')
+      
+      console.log('About to invoke fix-recipe-consistency function...')
       
       // Test if the function exists first
       const { data, error } = await supabase.functions.invoke('fix-recipe-consistency', {
@@ -20,6 +23,8 @@ export const useRecipeConsistencyFix = () => {
           'Content-Type': 'application/json',
         }
       })
+      
+      console.log('Function invocation completed')
       
       console.log('Raw function response:', { data, error, status: 'received' })
       
