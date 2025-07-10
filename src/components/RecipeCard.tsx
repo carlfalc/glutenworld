@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Users, ChefHat, Heart } from 'lucide-react';
+import { Clock, Users, ChefHat, Heart, ImageOff } from 'lucide-react';
 import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite } from '@/hooks/useFavorites';
 import { useToast } from '@/hooks/use-toast';
 
@@ -24,6 +24,7 @@ interface RecipeCardProps {
 
 const RecipeCard = ({ recipe }: RecipeCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
   const { data: isFav } = useIsFavorite('recipe', { itemId: recipe.id });
@@ -62,20 +63,32 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border-border">
       <div className="relative overflow-hidden">
         <div className="aspect-video bg-muted flex items-center justify-center">
-          {!imageLoaded && (
+          {!imageLoaded && !imageError && (
             <div className="animate-pulse bg-muted w-full h-full flex items-center justify-center">
               <ChefHat className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
-          <img
-            src={recipe.image}
-            alt={recipe.title}
-            className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(true)}
-          />
+          {imageError ? (
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <div className="text-center">
+                <ImageOff className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Image unavailable</p>
+              </div>
+            </div>
+          ) : (
+            <img
+              src={recipe.image}
+              alt={recipe.title}
+              className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => {
+                setImageError(true);
+                setImageLoaded(true);
+              }}
+            />
+          )}
         </div>
         
         <Button
