@@ -78,6 +78,14 @@ const Header = () => {
                   </NavigationMenuItem>
                   <NavigationMenuItem>
                     <NavigationMenuLink
+                      className={cn(navigationMenuTriggerStyle(), "cursor-pointer")}
+                      onClick={() => navigate('/recipe-menu')}
+                    >
+                      Recipe Menu
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink
                       className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1", subscribed ? "text-gluten-primary" : "")}
                       onClick={() => navigate('/subscription')}
                     >
