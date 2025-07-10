@@ -302,13 +302,13 @@ const AddRecipeSection = () => {
           </DialogContent>
         </Dialog>
         
-        {user?.email === 'admin@glutenworld.com' && (
+        {user && (
           <Button
             onClick={fixRecipeConsistency}
             disabled={isFixing}
             className="w-full mt-3 bg-amber-600 hover:bg-amber-700 text-white"
           >
-            {isFixing ? 'Fixing Recipe Consistency...' : 'Fix Recipe Consistency (Admin)'}
+            {isFixing ? 'Fixing Recipe Consistency...' : 'Fix Recipe Consistency'}
           </Button>
         )}
         
