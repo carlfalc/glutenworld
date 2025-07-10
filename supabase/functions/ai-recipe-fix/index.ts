@@ -49,6 +49,7 @@ Deno.serve(async (req) => {
     }
 
     console.log(`Found ${recipes.length} recipes to analyze`);
+    console.log('Database query completed successfully');
     let updatedCount = 0;
 
     for (const recipe of recipes) {
