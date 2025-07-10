@@ -57,6 +57,7 @@ export const useRecipeSearch = () => {
     pageSize: number = 12
   ) => {
     setLoading(true);
+    console.log('🔍 Starting search with:', { query, filters, page, pageSize });
     
     try {
       let queryBuilder = supabase
@@ -72,6 +73,23 @@ export const useRecipeSearch = () => {
       }
 
       // Apply filters
+      if (filters.category && filters.category !== 'all') {
+        // Map category names to meal times for filtering
+        const categoryMap: { [key: string]: string[] } = {
+          'breakfast': ['breakfast'],
+          'lunch': ['lunch'],
+          'dinner': ['dinner'],
+          'snacks': ['snack', 'snacks']
+        };
+        
+        const searchTerms = categoryMap[filters.category] || [filters.category];
+        const categoryQueries = searchTerms.map(term => 
+          `title.ilike.%${term}%,converted_recipe.ilike.%${term}%,cuisine_type.ilike.%${term}%`
+        ).join(',');
+        
+        queryBuilder = queryBuilder.or(categoryQueries);
+      }
+      
       if (filters.difficulty) {
         queryBuilder = queryBuilder.eq('difficulty_level', filters.difficulty);
       }
@@ -97,6 +115,8 @@ export const useRecipeSearch = () => {
         .order('created_at', { ascending: false });
 
       const { data, error, count } = await queryBuilder;
+      
+      console.log('🔍 Search results:', { data: data?.length, error, count });
 
       if (error) {
         console.error('Search error:', error);
