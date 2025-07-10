@@ -225,6 +225,90 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
             </div>
           )}
 
+          {/* Ingredients */}
+          {recipe.ingredients && (
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Ingredients</h3>
+              <div className="bg-muted/30 rounded-lg p-4">
+                {Array.isArray(recipe.ingredients) ? (
+                  <ul className="space-y-1">
+                    {recipe.ingredients.map((ingredient, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        <span>{ingredient}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{JSON.stringify(recipe.ingredients)}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Instructions */}
+          {recipe.instructions && recipe.instructions.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Instructions</h3>
+              <div className="space-y-3">
+                {recipe.instructions.map((instruction, index) => (
+                  <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                      {index + 1}
+                    </div>
+                    <p className="flex-1">{instruction}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Nutrition Highlights */}
+          {recipe.calories_per_serving && (
+            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg p-4 border border-primary/20">
+              <div className="text-sm font-medium text-primary uppercase tracking-wide flex items-center gap-2 mb-3">
+                <ChefHat className="h-4 w-4" />
+                Nutrition Highlights
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="flex justify-between bg-background/50 rounded p-3">
+                  <span className="text-muted-foreground">Calories:</span>
+                  <span className="font-bold text-primary">{recipe.calories_per_serving}</span>
+                </div>
+                {recipe.protein_g && (
+                  <div className="flex justify-between bg-background/50 rounded p-3">
+                    <span className="text-muted-foreground">Protein:</span>
+                    <span className="font-bold text-primary">{recipe.protein_g}g</span>
+                  </div>
+                )}
+                {recipe.carbs_g && (
+                  <div className="flex justify-between bg-background/50 rounded p-3">
+                    <span className="text-muted-foreground">Carbs:</span>
+                    <span className="font-bold text-primary">{recipe.carbs_g}g</span>
+                  </div>
+                )}
+                {recipe.fat_g && (
+                  <div className="flex justify-between bg-background/50 rounded p-3">
+                    <span className="text-muted-foreground">Fat:</span>
+                    <span className="font-bold text-primary">{recipe.fat_g}g</span>
+                  </div>
+                )}
+                {recipe.fiber_g && (
+                  <div className="flex justify-between bg-background/50 rounded p-3">
+                    <span className="text-muted-foreground">Fiber:</span>
+                    <span className="font-bold text-primary">{recipe.fiber_g}g</span>
+                  </div>
+                )}
+                {recipe.sodium_mg && (
+                  <div className="flex justify-between bg-background/50 rounded p-3">
+                    <span className="text-muted-foreground">Sodium:</span>
+                    <span className="font-bold text-primary">{recipe.sodium_mg}mg</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">
             <Button 
