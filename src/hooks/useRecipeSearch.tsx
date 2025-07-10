@@ -67,34 +67,50 @@ export const useRecipeSearch = () => {
         .eq('is_public', true);
       console.log('🔍 Base query built successfully');
 
-      // Apply text search if query provided
+      // Build combined search conditions
+      const searchConditions = [];
+      
+      // Add text search conditions
       if (query.trim()) {
         console.log('🔍 Applying text search for:', query);
-        queryBuilder = queryBuilder.or(
-          `title.ilike.%${query}%,converted_recipe.ilike.%${query}%`
-        );
+        searchConditions.push(`title.ilike.%${query}%`);
+        searchConditions.push(`converted_recipe.ilike.%${query}%`);
+        searchConditions.push(`original_recipe.ilike.%${query}%`);
       }
 
-      // Apply category filter
+      // Add category-specific conditions
       if (filters.category && filters.category !== 'all') {
         console.log('🔍 Applying category filter:', filters.category);
         
         switch (filters.category.toLowerCase()) {
           case 'breakfast':
-            queryBuilder = queryBuilder.or(
-              `title.ilike.%pancake%,title.ilike.%breakfast%,title.ilike.%bowl%`
-            );
+            if (!query.trim()) { // Only apply category filter if no text search
+              searchConditions.push(`title.ilike.%pancake%`);
+              searchConditions.push(`title.ilike.%breakfast%`);
+              searchConditions.push(`title.ilike.%bowl%`);
+            }
             break;
           case 'lunch':
           case 'dinner':
-            queryBuilder = queryBuilder.or(
-              `title.ilike.%chicken%,title.ilike.%beef%,title.ilike.%stir%,title.ilike.%meatball%,cuisine_type.ilike.%mediterranean%,cuisine_type.ilike.%italian%,cuisine_type.ilike.%asian%`
-            );
+            if (!query.trim()) { // Only apply category filter if no text search
+              searchConditions.push(`title.ilike.%chicken%`);
+              searchConditions.push(`title.ilike.%beef%`);
+              searchConditions.push(`title.ilike.%stir%`);
+              searchConditions.push(`title.ilike.%meatball%`);
+              searchConditions.push(`cuisine_type.ilike.%mediterranean%`);
+              searchConditions.push(`cuisine_type.ilike.%italian%`);
+              searchConditions.push(`cuisine_type.ilike.%asian%`);
+            }
             break;
           case 'snacks':
             queryBuilder = queryBuilder.eq('difficulty_level', 'Easy');
             break;
         }
+      }
+      
+      // Apply combined search conditions
+      if (searchConditions.length > 0) {
+        queryBuilder = queryBuilder.or(searchConditions.join(','));
       }
       
       // Apply other filters
