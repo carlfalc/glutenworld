@@ -7,18 +7,24 @@ export const useRecipeConsistencyFix = () => {
   const { toast } = useToast()
 
   const fixRecipeConsistency = async () => {
+    console.log('Fix recipe consistency button clicked!')
     setIsFixing(true)
     
     try {
+      console.log('Invoking fix-recipe-consistency function...')
       const { data, error } = await supabase.functions.invoke('fix-recipe-consistency')
       
+      console.log('Function response:', { data, error })
+      
       if (error) {
+        console.error('Function returned error:', error)
         throw error
       }
 
+      console.log('Function completed successfully:', data)
       toast({
         title: "Recipe Consistency Fixed",
-        description: `Successfully fixed ${data.updatesApplied} recipes with consistency issues.`,
+        description: `Successfully fixed ${data?.updatesApplied || 0} recipes with consistency issues.`,
       })
 
       return data
