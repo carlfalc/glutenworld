@@ -13,56 +13,39 @@ export const useRecipeConsistencyFix = () => {
     try {
       console.log('Invoking fix-recipe-consistency function...')
       
-      // Add timeout and better error handling
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Function timeout after 2 minutes')), 120000)
-      )
-      
-      const functionPromise = supabase.functions.invoke('fix-recipe-consistency', {
+      // Test if the function exists first
+      const { data, error } = await supabase.functions.invoke('fix-recipe-consistency', {
+        body: JSON.stringify({ test: true }),
         headers: {
           'Content-Type': 'application/json',
         }
       })
       
-      const result = await Promise.race([functionPromise, timeoutPromise])
-      const { data, error } = result as any
-      
-      console.log('Function response received:', { data, error, hasData: !!data, hasError: !!error })
+      console.log('Raw function response:', { data, error, status: 'received' })
       
       if (error) {
         console.error('Function returned error:', error)
-        throw new Error(`Function error: ${error.message || JSON.stringify(error)}`)
-      }
-
-      if (!data) {
-        console.error('Function returned no data')
-        throw new Error('Function completed but returned no data')
+        throw new Error(`Function error: ${JSON.stringify(error)}`)
       }
 
       console.log('Function completed successfully:', data)
       toast({
         title: "Recipe Consistency Fixed",
-        description: data.message || `Successfully fixed ${data?.updatesApplied || 0} recipes with consistency issues.`,
+        description: data?.message || `Successfully processed recipes.`,
       })
 
       return data
     } catch (error: any) {
       console.error('Error fixing recipe consistency:', error)
       
-      let errorMessage = "Failed to fix recipe consistency. Please try again."
-      if (error.message?.includes('timeout')) {
-        errorMessage = "The operation is taking longer than expected. It may still be running in the background."
-      } else if (error.message?.includes('Function error:')) {
-        errorMessage = error.message.replace('Function error: ', '')
-      }
-      
       toast({
         title: "Error",
-        description: errorMessage,
+        description: `Failed to fix recipe consistency: ${error.message}`,
         variant: "destructive",
       })
       throw error
     } finally {
+      console.log('Resetting isFixing state...')
       setIsFixing(false)
     }
   }
