@@ -20,6 +20,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting recipe consistency fix process...')
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -33,6 +35,7 @@ serve(async (req) => {
       .not('instructions', 'is', null)
 
     if (error) {
+      console.error('Error fetching recipes:', error)
       throw error
     }
 
@@ -41,188 +44,210 @@ serve(async (req) => {
     const updates = []
     let fixedCount = 0
 
-    for (const recipe of recipes) {
-      let needsUpdate = false
-      let newTitle = recipe.title
-      let newInstructions = [...recipe.instructions]
-      let newIngredients = recipe.ingredients ? [...recipe.ingredients] : []
+    // Process in smaller batches to avoid timeout
+    const BATCH_SIZE = 25
+    const totalBatches = Math.ceil(recipes.length / BATCH_SIZE)
+    
+    console.log(`Processing in ${totalBatches} batches of ${BATCH_SIZE} recipes each...`)
 
-      // Check if title mentions specific protein but ingredients are generic
-      const titleLower = recipe.title.toLowerCase()
-      let specificProtein = null
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const startIndex = batchIndex * BATCH_SIZE
+      const endIndex = Math.min(startIndex + BATCH_SIZE, recipes.length)
+      const batchRecipes = recipes.slice(startIndex, endIndex)
       
-      if (titleLower.includes('chicken')) {
-        specificProtein = 'chicken'
-      } else if (titleLower.includes('beef')) {
-        specificProtein = 'beef'
-      } else if (titleLower.includes('pork')) {
-        specificProtein = 'pork'
-      } else if (titleLower.includes('lamb')) {
-        specificProtein = 'lamb'
-      } else if (titleLower.includes('salmon')) {
-        specificProtein = 'salmon'
-      } else if (titleLower.includes('fish')) {
-        specificProtein = 'fish'
-      } else if (titleLower.includes('shrimp')) {
-        specificProtein = 'shrimp'
-      } else if (titleLower.includes('turkey')) {
-        specificProtein = 'turkey'
-      }
+      console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (recipes ${startIndex + 1}-${endIndex})`)
 
-      if (specificProtein) {
-        // Check if ingredients have generic "main protein"
-        const hasGenericProtein = recipe.ingredients?.some((ing: any) => 
-          ing.name?.toLowerCase().includes('main protein') ||
-          ing.name?.toLowerCase().includes('protein of choice')
-        )
+      for (const recipe of batchRecipes) {
+        let needsUpdate = false
+        let newTitle = recipe.title
+        let newInstructions = [...recipe.instructions]
+        let newIngredients = recipe.ingredients ? [...recipe.ingredients] : []
 
-        if (hasGenericProtein) {
-          // Update ingredients to use specific protein
-          newIngredients = newIngredients.map((ing: any) => {
-            if (ing.name?.toLowerCase().includes('main protein')) {
-              return { ...ing, name: ing.name.replace(/main protein/i, specificProtein) }
-            }
-            if (ing.name?.toLowerCase().includes('protein of choice')) {
-              return { ...ing, name: ing.name.replace(/protein of choice/i, specificProtein) }
-            }
-            return ing
-          })
-          needsUpdate = true
-        }
-
-        // Check if instructions have generic "protein" references
-        const hasGenericInstructions = recipe.instructions.some((inst: string) => 
-          inst.toLowerCase().includes('season protein') ||
-          inst.toLowerCase().includes('cook protein')
-        )
-
-        if (hasGenericInstructions) {
-          // Update instructions to use specific protein
-          newInstructions = newInstructions.map((inst: string) => {
-            let newInst = inst.replace(/season protein/gi, `season ${specificProtein}`)
-            newInst = newInst.replace(/cook protein/gi, `cook ${specificProtein}`)
-            return newInst
-          })
-          needsUpdate = true
-        }
-      }
-
-      // Check if title contains protein but ingredients have protein choice
-      const hasProteinChoice = recipe.ingredients?.some((ing: any) => 
-        ing.name?.toLowerCase().includes('protein of choice') ||
-        ing.name?.toLowerCase().includes('chicken, fish, or tofu') ||
-        ing.name?.toLowerCase().includes('(chicken, fish,')
-      )
-
-      if (hasProteinChoice && !recipe.title.toLowerCase().includes('with protein')) {
-        // Add "with Protein" to titles that have protein choices
-        if (recipe.title.toLowerCase().includes('dip') || 
-            recipe.title.toLowerCase().includes('sauce') ||
-            recipe.title.toLowerCase().includes('bowl') ||
-            recipe.title.toLowerCase().includes('salad')) {
-          newTitle = recipe.title.replace(/^([^-]+)/, '$1 with Protein')
-          needsUpdate = true
-        }
-      }
-
-      // Check for "bites", "balls", "energy balls" titles that need rolling instructions
-      const needsRolling = (
-        recipe.title.toLowerCase().includes('bites') ||
-        recipe.title.toLowerCase().includes('balls') ||
-        recipe.title.toLowerCase().includes('energy balls')
-      ) && !recipe.instructions.some((inst: string) => 
-        inst.toLowerCase().includes('roll') || 
-        inst.toLowerCase().includes('form') ||
-        inst.toLowerCase().includes('shape')
-      )
-
-      if (needsRolling) {
-        // Add rolling instruction before serving
-        const lastIndex = newInstructions.length - 1
-        const servingInstruction = newInstructions[lastIndex]
+        // Check if title mentions specific protein but ingredients are generic
+        const titleLower = recipe.title.toLowerCase()
+        let specificProtein = null
         
-        if (servingInstruction.toLowerCase().includes('serve')) {
-          newInstructions[lastIndex] = 'Roll mixture into bite-sized balls using your hands or a small scoop'
-          newInstructions.push(servingInstruction)
-        } else {
-          newInstructions.push('Roll mixture into bite-sized balls using your hands or a small scoop')
+        if (titleLower.includes('chicken')) {
+          specificProtein = 'chicken'
+        } else if (titleLower.includes('beef')) {
+          specificProtein = 'beef'
+        } else if (titleLower.includes('pork')) {
+          specificProtein = 'pork'
+        } else if (titleLower.includes('lamb')) {
+          specificProtein = 'lamb'
+        } else if (titleLower.includes('salmon')) {
+          specificProtein = 'salmon'
+        } else if (titleLower.includes('fish')) {
+          specificProtein = 'fish'
+        } else if (titleLower.includes('shrimp')) {
+          specificProtein = 'shrimp'
+        } else if (titleLower.includes('turkey')) {
+          specificProtein = 'turkey'
         }
-        needsUpdate = true
-      }
 
-      // Check for "crackers", "chips", "bars" that need cutting/shaping instructions
-      const needsCutting = (
-        recipe.title.toLowerCase().includes('crackers') ||
-        recipe.title.toLowerCase().includes('chips') ||
-        recipe.title.toLowerCase().includes('bars')
-      ) && !recipe.instructions.some((inst: string) => 
-        inst.toLowerCase().includes('cut') || 
-        inst.toLowerCase().includes('slice') ||
-        inst.toLowerCase().includes('break')
-      )
+        if (specificProtein) {
+          // Check if ingredients have generic "main protein"
+          const hasGenericProtein = recipe.ingredients?.some((ing: any) => 
+            ing.name?.toLowerCase().includes('main protein') ||
+            ing.name?.toLowerCase().includes('protein of choice')
+          )
 
-      if (needsCutting) {
-        const lastIndex = newInstructions.length - 1
-        const servingInstruction = newInstructions[lastIndex]
-        
-        if (servingInstruction.toLowerCase().includes('serve')) {
-          if (recipe.title.toLowerCase().includes('crackers')) {
-            newInstructions[lastIndex] = 'Cut into small cracker-sized squares'
-          } else if (recipe.title.toLowerCase().includes('chips')) {
-            newInstructions[lastIndex] = 'Break or cut into chip-sized pieces'
-          } else if (recipe.title.toLowerCase().includes('bars')) {
-            newInstructions[lastIndex] = 'Cut into rectangular bar shapes'
+          if (hasGenericProtein) {
+            // Update ingredients to use specific protein
+            newIngredients = newIngredients.map((ing: any) => {
+              if (ing.name?.toLowerCase().includes('main protein')) {
+                return { ...ing, name: ing.name.replace(/main protein/i, specificProtein) }
+              }
+              if (ing.name?.toLowerCase().includes('protein of choice')) {
+                return { ...ing, name: ing.name.replace(/protein of choice/i, specificProtein) }
+              }
+              return ing
+            })
+            needsUpdate = true
           }
-          newInstructions.push(servingInstruction)
-        } else {
-          if (recipe.title.toLowerCase().includes('crackers')) {
-            newInstructions.push('Cut into small cracker-sized squares')
-          } else if (recipe.title.toLowerCase().includes('chips')) {
-            newInstructions.push('Break or cut into chip-sized pieces')
-          } else if (recipe.title.toLowerCase().includes('bars')) {
-            newInstructions.push('Cut into rectangular bar shapes')
+
+          // Check if instructions have generic "protein" references
+          const hasGenericInstructions = recipe.instructions.some((inst: string) => 
+            inst.toLowerCase().includes('season protein') ||
+            inst.toLowerCase().includes('cook protein')
+          )
+
+          if (hasGenericInstructions) {
+            // Update instructions to use specific protein
+            newInstructions = newInstructions.map((inst: string) => {
+              let newInst = inst.replace(/season protein/gi, `season ${specificProtein}`)
+              newInst = newInst.replace(/cook protein/gi, `cook ${specificProtein}`)
+              return newInst
+            })
+            needsUpdate = true
           }
         }
-        needsUpdate = true
+
+        // Check if title contains protein but ingredients have protein choice
+        const hasProteinChoice = recipe.ingredients?.some((ing: any) => 
+          ing.name?.toLowerCase().includes('protein of choice') ||
+          ing.name?.toLowerCase().includes('chicken, fish, or tofu') ||
+          ing.name?.toLowerCase().includes('(chicken, fish,')
+        )
+
+        if (hasProteinChoice && !recipe.title.toLowerCase().includes('with protein')) {
+          // Add "with Protein" to titles that have protein choices
+          if (recipe.title.toLowerCase().includes('dip') || 
+              recipe.title.toLowerCase().includes('sauce') ||
+              recipe.title.toLowerCase().includes('bowl') ||
+              recipe.title.toLowerCase().includes('salad')) {
+            newTitle = recipe.title.replace(/^([^-]+)/, '$1 with Protein')
+            needsUpdate = true
+          }
+        }
+
+        // Check for "bites", "balls", "energy balls" titles that need rolling instructions
+        const needsRolling = (
+          recipe.title.toLowerCase().includes('bites') ||
+          recipe.title.toLowerCase().includes('balls') ||
+          recipe.title.toLowerCase().includes('energy balls')
+        ) && !recipe.instructions.some((inst: string) => 
+          inst.toLowerCase().includes('roll') || 
+          inst.toLowerCase().includes('form') ||
+          inst.toLowerCase().includes('shape')
+        )
+
+        if (needsRolling) {
+          // Add rolling instruction before serving
+          const lastIndex = newInstructions.length - 1
+          const servingInstruction = newInstructions[lastIndex]
+          
+          if (servingInstruction.toLowerCase().includes('serve')) {
+            newInstructions[lastIndex] = 'Roll mixture into bite-sized balls using your hands or a small scoop'
+            newInstructions.push(servingInstruction)
+          } else {
+            newInstructions.push('Roll mixture into bite-sized balls using your hands or a small scoop')
+          }
+          needsUpdate = true
+        }
+
+        // Check for "crackers", "chips", "bars" that need cutting/shaping instructions
+        const needsCutting = (
+          recipe.title.toLowerCase().includes('crackers') ||
+          recipe.title.toLowerCase().includes('chips') ||
+          recipe.title.toLowerCase().includes('bars')
+        ) && !recipe.instructions.some((inst: string) => 
+          inst.toLowerCase().includes('cut') || 
+          inst.toLowerCase().includes('slice') ||
+          inst.toLowerCase().includes('break')
+        )
+
+        if (needsCutting) {
+          const lastIndex = newInstructions.length - 1
+          const servingInstruction = newInstructions[lastIndex]
+          
+          if (servingInstruction.toLowerCase().includes('serve')) {
+            if (recipe.title.toLowerCase().includes('crackers')) {
+              newInstructions[lastIndex] = 'Cut into small cracker-sized squares'
+            } else if (recipe.title.toLowerCase().includes('chips')) {
+              newInstructions[lastIndex] = 'Break or cut into chip-sized pieces'
+            } else if (recipe.title.toLowerCase().includes('bars')) {
+              newInstructions[lastIndex] = 'Cut into rectangular bar shapes'
+            }
+            newInstructions.push(servingInstruction)
+          } else {
+            if (recipe.title.toLowerCase().includes('crackers')) {
+              newInstructions.push('Cut into small cracker-sized squares')
+            } else if (recipe.title.toLowerCase().includes('chips')) {
+              newInstructions.push('Break or cut into chip-sized pieces')
+            } else if (recipe.title.toLowerCase().includes('bars')) {
+              newInstructions.push('Cut into rectangular bar shapes')
+            }
+          }
+          needsUpdate = true
+        }
+
+        if (needsUpdate) {
+          updates.push({
+            id: recipe.id,
+            title: newTitle,
+            instructions: newInstructions,
+            ingredients: newIngredients
+          })
+          fixedCount++
+        }
       }
 
-      if (needsUpdate) {
-        updates.push({
-          id: recipe.id,
-          title: newTitle,
-          instructions: newInstructions,
-          ingredients: newIngredients
-        })
-        fixedCount++
+      // Apply updates for this batch immediately
+      if (updates.length > 0) {
+        const batchUpdates = updates.slice(-batchRecipes.length) // Get updates for current batch
+        console.log(`Applying ${batchUpdates.length} updates for batch ${batchIndex + 1}...`)
+        
+        for (const update of batchUpdates) {
+          const { error: updateError } = await supabaseClient
+            .from('recipes')
+            .update({
+              title: update.title,
+              instructions: update.instructions,
+              ingredients: update.ingredients
+            })
+            .eq('id', update.id)
+
+          if (updateError) {
+            console.error(`Error updating recipe ${update.id}:`, updateError)
+          }
+        }
+      }
+      
+      // Add small delay between batches to prevent overwhelming the database
+      if (batchIndex < totalBatches - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100))
       }
     }
 
-    // Batch update recipes
-    if (updates.length > 0) {
-      console.log(`Updating ${updates.length} recipes...`)
-      
-      for (const update of updates) {
-        const { error: updateError } = await supabaseClient
-          .from('recipes')
-          .update({
-            title: update.title,
-            instructions: update.instructions,
-            ingredients: update.ingredients
-          })
-          .eq('id', update.id)
-
-        if (updateError) {
-          console.error(`Error updating recipe ${update.id}:`, updateError)
-        }
-      }
-    }
+    console.log(`Completed processing. Fixed ${fixedCount} recipes out of ${recipes.length} total.`)
 
     return new Response(
       JSON.stringify({
         success: true,
         message: `Fixed consistency issues in ${fixedCount} recipes`,
         totalProcessed: recipes.length,
-        updatesApplied: updates.length,
+        updatesApplied: fixedCount,
         details: {
           proteinTitleFixes: updates.filter(u => u.title.includes('with Protein')).length,
           shapingInstructionFixes: updates.filter(u => 
@@ -238,9 +263,13 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in fix-recipe-consistency function:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false,
+        error: error.message,
+        message: 'Failed to fix recipe consistency'
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
