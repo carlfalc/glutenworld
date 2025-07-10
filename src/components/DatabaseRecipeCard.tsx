@@ -9,12 +9,14 @@ import { useUserRecipeRating, useRateRecipe } from '@/hooks/useRecipeRatings';
 import { useToast } from '@/hooks/use-toast';
 import { DatabaseRecipe } from '@/hooks/useRecipeSearch';
 import StarRating from './StarRating';
+import RecipeDetailsModal from './RecipeDetailsModal';
 
 interface DatabaseRecipeCardProps {
   recipe: DatabaseRecipe;
 }
 
 const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
   const createRecipeMutation = useCreateRecipe();
@@ -250,11 +252,20 @@ const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
             <Plus className="h-4 w-4 mr-1" />
             Add to My Recipes
           </Button>
-          <Button className="flex-1 group-hover:bg-primary/90 transition-colors">
+          <Button 
+            className="flex-1 group-hover:bg-primary/90 transition-colors"
+            onClick={() => setIsModalOpen(true)}
+          >
             View Recipe
           </Button>
         </div>
       </CardContent>
+
+      <RecipeDetailsModal
+        recipe={recipe}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </Card>
   );
 };
