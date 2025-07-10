@@ -40,10 +40,25 @@ const generateBreakfastRecipes = (): Recipe[] => {
   const variations = ["Classic", "Chocolate", "Berry", "Tropical", "Vanilla", "Cinnamon"];
   const modifiers = ["Power", "Protein", "Healthy", "Deluxe"];
   
+  // Real food photo IDs from Unsplash
+  const breakfastImages = [
+    "photo-1558618666-fcd25c85cd64", // pancakes
+    "photo-1571997478779-2adcbbe9ab2f", // smoothie bowl
+    "photo-1556909114-f6e7ad7d3136", // breakfast bowl
+    "photo-1484723091739-30a097e8f929", // eggs benedict
+    "photo-1533089860892-a7c6f0a88666", // granola
+    "photo-1565299624946-b28f40a0ca4b", // waffles
+    "photo-1547573854-74d2a71d0826", // avocado toast
+    "photo-1551782450-a2132b4ba21d", // oatmeal
+    "photo-1517433456452-f9633a875f6f", // muffins
+    "photo-1497888329096-51c27beff665" // breakfast sandwich
+  ];
+  
   return Array.from({ length: 100 }, (_, i) => {
     const base = breakfastBases[i % breakfastBases.length];
     const variation = variations[Math.floor(i / breakfastBases.length) % variations.length];
     const modifier = modifiers[Math.floor(i / (breakfastBases.length * variations.length)) % modifiers.length];
+    const imageId = breakfastImages[i % breakfastImages.length];
     
     return {
       title: `${variation} ${modifier} ${base}`,
@@ -70,7 +85,7 @@ const generateBreakfastRecipes = (): Recipe[] => {
       sugar_g: 5 + (i % 15),
       sodium_mg: 300 + (i % 200),
       cholesterol_mg: 50 + (i % 100),
-      image_url: `https://images.unsplash.com/photo-${1567620905732 + i}?w=400`
+      image_url: `https://images.unsplash.com/${imageId}?w=400&h=300&fit=crop`
     };
   });
 };
@@ -85,9 +100,24 @@ const generateSnackRecipes = (): Recipe[] => {
   
   const flavors = ["Chocolate", "Vanilla", "Berry", "Coconut", "Almond", "Peanut"];
   
+  // Real snack/healthy food images from Unsplash
+  const snackImages = [
+    "photo-1579113800032-c38bd7635818", // energy balls
+    "photo-1567620905732-2d1ec7ab7445", // nuts
+    "photo-1571115764595-644a1f56a55c", // granola bars
+    "photo-1559181567-c3190ca9959b", // trail mix
+    "photo-1515543904379-3d47628d9d55", // smoothie
+    "photo-1602248147666-d0ff619e2eae", // chips
+    "photo-1587132137056-bfbf0166836e", // cookies
+    "photo-1571064492674-69c9e4bb4b62", // dried fruit
+    "photo-1568830743174-7a82f0866e8b", // hummus
+    "photo-1612198188060-c7c2a3b66eae"  // protein bites
+  ];
+  
   return Array.from({ length: 100 }, (_, i) => {
     const base = snackBases[i % snackBases.length];
     const flavor = flavors[Math.floor(i / snackBases.length) % flavors.length];
+    const imageId = snackImages[i % snackImages.length];
     
     return {
       title: `${flavor} ${base}`,
@@ -113,7 +143,7 @@ const generateSnackRecipes = (): Recipe[] => {
       sugar_g: 8 + (i % 12),
       sodium_mg: 50 + (i % 150),
       cholesterol_mg: 0,
-      image_url: `https://images.unsplash.com/photo-${1511690743698 + i}?w=400`
+      image_url: `https://images.unsplash.com/${imageId}?w=400&h=300&fit=crop`
     };
   });
 };
@@ -129,10 +159,25 @@ const generateLunchRecipes = (): Recipe[] => {
   const proteins = ["Chicken", "Turkey", "Salmon", "Tuna", "Tofu", "Tempeh"];
   const styles = ["Mediterranean", "Asian", "Mexican", "Italian"];
   
+  // Real lunch/main meal images from Unsplash
+  const lunchImages = [
+    "photo-1567620905732-2d1ec7ab7445", // salad
+    "photo-1547573854-74d2a71d0826", // soup
+    "photo-1571091718767-18b5b1457add", // sandwich
+    "photo-1511690743698-d9d85f2fbf38", // wrap
+    "photo-1512621776951-a57141f2eefd", // pasta bowl
+    "photo-1565299624946-b28f40a0ca4b", // rice dish
+    "photo-1604909052743-94e838986d24", // stir fry
+    "photo-1585937421612-70a008356fbe", // curry
+    "photo-1551024506-0bccd828d307", // tacos
+    "photo-1626700051175-6818013e1d4f"  // burrito bowl
+  ];
+  
   return Array.from({ length: 100 }, (_, i) => {
     const base = lunchBases[i % lunchBases.length];
     const protein = proteins[Math.floor(i / lunchBases.length) % proteins.length];
     const style = styles[Math.floor(i / (lunchBases.length * proteins.length)) % styles.length];
+    const imageId = lunchImages[i % lunchImages.length];
     
     return {
       title: `${style} ${protein} ${base}`,
@@ -159,7 +204,7 @@ const generateLunchRecipes = (): Recipe[] => {
       sugar_g: 6 + (i % 10),
       sodium_mg: 400 + (i % 300),
       cholesterol_mg: 60 + (i % 80),
-      image_url: `https://images.unsplash.com/photo-${1569718212165 + i}?w=400`
+      image_url: `https://images.unsplash.com/${imageId}?w=400&h=300&fit=crop`
     };
   });
 };
@@ -176,10 +221,25 @@ const generateDinnerRecipes = (): Recipe[] => {
   const preparations = ["Herb-Crusted", "Honey Glazed", "Spicy", "Garlic", "Lemon"];
   const sides = ["with Vegetables", "with Rice", "with Quinoa", "with Salad"];
   
+  // Real dinner/main course images from Unsplash
+  const dinnerImages = [
+    "photo-1504674900247-0877df9cc836", // grilled chicken
+    "photo-1467003909585-2f8a72700288", // salmon
+    "photo-1529042410759-befb1204b468", // beef stir fry
+    "photo-1585937421612-70a008356fbe", // main dish
+    "photo-1544025162-d76694265947", // meat dish
+    "photo-1599487488170-d11ec9c172f0", // tacos
+    "photo-1606923842584-7f5ff0b7de9d", // stuffed peppers
+    "photo-1551782450-17144efb9c50", // meatballs
+    "photo-1529042387047-c19bea7e6ad0", // roast meat
+    "photo-1603894584373-5ac82b2ae398"  // main course
+  ];
+  
   return Array.from({ length: 100 }, (_, i) => {
     const base = dinnerBases[i % dinnerBases.length];
     const prep = preparations[Math.floor(i / dinnerBases.length) % preparations.length];
     const side = sides[Math.floor(i / (dinnerBases.length * preparations.length)) % sides.length];
+    const imageId = dinnerImages[i % dinnerImages.length];
     
     return {
       title: `${prep} ${base} ${side}`,
@@ -206,7 +266,7 @@ const generateDinnerRecipes = (): Recipe[] => {
       sugar_g: 5 + (i % 10),
       sodium_mg: 500 + (i % 400),
       cholesterol_mg: 80 + (i % 100),
-      image_url: `https://images.unsplash.com/photo-${1529042410759 + i}?w=400`
+      image_url: `https://images.unsplash.com/${imageId}?w=400&h=300&fit=crop`
     };
   });
 };
