@@ -217,7 +217,7 @@ const sampleRecipes: Recipe[] = [
     sugar_g: 1.2,
     sodium_mg: 580,
     cholesterol_mg: 105,
-    image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400"
+    image_url: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=400"
   }
   // Add more recipes here...
 ];
@@ -233,10 +233,32 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Insert recipes into database
+    // Check if recipes already exist to prevent duplicates
+    const { data: existingRecipes } = await supabaseClient
+      .from('recipes')
+      .select('title')
+    
+    const existingTitles = new Set(existingRecipes?.map(r => r.title) || [])
+    const newRecipes = sampleRecipes.filter(recipe => !existingTitles.has(recipe.title))
+    
+    if (newRecipes.length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "All recipes already exist in database",
+          count: 0
+        }),
+        { 
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Insert only new recipes into database
     const { data, error } = await supabaseClient
       .from('recipes')
-      .insert(sampleRecipes)
+      .insert(newRecipes)
 
     if (error) {
       console.error('Error inserting recipes:', error)
@@ -252,7 +274,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Successfully added ${sampleRecipes.length} recipes to database`,
+        message: `Successfully added ${newRecipes.length} new recipes to database`,
         count: data?.length || 0
       }),
       { 
