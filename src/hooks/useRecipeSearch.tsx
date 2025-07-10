@@ -59,15 +59,6 @@ export const useRecipeSearch = () => {
     setLoading(true);
     console.log('🔍 Starting search with:', { query, filters, page, pageSize });
     
-    // Test basic connectivity first
-    console.log('🔍 Testing basic connectivity...');
-    try {
-      const testQuery = await supabase.from('recipes').select('count').single();
-      console.log('🔍 Basic connectivity test:', testQuery);
-    } catch (testError) {
-      console.error('🔍 Basic connectivity failed:', testError);
-    }
-    
     try {
       console.log('🔍 Building query for recipes table...');
       let queryBuilder = supabase
@@ -88,7 +79,6 @@ export const useRecipeSearch = () => {
       if (filters.category && filters.category !== 'all') {
         console.log('🔍 Applying category filter:', filters.category);
         
-        // Map categories to database content
         switch (filters.category.toLowerCase()) {
           case 'breakfast':
             queryBuilder = queryBuilder.or(
@@ -173,6 +163,12 @@ export const useRecipeSearch = () => {
         title: "Search Error",
         description: "An unexpected error occurred.",
         variant: "destructive",
+      });
+      setSearchResult({
+        recipes: [],
+        totalCount: 0,
+        currentPage: page,
+        totalPages: 0
       });
     } finally {
       setLoading(false);
