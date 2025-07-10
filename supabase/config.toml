@@ -1,1 +1,4 @@
 project_id = "hfuyqkcbpkrcragnytdv"
+
+[functions.fix-recipe-consistency]
+verify_jwt = false
