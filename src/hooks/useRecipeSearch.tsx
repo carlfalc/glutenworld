@@ -72,22 +72,13 @@ export const useRecipeSearch = () => {
         );
       }
 
-      // Apply filters
+      // Apply category filter
       if (filters.category && filters.category !== 'all') {
-        // Map category names to meal times for filtering
-        const categoryMap: { [key: string]: string[] } = {
-          'breakfast': ['breakfast'],
-          'lunch': ['lunch'],
-          'dinner': ['dinner'],
-          'snacks': ['snack', 'snacks']
-        };
-        
-        const searchTerms = categoryMap[filters.category] || [filters.category];
-        const categoryQueries = searchTerms.map(term => 
-          `title.ilike.%${term}%,converted_recipe.ilike.%${term}%,cuisine_type.ilike.%${term}%`
-        ).join(',');
-        
-        queryBuilder = queryBuilder.or(categoryQueries);
+        console.log('🔍 Applying category filter:', filters.category);
+        // Simple category matching based on recipe title/type
+        queryBuilder = queryBuilder.or(
+          `title.ilike.%${filters.category}%,cuisine_type.ilike.%${filters.category}%`
+        );
       }
       
       if (filters.difficulty) {

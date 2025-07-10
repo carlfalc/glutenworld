@@ -38,14 +38,13 @@ const RecipeMenu = () => {
     initializeData();
   }, []);
 
-  // Search when query or category changes
   useEffect(() => {
     if (hasPopulated) {
       const filters = activeCategory !== 'all' ? { category: activeCategory } : {};
       searchRecipes(searchQuery, filters, 1, 12);
       setCurrentPage(1);
     }
-  }, [searchQuery, activeCategory, hasPopulated]);
+  }, [searchQuery, activeCategory, hasPopulated, searchRecipes]);
 
   const clearSearch = () => {
     setSearchQuery('');
