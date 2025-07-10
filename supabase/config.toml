@@ -1,4 +1,4 @@
 project_id = "hfuyqkcbpkrcragnytdv"
 
-[functions.ai-recipe-fix]
+[functions.fix-recipe-consistency]
 verify_jwt = false
