@@ -30,16 +30,16 @@ const RecipeMenu = () => {
         console.log('Populating database with recipes...');
         await populateDatabase();
         setHasPopulated(true);
-        // Load initial recipes after population
-        await searchRecipes('', {}, 1, 12);
       }
     };
     
     initializeData();
-  }, []);
+  }, [populateDatabase]);
 
+  // Load recipes when component mounts or filters change
   useEffect(() => {
     if (hasPopulated) {
+      console.log('Loading recipes with filters:', { searchQuery, activeCategory });
       const filters = activeCategory !== 'all' ? { category: activeCategory } : {};
       searchRecipes(searchQuery, filters, 1, 12);
       setCurrentPage(1);

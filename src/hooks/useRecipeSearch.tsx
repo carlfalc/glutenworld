@@ -126,13 +126,15 @@ export const useRecipeSearch = () => {
         .order('created_at', { ascending: false });
 
       console.log('🔍 Executing query...');
-      const { data, error, count } = await queryBuilder;
+      const result = await queryBuilder;
+      const { data, error, count } = result;
       
+      console.log('🔍 Query completed successfully');
       console.log('🔍 Search results:', { 
         dataLength: data?.length, 
         error: error?.message || error, 
         count,
-        actualData: data?.slice(0, 3) // Log first 3 recipes for debugging
+        sampleData: data?.slice(0, 2) // Log first 2 recipes for debugging
       });
 
       if (error) {
