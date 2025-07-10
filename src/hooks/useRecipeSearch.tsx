@@ -76,47 +76,38 @@ export const useRecipeSearch = () => {
         .eq('is_public', true);
       console.log('🔍 Base query built successfully');
 
-      // Build search conditions
-      const searchConditions = [];
-      
-      // Text search across title and converted_recipe
+      // Apply text search if query provided
       if (query.trim()) {
-        searchConditions.push(`title.ilike.%${query}%`);
-        searchConditions.push(`converted_recipe.ilike.%${query}%`);
+        console.log('🔍 Applying text search for:', query);
+        queryBuilder = queryBuilder.or(
+          `title.ilike.%${query}%,converted_recipe.ilike.%${query}%`
+        );
       }
 
-      // Apply category filter - map frontend categories to database categories
+      // Apply category filter
       if (filters.category && filters.category !== 'all') {
         console.log('🔍 Applying category filter:', filters.category);
         
-        // Map categories to realistic database values
+        // Map categories to database content
         switch (filters.category.toLowerCase()) {
           case 'breakfast':
-            searchConditions.push(`title.ilike.%pancake%`);
-            searchConditions.push(`title.ilike.%breakfast%`);
-            searchConditions.push(`title.ilike.%bowl%`);
+            queryBuilder = queryBuilder.or(
+              `title.ilike.%pancake%,title.ilike.%breakfast%,title.ilike.%bowl%`
+            );
             break;
           case 'lunch':
           case 'dinner':
-            searchConditions.push(`title.ilike.%chicken%`);
-            searchConditions.push(`title.ilike.%beef%`);
-            searchConditions.push(`title.ilike.%stir%`);
-            searchConditions.push(`title.ilike.%meatball%`);
-            searchConditions.push(`cuisine_type.ilike.%mediterranean%`);
-            searchConditions.push(`cuisine_type.ilike.%italian%`);
-            searchConditions.push(`cuisine_type.ilike.%asian%`);
+            queryBuilder = queryBuilder.or(
+              `title.ilike.%chicken%,title.ilike.%beef%,title.ilike.%stir%,title.ilike.%meatball%,cuisine_type.ilike.%mediterranean%,cuisine_type.ilike.%italian%,cuisine_type.ilike.%asian%`
+            );
             break;
           case 'snacks':
-            searchConditions.push(`difficulty_level.eq.Easy`);
+            queryBuilder = queryBuilder.eq('difficulty_level', 'Easy');
             break;
         }
       }
       
-      // Apply search conditions if any exist
-      if (searchConditions.length > 0) {
-        queryBuilder = queryBuilder.or(searchConditions.join(','));
-      }
-      
+      // Apply other filters
       if (filters.difficulty) {
         queryBuilder = queryBuilder.eq('difficulty_level', filters.difficulty);
       }
@@ -141,6 +132,7 @@ export const useRecipeSearch = () => {
         .range(from, to)
         .order('created_at', { ascending: false });
 
+      console.log('🔍 Executing query...');
       const { data, error, count } = await queryBuilder;
       
       console.log('🔍 Search results:', { 
@@ -156,6 +148,12 @@ export const useRecipeSearch = () => {
           title: "Search Error",
           description: "Failed to search recipes. Please try again.",
           variant: "destructive",
+        });
+        setSearchResult({
+          recipes: [],
+          totalCount: 0,
+          currentPage: page,
+          totalPages: 0
         });
         return;
       }
