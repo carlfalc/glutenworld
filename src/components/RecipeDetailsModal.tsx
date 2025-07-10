@@ -20,8 +20,7 @@ const RecipeDetailsModal = ({ recipe, isOpen, onClose }: RecipeDetailsModalProps
   console.log('🟡 Modal render called with:', { 
     recipe: !!recipe, 
     isOpen, 
-    recipeTitle: recipe?.title,
-    recipeData: recipe 
+    recipeTitle: recipe?.title
   });
   
   const addToFavoritesMutation = useAddToFavorites();
