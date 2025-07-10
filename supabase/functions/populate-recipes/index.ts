@@ -42,19 +42,19 @@ const generateBreakfastRecipes = (): Recipe[] => {
   
   // Specific image mappings for recipe titles
   const getBreakfastImage = (title: string): string => {
-    if (title.includes("Pancakes")) return "photo-1565299624946-b28f40a0ca4b"; // pancakes
-    if (title.includes("Muffins")) return "photo-1486427944299-d1955d23e34d"; // blueberry muffins
-    if (title.includes("Waffles")) return "photo-1562376552-0d160a2f238d"; // waffles with berries
+    if (title.includes("Pancakes")) return "photo-1506084868230-bb9d95c24759"; // stack of pancakes
+    if (title.includes("Muffins")) return "photo-1486427944299-d1955d23e34d"; // fresh muffins
+    if (title.includes("Waffles")) return "photo-1562376552-0d160a2f238d"; // golden waffles
     if (title.includes("Burrito")) return "photo-1626700051175-6818013e1d4f"; // breakfast burrito
-    if (title.includes("Smoothie Bowl")) return "photo-1511690656952-34342bb7c2f2"; // smoothie bowl
-    if (title.includes("Parfait") || title.includes("Yogurt")) return "photo-1488477181946-6428a0291777"; // yogurt parfait
-    if (title.includes("Oats") || title.includes("Overnight")) return "photo-1517451330947-7809dead78d5"; // overnight oats
-    if (title.includes("Granola")) return "photo-1525385133512-2f3bdd039054"; // granola bowl
-    if (title.includes("Omelette") || title.includes("Eggs")) return "photo-1525351484163-7529414344d8"; // eggs/omelette
+    if (title.includes("Smoothie Bowl")) return "photo-1511690656952-34342bb7c2f2"; // colorful smoothie bowl
+    if (title.includes("Parfait") || title.includes("Yogurt")) return "photo-1551782450-a2132b4ba21d"; // layered yogurt parfait
+    if (title.includes("Oats") || title.includes("Overnight")) return "photo-1517451330947-7809dead78d5"; // overnight oats bowl
+    if (title.includes("Granola")) return "photo-1525385133512-2f3bdd039054"; // granola with berries
+    if (title.includes("Omelette") || title.includes("Eggs")) return "photo-1525351484163-7529414344d8"; // fluffy omelette
     if (title.includes("Toast") || title.includes("French")) return "photo-1484723091739-30a097e8f929"; // avocado toast
     if (title.includes("Sandwich")) return "photo-1481070555726-e2fe8357725c"; // breakfast sandwich
     if (title.includes("Bowl")) return "photo-1511690656952-34342bb7c2f2"; // breakfast bowl
-    return "photo-1565299624946-b28f40a0ca4b"; // default pancakes
+    return "photo-1506084868230-bb9d95c24759"; // default pancakes
   };
   
   return Array.from({ length: 100 }, (_, i) => {
@@ -106,18 +106,18 @@ const generateSnackRecipes = (): Recipe[] => {
   
   // Specific image mappings for snack titles
   const getSnackImage = (title: string): string => {
-    if (title.includes("Energy Balls") || title.includes("Protein Balls")) return "photo-1578662996442-48f60103fc96"; // energy balls
-    if (title.includes("Trail Mix")) return "photo-1559181567-c3190ca9959b"; // trail mix
+    if (title.includes("Energy Balls") || title.includes("Protein Balls")) return "photo-1593759608136-45d92d9863c3"; // energy balls
+    if (title.includes("Trail Mix")) return "photo-1559181567-c3190ca9959b"; // colorful trail mix
     if (title.includes("Bars") || title.includes("Granola")) return "photo-1571115764595-644a1f56a55c"; // granola bars
-    if (title.includes("Nuts")) return "photo-1578662996442-48f60103fc96"; // mixed nuts
-    if (title.includes("Chips")) return "photo-1600952841320-db92ec4047ca"; // veggie chips
+    if (title.includes("Nuts")) return "photo-1567620905732-2d1ec7ab7445"; // mixed nuts
+    if (title.includes("Chips")) return "photo-1600952841320-db92ec4047ca"; // healthy chips
     if (title.includes("Cookies")) return "photo-1596097477561-a6e0f7574a40"; // healthy cookies
-    if (title.includes("Hummus") || title.includes("Dip")) return "photo-1515543904379-3d47628d9d55"; // hummus and veggies
+    if (title.includes("Hummus") || title.includes("Dip")) return "photo-1568830743174-7a82f0866e8b"; // hummus with vegetables
     if (title.includes("Smoothie")) return "photo-1502741224143-90386d7f8c82"; // green smoothie
-    if (title.includes("Dried Fruit") || title.includes("Dates")) return "photo-1571064492674-69c9e4bb4b62"; // dried fruit
+    if (title.includes("Dried Fruit") || title.includes("Dates")) return "photo-1571064492674-69c9e4bb4b62"; // dried fruits
     if (title.includes("Bites")) return "photo-1593759608136-45d92d9863c3"; // protein bites
-    if (title.includes("Popcorn")) return "photo-1578662996442-48f60103fc96"; // healthy popcorn
-    return "photo-1578662996442-48f60103fc96"; // default energy balls
+    if (title.includes("Popcorn")) return "photo-1594736797933-d0401ba2fe65"; // healthy popcorn
+    return "photo-1593759608136-45d92d9863c3"; // default energy balls
   };
   
   return Array.from({ length: 100 }, (_, i) => {
@@ -168,20 +168,20 @@ const generateLunchRecipes = (): Recipe[] => {
   
   // Specific image mappings for lunch titles
   const getLunchImage = (title: string): string => {
-    if (title.includes("Salad")) return "photo-1512621776951-a57141f2eefd"; // fresh salad
-    if (title.includes("Soup")) return "photo-1547573854-74d2a71d0826"; // soup bowl
-    if (title.includes("Sandwich")) return "photo-1509722747041-616f39b57569"; // sandwich
-    if (title.includes("Wrap")) return "photo-1544982503-9f984c14501a"; // tortilla wrap
+    if (title.includes("Salad")) return "photo-1540420773420-3366772f4999"; // fresh green salad
+    if (title.includes("Soup")) return "photo-1547573854-74d2a71d0826"; // soup in bowl
+    if (title.includes("Sandwich")) return "photo-1509722747041-616f39b57569"; // gourmet sandwich
+    if (title.includes("Wrap")) return "photo-1544982503-9f984c14501a"; // fresh wrap
     if (title.includes("Pasta") || title.includes("Noodles")) return "photo-1621996346565-e3dbc353d2e5"; // pasta dish
     if (title.includes("Rice") || title.includes("Risotto")) return "photo-1585937421612-70a008356fbe"; // rice bowl
-    if (title.includes("Stir Fry")) return "photo-1604909052743-94e838986d24"; // stir fry
+    if (title.includes("Stir Fry")) return "photo-1604909052743-94e838986d24"; // vegetable stir fry
     if (title.includes("Curry")) return "photo-1631452180519-c014fe946bc7"; // curry dish
-    if (title.includes("Tacos")) return "photo-1551024506-0bccd828d307"; // tacos
+    if (title.includes("Tacos")) return "photo-1551024506-0bccd828d307"; // colorful tacos
     if (title.includes("Burrito") || title.includes("Bowl")) return "photo-1512852939750-1305098529bf"; // burrito bowl
     if (title.includes("Pizza") || title.includes("Flatbread")) return "photo-1513104890138-7c749659a591"; // flatbread pizza
-    if (title.includes("Burger")) return "photo-1520072959219-c595dc870360"; // healthy burger
+    if (title.includes("Burger")) return "photo-1520072959219-c595dc870360"; // gourmet burger
     if (title.includes("Stuffed")) return "photo-1571997478779-2adcbbe9ab2f"; // stuffed peppers
-    return "photo-1512621776951-a57141f2eefd"; // default salad
+    return "photo-1540420773420-3366772f4999"; // default fresh salad
   };
   
   return Array.from({ length: 100 }, (_, i) => {
@@ -235,17 +235,18 @@ const generateDinnerRecipes = (): Recipe[] => {
   
   // Specific image mappings for dinner titles
   const getDinnerImage = (title: string): string => {
-    if (title.includes("Chicken") && !title.includes("Curry")) return "photo-1598103442097-8b74394b95c6"; // grilled chicken
-    if (title.includes("Salmon") || title.includes("Fish")) return "photo-1519708227418-c8fd9a32b7a2"; // salmon fillet
+    if (title.includes("Chicken") && !title.includes("Curry")) return "photo-1598103442097-8b74394b95c6"; // grilled chicken breast
+    if (title.includes("Salmon") || title.includes("Fish")) return "photo-1519708227418-c8fd9a32b7a2"; // grilled salmon
     if (title.includes("Beef") || title.includes("Stir Fry")) return "photo-1546833999-b9f581a1996d"; // beef stir fry
     if (title.includes("Pork") || title.includes("Lamb")) return "photo-1588168333986-5078d3ae3976"; // pork chops
-    if (title.includes("Stuffed Peppers")) return "photo-1571997478779-2adcbbe9ab2f"; // stuffed peppers
-    if (title.includes("Meatballs")) return "photo-1551782450-17144efb9c50"; // meatballs
-    if (title.includes("Roast") || title.includes("Turkey")) return "photo-1574653163676-ad05ec94ce28"; // roast turkey
+    if (title.includes("Stuffed Peppers")) return "photo-1571997478779-2adcbbe9ab2f"; // colorful stuffed peppers
+    if (title.includes("Meatballs")) return "photo-1551782450-17144efb9c50"; // homemade meatballs
+    if (title.includes("Roast") || title.includes("Turkey")) return "photo-1574653163676-ad05ec94ce28"; // roasted meat
     if (title.includes("Curry")) return "photo-1585937421612-70a008356fbe"; // chicken curry
     if (title.includes("Ribs") || title.includes("BBQ")) return "photo-1544025162-d76694265947"; // BBQ ribs
     if (title.includes("Shrimp") || title.includes("Scampi")) return "photo-1615141982883-c7ad0e69fd62"; // shrimp scampi
     if (title.includes("Duck")) return "photo-1603894584373-5ac82b2ae398"; // duck breast
+    if (title.includes("Steak")) return "photo-1546833999-b9f581a1996d"; // grilled steak
     return "photo-1603894584373-5ac82b2ae398"; // default main course
   };
   
