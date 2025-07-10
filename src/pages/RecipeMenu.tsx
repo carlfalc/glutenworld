@@ -183,7 +183,7 @@ const recipeData = {
     {
       id: '9',
       title: 'Stuffed Bell Peppers',
-      image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400',
+      image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400',
       difficulty: 'Hard' as const,
       prepTime: 30,
       cookTime: 45,
@@ -194,7 +194,7 @@ const recipeData = {
     {
       id: '17',
       title: 'Herb-Crusted Chicken',
-      image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400',
+      image: 'https://images.unsplash.com/photo-1517022812141-23620dba5c23?w=400',
       difficulty: 'Medium' as const,
       prepTime: 10,
       cookTime: 25,
