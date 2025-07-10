@@ -45,6 +45,67 @@ serve(async (req) => {
       let needsUpdate = false
       let newTitle = recipe.title
       let newInstructions = [...recipe.instructions]
+      let newIngredients = recipe.ingredients ? [...recipe.ingredients] : []
+
+      // Check if title mentions specific protein but ingredients are generic
+      const titleLower = recipe.title.toLowerCase()
+      let specificProtein = null
+      
+      if (titleLower.includes('chicken')) {
+        specificProtein = 'chicken'
+      } else if (titleLower.includes('beef')) {
+        specificProtein = 'beef'
+      } else if (titleLower.includes('pork')) {
+        specificProtein = 'pork'
+      } else if (titleLower.includes('lamb')) {
+        specificProtein = 'lamb'
+      } else if (titleLower.includes('salmon')) {
+        specificProtein = 'salmon'
+      } else if (titleLower.includes('fish')) {
+        specificProtein = 'fish'
+      } else if (titleLower.includes('shrimp')) {
+        specificProtein = 'shrimp'
+      } else if (titleLower.includes('turkey')) {
+        specificProtein = 'turkey'
+      }
+
+      if (specificProtein) {
+        // Check if ingredients have generic "main protein"
+        const hasGenericProtein = recipe.ingredients?.some((ing: any) => 
+          ing.name?.toLowerCase().includes('main protein') ||
+          ing.name?.toLowerCase().includes('protein of choice')
+        )
+
+        if (hasGenericProtein) {
+          // Update ingredients to use specific protein
+          newIngredients = newIngredients.map((ing: any) => {
+            if (ing.name?.toLowerCase().includes('main protein')) {
+              return { ...ing, name: ing.name.replace(/main protein/i, specificProtein) }
+            }
+            if (ing.name?.toLowerCase().includes('protein of choice')) {
+              return { ...ing, name: ing.name.replace(/protein of choice/i, specificProtein) }
+            }
+            return ing
+          })
+          needsUpdate = true
+        }
+
+        // Check if instructions have generic "protein" references
+        const hasGenericInstructions = recipe.instructions.some((inst: string) => 
+          inst.toLowerCase().includes('season protein') ||
+          inst.toLowerCase().includes('cook protein')
+        )
+
+        if (hasGenericInstructions) {
+          // Update instructions to use specific protein
+          newInstructions = newInstructions.map((inst: string) => {
+            let newInst = inst.replace(/season protein/gi, `season ${specificProtein}`)
+            newInst = newInst.replace(/cook protein/gi, `cook ${specificProtein}`)
+            return newInst
+          })
+          needsUpdate = true
+        }
+      }
 
       // Check if title contains protein but ingredients have protein choice
       const hasProteinChoice = recipe.ingredients?.some((ing: any) => 
@@ -125,23 +186,12 @@ serve(async (req) => {
         needsUpdate = true
       }
 
-      // Check for mismatched ingredients vs instructions
-      const hasCoconut = recipe.ingredients?.some((ing: any) => 
-        ing.name?.toLowerCase().includes('coconut')
-      )
-      const titleHasCoconut = recipe.title.toLowerCase().includes('coconut')
-      
-      if (!hasCoconut && titleHasCoconut && recipe.title !== 'Coconut Smoothie' && recipe.title !== 'Coconut Shake') {
-        // If title mentions coconut but ingredients don't, this might be a mismatch
-        // For now, we'll log these for manual review
-        console.log(`Potential coconut mismatch: ${recipe.title} (ID: ${recipe.id})`)
-      }
-
       if (needsUpdate) {
         updates.push({
           id: recipe.id,
           title: newTitle,
-          instructions: newInstructions
+          instructions: newInstructions,
+          ingredients: newIngredients
         })
         fixedCount++
       }
@@ -156,7 +206,8 @@ serve(async (req) => {
           .from('recipes')
           .update({
             title: update.title,
-            instructions: update.instructions
+            instructions: update.instructions,
+            ingredients: update.ingredients
           })
           .eq('id', update.id)
 
