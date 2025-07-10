@@ -137,7 +137,7 @@ const recipeData = {
     {
       id: '7',
       title: 'Zucchini Noodles',
-      image: 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400',
+      image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400',
       difficulty: 'Easy' as const,
       prepTime: 15,
       cookTime: 5,
@@ -148,7 +148,7 @@ const recipeData = {
     {
       id: '15',
       title: 'Quinoa Salad',
-      image: 'https://images.unsplash.com/photo-1505253213348-cd54c92b37eb?w=400',
+      image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400',
       difficulty: 'Easy' as const,
       prepTime: 15,
       cookTime: 15,
