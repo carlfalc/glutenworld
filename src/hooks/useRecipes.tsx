@@ -19,6 +19,17 @@ export interface Recipe {
   user_id: string;
   created_at: string;
   updated_at: string;
+  calories_per_serving?: number;
+  protein_g?: number;
+  carbs_g?: number;
+  fat_g?: number;
+  fiber_g?: number;
+  sugar_g?: number;
+  sodium_mg?: number;
+  cholesterol_mg?: number;
+  image_url?: string;
+  average_rating?: number;
+  rating_count?: number;
 }
 
 export const useRecipes = () => {
@@ -67,7 +78,8 @@ export const useCreateRecipe = () => {
     mutationFn: async (recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       if (!user) throw new Error('User not authenticated');
 
-      const { data, error } = await supabase
+      // First, insert into user_recipes
+      const { data: userRecipe, error: userRecipeError } = await supabase
         .from('user_recipes')
         .insert({
           ...recipe,
@@ -76,8 +88,30 @@ export const useCreateRecipe = () => {
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (userRecipeError) throw userRecipeError;
+
+      // If recipe is gluten-free, also add to main recipes database for all users
+      const isGlutenFree = recipe.title?.toLowerCase().includes('gluten free') || 
+                          recipe.title?.toLowerCase().includes('gluten-free') ||
+                          recipe.converted_recipe?.toLowerCase().includes('gluten free') ||
+                          recipe.converted_recipe?.toLowerCase().includes('gluten-free');
+
+      if (isGlutenFree) {
+        const { error: publicRecipeError } = await supabase
+          .from('recipes')
+          .insert({
+            ...recipe,
+            user_id: null, // Public recipe
+            is_public: true,
+          });
+
+        // Don't throw error if public insertion fails, just log it
+        if (publicRecipeError) {
+          console.warn('Failed to add gluten-free recipe to public database:', publicRecipeError);
+        }
+      }
+
+      return userRecipe;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });

@@ -161,8 +161,36 @@ export type Database = {
           },
         ]
       }
+      recipe_ratings: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          recipe_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating: number
+          recipe_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          recipe_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       recipes: {
         Row: {
+          average_rating: number | null
           calories_per_serving: number | null
           carbs_g: number | null
           cholesterol_mg: number | null
@@ -182,6 +210,7 @@ export type Database = {
           original_recipe: string | null
           prep_time: number | null
           protein_g: number | null
+          rating_count: number | null
           servings: number | null
           sodium_mg: number | null
           sugar_g: number | null
@@ -190,6 +219,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          average_rating?: number | null
           calories_per_serving?: number | null
           carbs_g?: number | null
           cholesterol_mg?: number | null
@@ -209,6 +239,7 @@ export type Database = {
           original_recipe?: string | null
           prep_time?: number | null
           protein_g?: number | null
+          rating_count?: number | null
           servings?: number | null
           sodium_mg?: number | null
           sugar_g?: number | null
@@ -217,6 +248,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          average_rating?: number | null
           calories_per_serving?: number | null
           carbs_g?: number | null
           cholesterol_mg?: number | null
@@ -236,6 +268,7 @@ export type Database = {
           original_recipe?: string | null
           prep_time?: number | null
           protein_g?: number | null
+          rating_count?: number | null
           servings?: number | null
           sodium_mg?: number | null
           sugar_g?: number | null
@@ -426,6 +459,7 @@ export type Database = {
       }
       user_recipes: {
         Row: {
+          average_rating: number | null
           calories_per_serving: number | null
           carbs_g: number | null
           cholesterol_mg: number | null
@@ -444,6 +478,7 @@ export type Database = {
           original_recipe: string | null
           prep_time: number | null
           protein_g: number | null
+          rating_count: number | null
           servings: number | null
           sodium_mg: number | null
           sugar_g: number | null
@@ -452,6 +487,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          average_rating?: number | null
           calories_per_serving?: number | null
           carbs_g?: number | null
           cholesterol_mg?: number | null
@@ -470,6 +506,7 @@ export type Database = {
           original_recipe?: string | null
           prep_time?: number | null
           protein_g?: number | null
+          rating_count?: number | null
           servings?: number | null
           sodium_mg?: number | null
           sugar_g?: number | null
@@ -478,6 +515,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          average_rating?: number | null
           calories_per_serving?: number | null
           carbs_g?: number | null
           cholesterol_mg?: number | null
@@ -496,6 +534,7 @@ export type Database = {
           original_recipe?: string | null
           prep_time?: number | null
           protein_g?: number | null
+          rating_count?: number | null
           servings?: number | null
           sodium_mg?: number | null
           sugar_g?: number | null
