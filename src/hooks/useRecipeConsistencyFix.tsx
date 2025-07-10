@@ -15,14 +15,14 @@ export const useRecipeConsistencyFix = () => {
       setIsFixing(true)
       console.log('isFixing set to true, current state:', true)
       
-      console.log('Invoking ai-recipe-fix function with AI...')
+      console.log('Invoking fix-recipe-consistency function...')
       
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Function timeout after 60 seconds')), 60000)
       );
       
-      const functionPromise = supabase.functions.invoke('ai-recipe-fix', {
+      const functionPromise = supabase.functions.invoke('fix-recipe-consistency', {
         body: JSON.stringify({}),
         headers: {
           'Content-Type': 'application/json',
