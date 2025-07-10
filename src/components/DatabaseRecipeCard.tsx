@@ -9,7 +9,7 @@ import { useUserRecipeRating, useRateRecipe } from '@/hooks/useRecipeRatings';
 import { useToast } from '@/hooks/use-toast';
 import { DatabaseRecipe } from '@/hooks/useRecipeSearch';
 import StarRating from './StarRating';
-import RecipeDetailsModal from './RecipeDetailsModal';
+import SimpleRecipeModal from './SimpleRecipeModal';
 
 interface DatabaseRecipeCardProps {
   recipe: DatabaseRecipe;
@@ -254,17 +254,14 @@ const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
           </Button>
           <Button 
             className="flex-1 group-hover:bg-primary/90 transition-colors"
-            onClick={() => {
-              console.log('🔴 View Recipe clicked for:', recipe.title);
-              setIsModalOpen(true);
-            }}
+            onClick={() => setIsModalOpen(true)}
           >
-            View Recipe {isModalOpen ? '(OPEN)' : '(CLOSED)'}
+            View Recipe
           </Button>
         </div>
       </CardContent>
 
-      <RecipeDetailsModal
+      <SimpleRecipeModal
         recipe={recipe}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
