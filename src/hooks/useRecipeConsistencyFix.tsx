@@ -8,10 +8,12 @@ export const useRecipeConsistencyFix = () => {
 
   const fixRecipeConsistency = async () => {
     console.log('=== AI Recipe consistency fix starting! ===')
+    console.log('Button clicked - function called')
     
     try {
       console.log('Setting isFixing to true...')
       setIsFixing(true)
+      console.log('isFixing set to true, current state:', true)
       
       console.log('Invoking ai-recipe-fix function with AI...')
       
