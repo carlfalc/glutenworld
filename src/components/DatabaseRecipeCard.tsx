@@ -255,9 +255,11 @@ const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
           <Button 
             className="flex-1 group-hover:bg-primary/90 transition-colors"
             onClick={() => {
-              console.log('View Recipe clicked for:', recipe.title);
-              console.log('Full recipe data:', recipe);
+              console.log('🔴 View Recipe clicked for:', recipe.title);
+              console.log('🔴 Full recipe data:', recipe);
+              console.log('🔴 Setting modal open to true');
               setIsModalOpen(true);
+              console.log('🔴 Modal state after set:', true);
             }}
           >
             View Recipe
