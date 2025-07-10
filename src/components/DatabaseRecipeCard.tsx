@@ -5,28 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Clock, Users, ChefHat, Heart, ImageOff } from 'lucide-react';
 import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite } from '@/hooks/useFavorites';
 import { useToast } from '@/hooks/use-toast';
+import { DatabaseRecipe } from '@/hooks/useRecipeSearch';
 
-interface Recipe {
-  id: string;
-  title: string;
-  image: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  prepTime: number;
-  cookTime?: number;
-  servings: number;
-  description: string;
-  tags: string[];
-  calories_per_serving?: number;
-  protein_g?: number;
-  carbs_g?: number;
-  fat_g?: number;
+interface DatabaseRecipeCardProps {
+  recipe: DatabaseRecipe;
 }
 
-interface RecipeCardProps {
-  recipe: Recipe;
-}
-
-const RecipeCard = ({ recipe }: RecipeCardProps) => {
+const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const addToFavoritesMutation = useAddToFavorites();
@@ -49,9 +34,6 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
 
   const handleFavoriteToggle = async () => {
     if (isFav) {
-      // For removal, we need to find the favorite ID first
-      // For now, we'll just use the mutation without the specific ID
-      // In a real implementation, you'd need to fetch the favorite record first
       removeFromFavoritesMutation.mutate(recipe.id);
     } else {
       addToFavoritesMutation.mutate({
@@ -61,7 +43,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
     }
   };
 
-  const totalTime = recipe.cookTime ? recipe.prepTime + recipe.cookTime : recipe.prepTime;
+  const totalTime = recipe.cook_time ? (recipe.prep_time || 0) + recipe.cook_time : (recipe.prep_time || 0);
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border-border">
@@ -81,7 +63,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
             </div>
           ) : (
             <img
-              src={recipe.image}
+              src={recipe.image_url || 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400'}
               alt={recipe.title}
               className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
@@ -112,12 +94,14 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
           <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
             {recipe.title}
           </CardTitle>
-          <Badge className={`shrink-0 ${getDifficultyColor(recipe.difficulty)}`}>
-            {recipe.difficulty}
-          </Badge>
+          {recipe.difficulty_level && (
+            <Badge className={`shrink-0 ${getDifficultyColor(recipe.difficulty_level)}`}>
+              {recipe.difficulty_level}
+            </Badge>
+          )}
         </div>
         <CardDescription className="line-clamp-2">
-          {recipe.description}
+          {recipe.converted_recipe || recipe.original_recipe || "Delicious gluten-free recipe"}
         </CardDescription>
       </CardHeader>
 
@@ -129,7 +113,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
           </div>
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span>{recipe.servings} servings</span>
+            <span>{recipe.servings || 1} servings</span>
           </div>
         </div>
 
@@ -166,17 +150,15 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
           </div>
         )}
 
+        {/* Cuisine and dietary info */}
         <div className="flex flex-wrap gap-1">
-          {recipe.tags.slice(0, 3).map((tag) => (
-            <Badge key={tag} variant="secondary" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-          {recipe.tags.length > 3 && (
+          {recipe.cuisine_type && (
             <Badge variant="secondary" className="text-xs">
-              +{recipe.tags.length - 3} more
+              {recipe.cuisine_type}
             </Badge>
           )}
+          <Badge variant="secondary" className="text-xs">no gluten</Badge>
+          <Badge variant="secondary" className="text-xs">healthy</Badge>
         </div>
 
         <Button className="w-full group-hover:bg-primary/90 transition-colors">
@@ -187,4 +169,4 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
   );
 };
 
-export default RecipeCard;
+export default DatabaseRecipeCard;

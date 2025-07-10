@@ -163,55 +163,82 @@ export type Database = {
       }
       recipes: {
         Row: {
+          calories_per_serving: number | null
+          carbs_g: number | null
+          cholesterol_mg: number | null
           converted_recipe: string | null
           cook_time: number | null
           created_at: string
           cuisine_type: string | null
           difficulty_level: string | null
+          fat_g: number | null
+          fiber_g: number | null
           id: string
+          image_url: string | null
           ingredients: Json | null
           instructions: string[] | null
           is_public: boolean | null
           likes_count: number | null
           original_recipe: string | null
           prep_time: number | null
+          protein_g: number | null
           servings: number | null
+          sodium_mg: number | null
+          sugar_g: number | null
           title: string
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          calories_per_serving?: number | null
+          carbs_g?: number | null
+          cholesterol_mg?: number | null
           converted_recipe?: string | null
           cook_time?: number | null
           created_at?: string
           cuisine_type?: string | null
           difficulty_level?: string | null
+          fat_g?: number | null
+          fiber_g?: number | null
           id?: string
+          image_url?: string | null
           ingredients?: Json | null
           instructions?: string[] | null
           is_public?: boolean | null
           likes_count?: number | null
           original_recipe?: string | null
           prep_time?: number | null
+          protein_g?: number | null
           servings?: number | null
+          sodium_mg?: number | null
+          sugar_g?: number | null
           title: string
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          calories_per_serving?: number | null
+          carbs_g?: number | null
+          cholesterol_mg?: number | null
           converted_recipe?: string | null
           cook_time?: number | null
           created_at?: string
           cuisine_type?: string | null
           difficulty_level?: string | null
+          fat_g?: number | null
+          fiber_g?: number | null
           id?: string
+          image_url?: string | null
           ingredients?: Json | null
           instructions?: string[] | null
           is_public?: boolean | null
           likes_count?: number | null
           original_recipe?: string | null
           prep_time?: number | null
+          protein_g?: number | null
           servings?: number | null
+          sodium_mg?: number | null
+          sugar_g?: number | null
           title?: string
           updated_at?: string
           user_id?: string | null
@@ -399,52 +426,79 @@ export type Database = {
       }
       user_recipes: {
         Row: {
+          calories_per_serving: number | null
+          carbs_g: number | null
+          cholesterol_mg: number | null
           converted_recipe: string | null
           cook_time: number | null
           created_at: string
           cuisine_type: string | null
           difficulty_level: string | null
+          fat_g: number | null
+          fiber_g: number | null
           id: string
+          image_url: string | null
           ingredients: Json | null
           instructions: string[] | null
           is_public: boolean | null
           original_recipe: string | null
           prep_time: number | null
+          protein_g: number | null
           servings: number | null
+          sodium_mg: number | null
+          sugar_g: number | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          calories_per_serving?: number | null
+          carbs_g?: number | null
+          cholesterol_mg?: number | null
           converted_recipe?: string | null
           cook_time?: number | null
           created_at?: string
           cuisine_type?: string | null
           difficulty_level?: string | null
+          fat_g?: number | null
+          fiber_g?: number | null
           id?: string
+          image_url?: string | null
           ingredients?: Json | null
           instructions?: string[] | null
           is_public?: boolean | null
           original_recipe?: string | null
           prep_time?: number | null
+          protein_g?: number | null
           servings?: number | null
+          sodium_mg?: number | null
+          sugar_g?: number | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          calories_per_serving?: number | null
+          carbs_g?: number | null
+          cholesterol_mg?: number | null
           converted_recipe?: string | null
           cook_time?: number | null
           created_at?: string
           cuisine_type?: string | null
           difficulty_level?: string | null
+          fat_g?: number | null
+          fiber_g?: number | null
           id?: string
+          image_url?: string | null
           ingredients?: Json | null
           instructions?: string[] | null
           is_public?: boolean | null
           original_recipe?: string | null
           prep_time?: number | null
+          protein_g?: number | null
           servings?: number | null
+          sodium_mg?: number | null
+          sugar_g?: number | null
           title?: string
           updated_at?: string
           user_id?: string
