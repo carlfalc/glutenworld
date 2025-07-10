@@ -256,6 +256,7 @@ const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
             className="flex-1 group-hover:bg-primary/90 transition-colors"
             onClick={() => {
               console.log('View Recipe clicked for:', recipe.title);
+              console.log('Full recipe data:', recipe);
               setIsModalOpen(true);
             }}
           >
