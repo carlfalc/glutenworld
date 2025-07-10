@@ -27,14 +27,21 @@ const RecipeMenu = () => {
   useEffect(() => {
     const initializeData = async () => {
       if (!hasPopulated) {
-        console.log('Populating database with recipes...');
-        await populateDatabase();
-        setHasPopulated(true);
+        console.log('🔄 Populating database with recipes...');
+        try {
+          await populateDatabase();
+          console.log('✅ Database population completed');
+          setHasPopulated(true);
+        } catch (error) {
+          console.error('❌ Database population failed:', error);
+        }
+      } else {
+        console.log('⚡ Database already populated, skipping...');
       }
     };
     
     initializeData();
-  }, [populateDatabase]);
+  }, []); // Remove populateDatabase dependency to prevent re-calls
 
   // Load recipes when component mounts or filters change
   useEffect(() => {

@@ -112,12 +112,13 @@ export const useRecipeSearch = () => {
       const result = await queryBuilder;
       const { data, error, count } = result;
       
-      console.log('🔍 Query completed successfully');
+      console.log('🔍 Query completed');
+      console.log('🔍 Raw result:', result);
       console.log('🔍 Search results:', { 
         dataLength: data?.length, 
         error: error?.message || error, 
         count,
-        sampleData: data?.slice(0, 2) // Log first 2 recipes for debugging
+        sampleTitles: data?.slice(0, 3).map(r => r.title) // Show first 3 titles for debugging
       });
 
       if (error) {
