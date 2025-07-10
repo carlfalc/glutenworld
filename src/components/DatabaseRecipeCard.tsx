@@ -255,6 +255,7 @@ const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
           <Button 
             className="flex-1 group-hover:bg-primary/90 transition-colors"
             onClick={() => {
+              alert('Button clicked!');
               console.log('🔴 View Recipe clicked for:', recipe.title);
               console.log('🔴 Full recipe data:', recipe);
               console.log('🔴 Setting modal open to true');
