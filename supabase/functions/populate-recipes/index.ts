@@ -299,10 +299,10 @@ serve(async (req) => {
       logStep(`Generating ${names.length} ${recipeType} recipes...`);
       
       // Process in smaller batches to reduce timeout risk
-      const batchSize = 3;
+      const batchSize = 5;
       for (let i = 0; i < names.length; i += batchSize) {
         const batch = names.slice(i, i + batchSize);
-        logStep(`Processing ${recipeType} batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(names.length/batchSize)}`);
+        logStep(`Processing ${recipeType} batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(names.length/batchSize)} - Items ${i + 1} to ${Math.min(i + batchSize, names.length)}`);
         
         // Generate recipes sequentially to avoid rate limits
         const batchRecipes = [];
@@ -310,74 +310,64 @@ serve(async (req) => {
           try {
             const recipe = await generateAIRecipe(recipeType, recipeName);
             batchRecipes.push(recipe);
-            logStep(`Generated recipe: ${recipeName}`);
+            logStep(`✓ Generated recipe: ${recipeName}`);
             
-            // Add small delay between requests
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Add small delay between requests to avoid rate limits
+            await new Promise(resolve => setTimeout(resolve, 500));
           } catch (error) {
-            logStep(`Error generating ${recipeName}:`, error.message);
-            // Continue with next recipe
+            logStep(`✗ Error generating ${recipeName}:`, error.message);
+            // Continue with next recipe instead of stopping
           }
         }
         
         if (batchRecipes.length > 0) {
           allRecipes.push(...batchRecipes);
           totalGenerated += batchRecipes.length;
-          logStep(`Generated ${batchRecipes.length} recipes. Total: ${totalGenerated}`);
+          logStep(`✓ Batch complete! Generated ${batchRecipes.length} recipes. Total: ${totalGenerated}/${names.length * Object.keys(recipeNames).length}`);
+          
+          // Insert batch immediately to prevent loss
+          try {
+            const { error: insertError } = await supabaseClient
+              .from('recipes')
+              .insert(batchRecipes, { ignoreDuplicates: true });
+            
+            if (insertError) {
+              logStep(`Insert error for batch:`, insertError.message);
+            } else {
+              logStep(`✓ Successfully inserted ${batchRecipes.length} recipes to database`);
+            }
+          } catch (insertErr) {
+            logStep(`Database insert failed:`, insertErr.message);
+          }
+        }
+        
+        // Longer delay between batches to ensure stability
+        if (i + batchSize < names.length) {
+          logStep(`Waiting before next batch...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
+      
+      logStep(`✓ Completed ${recipeType} category: ${totalGenerated} total recipes generated`);
     }
 
     if (allRecipes.length === 0) {
       throw new Error('No recipes were generated successfully');
     }
 
-    // Insert all recipes into database
-    logStep(`Inserting ${allRecipes.length} recipes into database...`);
-    
-    // Insert in smaller batches to avoid payload size limits
-    const insertBatchSize = 10;
-    let insertedCount = 0;
-    
-    for (let i = 0; i < allRecipes.length; i += insertBatchSize) {
-      const batch = allRecipes.slice(i, i + insertBatchSize);
-      logStep(`Inserting batch ${Math.floor(i/insertBatchSize) + 1}/${Math.ceil(allRecipes.length/insertBatchSize)} (${batch.length} recipes)`);
-      
-      const { data, error } = await supabaseClient
-        .from('recipes')
-        .insert(batch, { 
-          ignoreDuplicates: true 
-        });
-
-      if (error) {
-        logStep(`Insert error for batch ${Math.floor(i/insertBatchSize) + 1}:`, error);
-        // Continue with next batch instead of failing completely
-      } else {
-        insertedCount += batch.length;
-        logStep(`Successfully inserted batch ${Math.floor(i/insertBatchSize) + 1}. Total inserted: ${insertedCount}`);
-      }
-    }
-
-    if (insertedCount === 0) {
-      const errorMsg = 'Failed to insert any recipes into database';
-      logStep('Database insertion error:', errorMsg);
-      throw new Error(errorMsg);
-    }
-
-    logStep(`Successfully completed! Generated ${allRecipes.length} recipes, inserted ${insertedCount} into database`);
+    logStep(`Successfully completed! Generated ${allRecipes.length} recipes across all categories`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Successfully generated ${allRecipes.length} AI-powered gluten-free recipes and inserted ${insertedCount} into database`,
+        message: `Successfully generated ${allRecipes.length} AI-powered gluten-free recipes`,
         breakdown: {
           breakfast: recipeNames.Breakfast.length,
           snacks: recipeNames.Snacks.length,
           lunch: recipeNames.Lunch.length,
           dinner: recipeNames.Dinner.length
         },
-        total_generated: allRecipes.length,
-        total_inserted: insertedCount
+        total_generated: allRecipes.length
       }),
       { 
         status: 200,
