@@ -293,10 +293,12 @@ serve(async (req) => {
 
     const allRecipes: Recipe[] = [];
     let totalGenerated = 0;
+    const totalExpected = Object.values(recipeNames).reduce((sum, names) => sum + names.length, 0);
 
     // Generate recipes for each category
     for (const [recipeType, names] of Object.entries(recipeNames)) {
       logStep(`Generating ${names.length} ${recipeType} recipes...`);
+      let categoryGenerated = 0;
       
       // Process in smaller batches to reduce timeout risk
       const batchSize = 5;
@@ -322,8 +324,9 @@ serve(async (req) => {
         
         if (batchRecipes.length > 0) {
           allRecipes.push(...batchRecipes);
+          categoryGenerated += batchRecipes.length;
           totalGenerated += batchRecipes.length;
-          logStep(`✓ Batch complete! Generated ${batchRecipes.length} recipes. Total: ${totalGenerated}/${names.length * Object.keys(recipeNames).length}`);
+          logStep(`✓ Batch complete! Generated ${batchRecipes.length} recipes. Category: ${categoryGenerated}/${names.length}, Total: ${totalGenerated}/${totalExpected}`);
           
           // Insert batch immediately to prevent loss
           try {
@@ -348,7 +351,7 @@ serve(async (req) => {
         }
       }
       
-      logStep(`✓ Completed ${recipeType} category: ${totalGenerated} total recipes generated`);
+      logStep(`✓ Completed ${recipeType} category: generated ${categoryGenerated}/${names.length} recipes. Overall total: ${totalGenerated}/${totalExpected}`);
     }
 
     if (allRecipes.length === 0) {
