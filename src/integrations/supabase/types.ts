@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_generator_access: {
+        Row: {
+          amount: number
+          created_at: string
+          email: string
+          id: string
+          paid: boolean
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          email: string
+          id?: string
+          paid?: boolean
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          email?: string
+          id?: string
+          paid?: boolean
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_posts: {
         Row: {
           comments_count: number | null

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock, Info } from 'lucide-react';
 import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import PricingCards from '@/components/PricingCards';
+import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -224,6 +225,22 @@ const Landing = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+      </section>
+
+      {/* AI Recipe Generator Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h3 className="text-4xl font-bold text-foreground mb-4">
+            AI Recipe Generator
+          </h3>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Generate 400 unique, detailed gluten-free recipes using our advanced AI technology.
+          </p>
+        </div>
+        
+        <div className="max-w-md mx-auto">
+          <AIRecipeGenerator />
         </div>
       </section>
 

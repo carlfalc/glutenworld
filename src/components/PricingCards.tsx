@@ -22,7 +22,6 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       description: "Try all features risk-free",
       features: [
         "Convert up to 5 recipes",
-        "Access basic recipe library",
         "Community chat access",
         "AI recipe assistant"
       ],
@@ -37,7 +36,6 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       description: "Perfect for regular home cooks",
       features: [
         "Unlimited recipe conversions",
-        "Full recipe library access",
         "Premium community features",
         "Priority AI support",
         "Save favorite recipes",
@@ -54,6 +52,7 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       description: "Best value for committed users",
       features: [
         "Everything in Quarterly",
+        "AI Recipe Generator (400 recipes)",
         "Advanced nutrition tracking",
         "Custom recipe collections",
         "Early access to new features",
