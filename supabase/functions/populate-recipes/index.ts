@@ -40,7 +40,7 @@ interface Recipe {
 const generateAIRecipe = async (recipeType: string, recipeName: string): Promise<Recipe> => {
   logStep(`Generating AI recipe for: ${recipeName}`);
   
-  const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+  const openAIApiKey = Deno.env.get('OPENAI') || Deno.env.get('OPENAI_API_KEY');
   if (!openAIApiKey) {
     throw new Error('OpenAI API key not found');
   }
@@ -303,12 +303,12 @@ serve(async (req) => {
   try {
     logStep('AI Recipe Generation Started');
     
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    const openAIApiKey = Deno.env.get('OPENAI') || Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       logStep('OpenAI API key not found');
       return new Response(
         JSON.stringify({ 
-          error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to Supabase secrets.',
+          error: 'OpenAI API key not configured. Please add OPENAI or OPENAI_API_KEY to Supabase secrets.',
           success: false 
         }), 
         { 
