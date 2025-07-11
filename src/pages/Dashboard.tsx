@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
 import {
   Sheet,
   SheetContent,
@@ -47,6 +48,7 @@ const Dashboard = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full space-y-6">
       {user && <SubscriptionStatus />}
+      <AIRecipeGenerator />
       <AddRecipeSection />
       <div className="border-t border-border/50 pt-6">
         <CommunityShop />
