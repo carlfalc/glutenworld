@@ -363,28 +363,48 @@ serve(async (req) => {
 
     // Insert all recipes into database
     logStep(`Inserting ${allRecipes.length} recipes into database...`);
-    const { data, error } = await supabaseClient
-      .from('recipes')
-      .insert(allRecipes);
+    
+    // Insert in smaller batches to avoid payload size limits
+    const insertBatchSize = 10;
+    let insertedCount = 0;
+    
+    for (let i = 0; i < allRecipes.length; i += insertBatchSize) {
+      const batch = allRecipes.slice(i, i + insertBatchSize);
+      logStep(`Inserting batch ${Math.floor(i/insertBatchSize) + 1}/${Math.ceil(allRecipes.length/insertBatchSize)} (${batch.length} recipes)`);
+      
+      const { data, error } = await supabaseClient
+        .from('recipes')
+        .insert(batch);
 
-    if (error) {
-      logStep('Database insertion error:', error);
-      throw error;
+      if (error) {
+        logStep(`Insert error for batch ${Math.floor(i/insertBatchSize) + 1}:`, error);
+        // Continue with next batch instead of failing completely
+      } else {
+        insertedCount += batch.length;
+        logStep(`Successfully inserted batch ${Math.floor(i/insertBatchSize) + 1}. Total inserted: ${insertedCount}`);
+      }
     }
 
-    logStep(`Successfully completed! Generated and inserted ${allRecipes.length} AI-powered recipes`);
+    if (insertedCount === 0) {
+      const errorMsg = 'Failed to insert any recipes into database';
+      logStep('Database insertion error:', errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    logStep(`Successfully completed! Generated ${allRecipes.length} recipes, inserted ${insertedCount} into database`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Successfully generated and added ${allRecipes.length} AI-powered gluten-free recipes`,
+        message: `Successfully generated ${allRecipes.length} AI-powered gluten-free recipes and inserted ${insertedCount} into database`,
         breakdown: {
           breakfast: recipeNames.Breakfast.length,
           snacks: recipeNames.Snacks.length,
           lunch: recipeNames.Lunch.length,
           dinner: recipeNames.Dinner.length
         },
-        total_generated: allRecipes.length
+        total_generated: allRecipes.length,
+        total_inserted: insertedCount
       }),
       { 
         status: 200,
