@@ -297,7 +297,10 @@ serve(async (req) => {
       
       const { data, error } = await supabaseClient
         .from('recipes')
-        .insert(batch);
+        .upsert(batch, { 
+          onConflict: 'title',
+          ignoreDuplicates: false 
+        });
 
       if (error) {
         logStep(`Insert error for batch ${Math.floor(i/insertBatchSize) + 1}:`, error);
