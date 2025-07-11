@@ -69,18 +69,15 @@ export const useAIGeneratorAccess = () => {
 
       if (error) {
         console.error('❌ Database error:', error.message);
-        // For testing purposes, grant access on errors
-        console.log('🔧 Setting default free access for testing');
-        setHasAccess(true);
+        setHasAccess(false);
         setHasPaidUpgrade(false);
       } else if (data && data.paid === true) {
         console.log('✅ Found paid upgrade - granting access');
         setHasAccess(true);
         setHasPaidUpgrade(true);
       } else {
-        console.log('❌ No paid upgrade found - but granting access for testing');
-        // Grant access for testing since this is a demo
-        setHasAccess(true);
+        console.log('❌ No paid upgrade found');
+        setHasAccess(false);
         setHasPaidUpgrade(false);
       }
     } catch (error) {
