@@ -190,107 +190,30 @@ const getImageForRecipe = (recipeName: string, recipeType: string): string => {
 };
 
 
-// Recipe name lists for AI generation
+// Recipe name lists for AI generation - SMALL BATCH FOR QUICK TESTING
 const recipeNames = {
   Breakfast: [
-    "Gluten-Free Blueberry Pancakes", "Quinoa Breakfast Bowl", "Chia Seed Pudding", "Acai Smoothie Bowl", 
-    "Vegetable Omelet", "Almond French Toast", "Coconut Granola", "Banana Muffins", "Sweet Potato Waffles",
-    "Breakfast Burrito", "Greek Yogurt Parfait", "Overnight Oats", "Scrambled Tofu", "Hash Brown Casserole",
-    "Steel Cut Oats", "Avocado Toast", "Breakfast Sandwich", "Protein Smoothie", "Fruit Salad Bowl",
-    "Energy Breakfast Bowl", "Gluten-Free Cereal", "Morning Power Wrap", "Breakfast Quesadilla", 
-    "Green Smoothie Bowl", "Protein Pancakes", "Buckwheat Porridge", "Breakfast Muffin Cups", 
-    "Coconut Yogurt Bowl", "Morning Glory Muffins", "Breakfast Grain Bowl", "Sweet Potato Hash",
-    "Quinoa Porridge", "Nut Butter Toast", "Breakfast Parfait", "Morning Smoothie", "Egg Muffins",
-    "Breakfast Salad", "Power Bowl", "Morning Wrap", "Breakfast Pizza", "Protein Bowl",
-    "Chia Breakfast Bowl", "Morning Oats", "Breakfast Quinoa", "Sweet Breakfast Bowl", "Morning Muffin",
-    "Breakfast Smoothie", "Power Pancakes", "Morning Bowl", "Breakfast Bar", "Energy Muffin",
-    "Morning Granola", "Breakfast Wrap", "Power Smoothie", "Morning Parfait", "Breakfast Pudding",
-    "Energy Bowl", "Morning Toast", "Breakfast Cake", "Power Muffin", "Morning Shake",
-    "Breakfast Soup", "Energy Pancakes", "Morning Cookies", "Breakfast Bread", "Power Bowl Special",
-    "Morning Energy Bar", "Breakfast Tart", "Power Pudding", "Morning Crackers", "Breakfast Bites",
-    "Energy Toast", "Morning Balls", "Breakfast Chips", "Power Granola", "Morning Mix",
-    "Breakfast Trail Mix", "Energy Cookies", "Morning Bread", "Breakfast Nuts", "Power Toast",
-    "Morning Tart", "Breakfast Crackers", "Energy Bread", "Morning Bites", "Breakfast Mix",
-    "Power Cookies", "Morning Chips", "Breakfast Balls", "Energy Mix", "Morning Nuts",
-    "Breakfast Seeds", "Power Crackers", "Morning Seeds", "Breakfast Dried Fruit", "Energy Nuts",
-    "Morning Jerky", "Breakfast Popcorn", "Power Seeds", "Morning Dried Fruit", "Breakfast Hummus",
-    "Energy Jerky", "Morning Popcorn", "Breakfast Dip", "Power Dried Fruit", "Morning Hummus",
-    "Breakfast Shake Special", "Energy Popcorn", "Morning Dip", "Breakfast Smoothie Special", "Power Hummus"
+    "Gluten-Free Blueberry Pancakes", 
+    "Quinoa Breakfast Bowl", 
+    "Chia Seed Pudding"
   ],
   
   Snacks: [
-    "Chocolate Energy Balls", "Mixed Nut Trail Mix", "Almond Protein Bars", "Sweet Potato Chips", 
-    "Coconut Date Balls", "Roasted Chickpeas", "Fruit Leather Rolls", "Herb Popcorn", "Avocado Hummus",
-    "Spinach Artichoke Dip", "Green Smoothie", "Protein Shake", "Chocolate Bites", "Oatmeal Cookies",
-    "Banana Muffins", "Turkey Jerky", "Pumpkin Seeds", "Granola Bars", "Protein Balls", "Kale Chips",
-    "Cheese Crisps", "Almond Butter", "Medjool Dates", "Dried Mango", "Spiced Chickpeas",
-    "Coconut Chips", "Nut Mix", "Seed Crackers", "Fruit Bites", "Veggie Sticks", "Protein Cookies",
-    "Energy Bites", "Trail Mix Bars", "Roasted Nuts", "Dried Fruit Mix", "Savory Popcorn",
-    "Hummus Varieties", "Nut Butter Balls", "Seed Mix", "Baked Chips", "Protein Crackers",
-    "Energy Cookies", "Trail Cookies", "Nut Cookies", "Seed Cookies", "Fruit Cookies",
-    "Veggie Cookies", "Protein Muffins", "Energy Muffins", "Trail Muffins", "Nut Muffins",
-    "Seed Muffins", "Fruit Muffins", "Veggie Muffins", "Protein Bars Special", "Energy Bars Special",
-    "Trail Bars", "Nut Bars", "Seed Bars", "Fruit Bars", "Veggie Bars",
-    "Protein Chips", "Energy Chips", "Trail Chips", "Nut Chips", "Seed Chips",
-    "Fruit Chips", "Veggie Chips Special", "Protein Jerky", "Energy Jerky", "Trail Jerky",
-    "Nut Jerky", "Seed Jerky", "Fruit Jerky", "Veggie Jerky", "Protein Popcorn",
-    "Energy Popcorn", "Trail Popcorn", "Nut Popcorn", "Seed Popcorn", "Fruit Popcorn",
-    "Veggie Popcorn", "Protein Hummus", "Energy Hummus", "Trail Hummus", "Nut Hummus",
-    "Seed Hummus", "Fruit Hummus", "Veggie Hummus", "Protein Dip", "Energy Dip",
-    "Trail Dip", "Nut Dip", "Seed Dip", "Fruit Dip", "Veggie Dip",
-    "Protein Smoothie", "Energy Smoothie", "Trail Smoothie", "Nut Smoothie", "Seed Smoothie",
-    "Fruit Smoothie", "Veggie Smoothie", "Protein Shake Special", "Energy Shake", "Trail Shake"
+    "Chocolate Energy Balls", 
+    "Mixed Nut Trail Mix", 
+    "Almond Protein Bars"
   ],
   
   Lunch: [
-    "Mediterranean Quinoa Salad", "Asian Chicken Soup", "Turkey Avocado Wrap", "Buddha Bowl", 
-    "Gluten-Free Pasta Primavera", "Coconut Rice Bowl", "Vegetable Stir Fry", "Thai Curry", 
-    "Fish Tacos", "Chicken Burrito Bowl", "Margherita Pizza", "Turkey Burger", "Naan Flatbread",
-    "Pad Thai Noodles", "Mushroom Risotto", "Tuna Casserole", "Stuffed Bell Peppers", "Greek Salad",
-    "Poke Bowl", "Grain Bowl", "Lettuce Wraps", "Vietnamese Spring Rolls", "Stuffed Avocado",
-    "Chicken Caesar Salad", "Salmon Quinoa Bowl", "Mediterranean Wrap", "Asian Noodle Soup",
-    "Mexican Rice Bowl", "Italian Pasta Salad", "Indian Curry Bowl", "Greek Pita Wrap",
-    "Thai Soup", "Vietnamese Pho", "Korean Bibimbap", "Japanese Chirashi", "Chinese Fried Rice",
-    "American Club Sandwich", "French Onion Soup", "Spanish Paella", "German Schnitzel",
-    "Russian Borscht", "Moroccan Tagine", "Ethiopian Injera", "Lebanese Tabbouleh", "Turkish Kebab",
-    "Brazilian Feijoada", "Peruvian Ceviche", "Argentine Empanadas", "Chilean Sea Bass", "Colombian Arepa",
-    "Venezuelan Cachapa", "Ecuadorian Quinoa Soup", "Bolivian Salteña", "Paraguayan Sopa",
-    "Uruguayan Chivito", "Jamaican Jerk Chicken", "Cuban Sandwich", "Puerto Rican Mofongo",
-    "Dominican Mangu", "Haitian Griot", "Trinidadian Roti", "Barbadian Flying Fish", "Guyanese Pepperpot",
-    "Surinamese Pom", "French Guianese Bouillon", "Brazilian Açaí Bowl", "Peruvian Lomo Saltado",
-    "Argentine Milanesa", "Chilean Pastel de Choclo", "Colombian Bandeja Paisa", "Venezuelan Pabellón",
-    "Ecuadorian Encebollado", "Bolivian Anticuchos", "Paraguayan Asado", "Uruguayan Parrillada",
-    "Jamaican Curry Goat", "Cuban Ropa Vieja", "Puerto Rican Pernil", "Dominican Pollo Guisado",
-    "Haitian Tasso", "Trinidadian Pelau", "Barbadian Cou Cou", "Guyanese Cook-up Rice",
-    "Surinamese Saoto Soup", "French Guianese Colombo", "Hawaiian Poke", "Californian Cobb Salad",
-    "Texan BBQ Brisket", "New York Deli Sandwich", "Chicago Deep Dish", "Philadelphia Cheesesteak",
-    "Boston Clam Chowder", "Seattle Salmon", "Portland Food Truck", "Denver Green Chili"
+    "Mediterranean Quinoa Salad", 
+    "Asian Chicken Soup", 
+    "Turkey Avocado Wrap"
   ],
   
   Dinner: [
-    "Herb-Crusted Salmon", "Lemon Garlic Chicken", "Beef Stir Fry", "Pork Tenderloin", 
-    "Lamb Chops", "Fish Tacos", "Stuffed Peppers", "Turkey Meatballs", "Roast Beef", 
-    "Grilled Turkey Breast", "Shrimp Scampi", "Cod Fillet", "Duck Breast", "Venison Steak",
-    "Rabbit Stew", "Bison Burger", "Elk Roast", "Chicken Thighs", "Pork Chops", "Beef Stroganoff",
-    "Chicken Curry", "Fish Curry", "Shepherd's Pie", "Braised Short Ribs", "BBQ Ribs",
-    "Grilled Salmon", "Roasted Chicken", "Pan-Seared Duck", "Braised Lamb", "Grilled Steak",
-    "Baked Cod", "Stuffed Turkey", "Honey Glazed Ham", "Garlic Shrimp", "Blackened Fish",
-    "Teriyaki Chicken", "Moroccan Lamb", "Indian Chicken", "Thai Beef", "Chinese Pork",
-    "Italian Veal", "French Duck", "Spanish Paella", "German Sauerbraten", "Russian Beef Stroganoff",
-    "Greek Moussaka", "Turkish Kebab", "Lebanese Kibbeh", "Moroccan Tagine", "Ethiopian Doro Wat",
-    "Indian Biryani", "Thai Green Curry", "Vietnamese Pho", "Korean Bulgogi", "Japanese Teriyaki",
-    "Chinese Sweet and Sour", "Filipino Adobo", "Indonesian Rendang", "Malaysian Curry",
-    "Singaporean Laksa", "Burmese Mohinga", "Cambodian Amok", "Laotian Larb", "Taiwanese Beef Noodle",
-    "Hong Kong Dim Sum", "Macanese Portuguese Chicken", "Australian Meat Pie", "New Zealand Lamb",
-    "South African Bobotie", "Nigerian Jollof Rice", "Ghanaian Banku", "Kenyan Nyama Choma",
-    "Ethiopian Injera", "Moroccan Couscous", "Egyptian Koshari", "Tunisian Brik", "Algerian Chakhchoukha",
-    "Libyan Bazin", "Sudanese Ful Medames", "Somali Anjero", "Djiboutian Skoudehkaris", "Eritrean Zigni",
-    "Chad Boule", "Central African Fufu", "Cameroon Ndolé", "Gabon Nyembwe", "Congo Pondu",
-    "Angola Muamba", "Namibia Potjiekos", "Botswana Seswaa", "Zimbabwe Sadza", "Zambia Nshima",
-    "Malawi Nsima", "Mozambique Matapa", "Madagascar Romazava", "Mauritius Curry", "Seychelles Curry",
-    "Comoros Langouste", "Mayotte Pilao", "Réunion Cari", "Brazilian Feijoada", "Argentine Asado",
-    "Chilean Empanadas", "Peruvian Ceviche", "Colombian Sancocho", "Venezuelan Arepa", "Ecuadorian Seco",
-    "Bolivian Salteña", "Paraguayan Asado", "Uruguayan Chivito", "Guyanese Curry", "Surinamese Pom"
+    "Herb-Crusted Salmon", 
+    "Lemon Garlic Chicken", 
+    "Stuffed Bell Peppers"
   ]
 };
 
