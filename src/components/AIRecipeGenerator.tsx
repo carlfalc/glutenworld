@@ -170,10 +170,10 @@ export const AIRecipeGenerator = () => {
                   <li>100 Lunch recipes</li>
                   <li>100 Dinner recipes</li>
                 </ul>
-                <p className="text-sm text-amber-600 bg-amber-50 p-2 rounded">
-                  <strong>Warning:</strong> This will replace any existing recipes in your database.
+                <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                  <strong>Note:</strong> Recipes will be generated in batches and added to your existing collection. This process may take several minutes to complete.
                 </p>
-                <p className="text-sm">Each recipe will include detailed ingredients, instructions, nutritional information, and cooking times. This process may take a few minutes.</p>
+                <p className="text-sm">Each recipe will include detailed ingredients, instructions, nutritional information, and cooking times.</p>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

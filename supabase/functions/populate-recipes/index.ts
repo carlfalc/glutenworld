@@ -190,31 +190,73 @@ const getImageForRecipe = (recipeName: string, recipeType: string): string => {
 };
 
 
-// Recipe name lists for AI generation - SMALL BATCH FOR QUICK TESTING
+// Recipe name lists for AI generation - 100 RECIPES PER CATEGORY
+const generateRecipeNames = (category: string, count: number): string[] => {
+  const bases = {
+    Breakfast: [
+      "Blueberry Pancakes", "Banana Pancakes", "Strawberry Pancakes", "Chocolate Chip Pancakes", "Vanilla Pancakes",
+      "Belgian Waffles", "Cinnamon Waffles", "Berry Waffles", "Protein Waffles", "Coconut Waffles",
+      "Blueberry Muffins", "Banana Muffins", "Chocolate Muffins", "Lemon Muffins", "Apple Muffins",
+      "Berry Smoothie Bowl", "Tropical Smoothie Bowl", "Green Smoothie Bowl", "Protein Smoothie Bowl", "Acai Bowl",
+      "Scrambled Eggs", "Cheese Omelette", "Veggie Omelette", "Herb Omelette", "Spanish Omelette",
+      "Avocado Toast", "Cinnamon Toast", "Banana Toast", "Almond Butter Toast", "Honey Toast",
+      "Granola Bowl", "Quinoa Breakfast Bowl", "Chia Pudding", "Overnight Oats", "Breakfast Burrito",
+      "French Toast", "Breakfast Hash", "Egg Benedict", "Breakfast Sandwich", "Fruit Salad"
+    ],
+    Snacks: [
+      "Energy Balls", "Protein Balls", "Chocolate Balls", "Coconut Balls", "Almond Balls",
+      "Trail Mix", "Nut Mix", "Dried Fruit Mix", "Seed Mix", "Granola Mix",
+      "Protein Bars", "Energy Bars", "Fruit Bars", "Nut Bars", "Chocolate Bars",
+      "Hummus Dip", "Veggie Dip", "Bean Dip", "Cheese Dip", "Avocado Dip",
+      "Kale Chips", "Sweet Potato Chips", "Beet Chips", "Apple Chips", "Banana Chips",
+      "Cookies", "Crackers", "Biscuits", "Muffins", "Brownies",
+      "Smoothie", "Shake", "Juice", "Tea", "Latte"
+    ],
+    Lunch: [
+      "Greek Salad", "Caesar Salad", "Garden Salad", "Quinoa Salad", "Pasta Salad",
+      "Chicken Soup", "Vegetable Soup", "Lentil Soup", "Tomato Soup", "Mushroom Soup",
+      "Turkey Sandwich", "Chicken Sandwich", "Veggie Sandwich", "BLT Sandwich", "Club Sandwich",
+      "Chicken Wrap", "Turkey Wrap", "Veggie Wrap", "Tuna Wrap", "Salmon Wrap",
+      "Pasta Primavera", "Chicken Pasta", "Seafood Pasta", "Veggie Pasta", "Pesto Pasta",
+      "Chicken Curry", "Vegetable Curry", "Thai Curry", "Indian Curry", "Coconut Curry",
+      "Fish Tacos", "Chicken Tacos", "Beef Tacos", "Veggie Tacos", "Shrimp Tacos",
+      "Veggie Burger", "Turkey Burger", "Salmon Burger", "Black Bean Burger", "Quinoa Burger"
+    ],
+    Dinner: [
+      "Grilled Chicken", "Roasted Chicken", "Baked Chicken", "Fried Chicken", "BBQ Chicken",
+      "Grilled Salmon", "Baked Salmon", "Pan Seared Salmon", "Teriyaki Salmon", "Lemon Salmon",
+      "Beef Steak", "Grilled Steak", "Ribeye Steak", "Sirloin Steak", "Filet Mignon",
+      "Pork Chops", "Grilled Pork", "Roasted Pork", "BBQ Pork", "Pork Tenderloin",
+      "Stuffed Peppers", "Stuffed Zucchini", "Stuffed Mushrooms", "Stuffed Tomatoes", "Stuffed Squash",
+      "BBQ Ribs", "Beef Ribs", "Pork Ribs", "Spare Ribs", "Short Ribs",
+      "Grilled Shrimp", "Garlic Shrimp", "Coconut Shrimp", "Spicy Shrimp", "Lemon Shrimp",
+      "Lamb Chops", "Roasted Lamb", "Grilled Lamb", "Mediterranean Lamb", "Herb Crusted Lamb"
+    ]
+  };
+
+  const categoryBases = bases[category as keyof typeof bases] || bases.Breakfast;
+  const recipes: string[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    const baseIndex = i % categoryBases.length;
+    const base = categoryBases[baseIndex];
+    const variation = Math.floor(i / categoryBases.length) + 1;
+    
+    if (variation === 1) {
+      recipes.push(`Gluten-Free ${base}`);
+    } else {
+      recipes.push(`Gluten-Free ${base} (Style ${variation})`);
+    }
+  }
+  
+  return recipes;
+};
+
 const recipeNames = {
-  Breakfast: [
-    "Gluten-Free Blueberry Pancakes", 
-    "Quinoa Breakfast Bowl", 
-    "Chia Seed Pudding"
-  ],
-  
-  Snacks: [
-    "Chocolate Energy Balls", 
-    "Mixed Nut Trail Mix", 
-    "Almond Protein Bars"
-  ],
-  
-  Lunch: [
-    "Mediterranean Quinoa Salad", 
-    "Asian Chicken Soup", 
-    "Turkey Avocado Wrap"
-  ],
-  
-  Dinner: [
-    "Herb-Crusted Salmon", 
-    "Lemon Garlic Chicken", 
-    "Stuffed Bell Peppers"
-  ]
+  Breakfast: generateRecipeNames('Breakfast', 100),
+  Snacks: generateRecipeNames('Snacks', 100),
+  Lunch: generateRecipeNames('Lunch', 100),
+  Dinner: generateRecipeNames('Dinner', 100)
 };
 
 serve(async (req) => {
@@ -246,9 +288,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Clear existing recipes first (optional - remove if you want to keep existing)
-    logStep('Clearing existing recipes...');
-    await supabaseClient.from('recipes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    // Skip clearing existing recipes to prevent data loss
+    logStep('Keeping existing recipes and adding new ones...');
 
     const allRecipes: Recipe[] = [];
     let totalGenerated = 0;
