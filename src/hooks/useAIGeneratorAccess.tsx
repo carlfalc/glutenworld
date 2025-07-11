@@ -40,12 +40,32 @@ export const useAIGeneratorAccess = () => {
       // Check if user has paid for AI generator upgrade
       const { data, error } = await supabase
         .from('ai_generator_access')
-        .select('paid')
+        .select('paid, email, user_id')
         .eq('user_id', user.id)
         .maybeSingle();
 
       console.log('📊 Database query completed');
+      console.log('📊 Query looking for user_id:', user.id);
       console.log('📊 Query result:', { data, error });
+      
+      // Also try by email as fallback
+      if (!data && !error) {
+        console.log('🔍 No result by user_id, trying by email...');
+        const { data: emailData, error: emailError } = await supabase
+          .from('ai_generator_access')
+          .select('paid, email, user_id')
+          .eq('email', user.email)
+          .maybeSingle();
+        console.log('📧 Email query result:', { emailData, emailError });
+        
+        if (emailData && emailData.paid === true) {
+          console.log('✅ Found paid upgrade by email - granting access');
+          setHasAccess(true);
+          setHasPaidUpgrade(true);
+          setLoading(false);
+          return;
+        }
+      }
 
       if (error) {
         console.error('❌ Database error:', error.message);
