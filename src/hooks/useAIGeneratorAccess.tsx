@@ -58,16 +58,24 @@ export const useAIGeneratorAccess = () => {
   const purchaseUpgrade = async () => {
     if (!user) return;
 
+    console.log('🛒 Starting AI generator upgrade purchase...');
+    
     try {
+      console.log('📞 Calling ai-generator-upgrade function...');
       const { data, error } = await supabase.functions.invoke('ai-generator-upgrade');
+      
+      console.log('📋 Function response:', { data, error });
       
       if (error) throw error;
       
       if (data?.url) {
+        console.log('🌐 Redirecting to Stripe checkout:', data.url);
         window.open(data.url, '_blank');
+      } else {
+        console.error('❌ No checkout URL received');
       }
     } catch (error) {
-      console.error('Error purchasing AI generator upgrade:', error);
+      console.error('💥 Error purchasing AI generator upgrade:', error);
       throw error;
     }
   };
