@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,9 @@ import Header from '@/components/Header';
 import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
 import DatabaseRecipeCard from '@/components/DatabaseRecipeCard';
 import { useRecipeSearch } from '@/hooks/useRecipeSearch';
+import { useAIGeneratorAccess } from '@/hooks/useAIGeneratorAccess';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { Coffee, Apple, Utensils, Moon, Search, X, ChefHat, Loader } from 'lucide-react';
 
 const categories = [
@@ -17,12 +21,51 @@ const categories = [
 ];
 
 const RecipeMenu = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [hasPopulated, setHasPopulated] = useState(false);
   
   const { searchRecipes, populateDatabase, searchResult, loading } = useRecipeSearch();
+  const { checkAccess } = useAIGeneratorAccess();
+  const { toast } = useToast();
+
+  // Handle upgrade success/cancel from URL params
+  useEffect(() => {
+    const handleUpgradeResult = async () => {
+      const upgrade = searchParams.get('upgrade');
+      if (upgrade === 'success') {
+        try {
+          // Confirm the payment on our backend
+          await supabase.functions.invoke('confirm-payment');
+          toast({
+            title: "Payment Successful! 🎉",
+            description: "You now have access to the AI Recipe Generator!",
+          });
+          checkAccess(); // Refresh access status
+        } catch (error) {
+          console.error('Error confirming payment:', error);
+          toast({
+            title: "Payment Processing",
+            description: "Your payment was successful. Access will be available shortly.",
+          });
+        }
+        // Clean up URL params
+        setSearchParams({});
+      } else if (upgrade === 'cancelled') {
+        toast({
+          title: "Payment Cancelled",
+          description: "Your purchase was cancelled. You can try again anytime.",
+          variant: "destructive",
+        });
+        // Clean up URL params
+        setSearchParams({});
+      }
+    };
+
+    handleUpgradeResult();
+  }, [searchParams, setSearchParams, toast, checkAccess]);
 
   // Populate database on first load
   useEffect(() => {
