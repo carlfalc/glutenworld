@@ -12,21 +12,35 @@ export const useAIGeneratorAccess = () => {
 
   const checkAccess = async () => {
     if (!user) {
+      console.log('🔒 No user logged in');
       setHasAccess(false);
       setHasPaidUpgrade(false);
       setLoading(false);
       return;
     }
 
+    console.log('🔍 Checking AI generator access for user:', user.email);
+
     try {
       // Check if user has yearly subscription (automatic access)
       if (subscription_tier === 'Annual') {
+        console.log('✅ User has Annual subscription - granting access');
         setHasAccess(true);
         setHasPaidUpgrade(false);
         setLoading(false);
         return;
       }
 
+      console.log('💳 Checking paid upgrade in database...');
+      
+      // First, let's see what records exist for this user
+      const { data: allRecords, error: allError } = await supabase
+        .from('ai_generator_access')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      console.log('📝 All AI generator records for user:', allRecords);
+      
       // Check if user has paid for AI generator upgrade
       const { data, error } = await supabase
         .from('ai_generator_access')
@@ -35,19 +49,23 @@ export const useAIGeneratorAccess = () => {
         .eq('paid', true)
         .single();
 
+      console.log('📊 Database query result:', { data, error });
+
       if (error && error.code !== 'PGRST116') {
-        console.error('Error checking AI generator access:', error);
+        console.error('❌ Error checking AI generator access:', error);
         setHasAccess(false);
         setHasPaidUpgrade(false);
       } else if (data) {
+        console.log('✅ Found paid upgrade - granting access');
         setHasAccess(true);
         setHasPaidUpgrade(true);
       } else {
+        console.log('❌ No paid upgrade found - access denied');
         setHasAccess(false);
         setHasPaidUpgrade(false);
       }
     } catch (error) {
-      console.error('Error checking AI generator access:', error);
+      console.error('💥 Exception checking AI generator access:', error);
       setHasAccess(false);
       setHasPaidUpgrade(false);
     } finally {
