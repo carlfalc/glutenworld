@@ -82,8 +82,7 @@ export const useAIGeneratorAccess = () => {
       }
     } catch (error) {
       console.error('💥 Exception in checkAccess:', error);
-      console.log('🔧 Setting default free access for testing');
-      setHasAccess(true);
+      setHasAccess(false);
       setHasPaidUpgrade(false);
     } finally {
       setLoading(false);
