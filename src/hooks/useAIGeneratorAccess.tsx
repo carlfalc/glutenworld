@@ -37,43 +37,43 @@ export const useAIGeneratorAccess = () => {
 
       console.log('💳 Checking paid upgrade in database...');
       
-      // Check if user has paid for AI generator upgrade
-      const { data, error } = await supabase
+      // First check by user_id, then by email as fallback
+      let accessData = null;
+      
+      const { data: userIdData, error: userIdError } = await supabase
         .from('ai_generator_access')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      console.log('📊 Database query completed');
-      console.log('📊 Query looking for user_id:', user.id);
-      console.log('📊 Query result:', { data, error });
-      console.log('📊 Raw data object:', JSON.stringify(data, null, 2));
-      
-      // Also try by email as fallback
-      if (!data && !error) {
+      if (userIdError) {
+        console.error('❌ Database error checking by user_id:', userIdError.message);
+      }
+
+      if (userIdData && userIdData.paid === true) {
+        accessData = userIdData;
+        console.log('✅ Found paid upgrade by user_id');
+      } else {
+        // Fallback to email check
         console.log('🔍 No result by user_id, trying by email...');
         const { data: emailData, error: emailError } = await supabase
           .from('ai_generator_access')
-          .select('paid, email, user_id')
+          .select('*')
           .eq('email', user.email)
           .maybeSingle();
-        console.log('📧 Email query result:', { emailData, emailError });
+        
+        if (emailError) {
+          console.error('❌ Database error checking by email:', emailError.message);
+        }
         
         if (emailData && emailData.paid === true) {
-          console.log('✅ Found paid upgrade by email - granting access');
-          setHasAccess(true);
-          setHasPaidUpgrade(true);
-          setLoading(false);
-          return;
+          accessData = emailData;
+          console.log('✅ Found paid upgrade by email');
         }
       }
 
-      if (error) {
-        console.error('❌ Database error:', error.message);
-        setHasAccess(false);
-        setHasPaidUpgrade(false);
-      } else if (data && data.paid === true) {
-        console.log('✅ Found paid upgrade - granting access');
+      if (accessData && accessData.paid === true) {
+        console.log('✅ Granting AI generator access - user has paid');
         setHasAccess(true);
         setHasPaidUpgrade(true);
       } else {
