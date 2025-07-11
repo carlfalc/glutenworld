@@ -20,6 +20,8 @@ export const useAIGeneratorAccess = () => {
     }
 
     console.log('🔍 Checking AI generator access for user:', user.email);
+    console.log('🔍 User ID:', user.id);
+    console.log('🔍 Subscription tier:', subscription_tier);
 
     try {
       // Check if user has yearly subscription (automatic access)
@@ -40,6 +42,7 @@ export const useAIGeneratorAccess = () => {
         .eq('user_id', user.id);
       
       console.log('📝 All AI generator records for user:', allRecords);
+      console.log('📝 All records error:', allError);
       
       // Check if user has paid for AI generator upgrade
       const { data, error } = await supabase
@@ -49,6 +52,9 @@ export const useAIGeneratorAccess = () => {
         .maybeSingle();
 
       console.log('📊 Database query result:', { data, error });
+      console.log('📊 Data type:', typeof data);
+      console.log('📊 Paid value:', data?.paid);
+      console.log('📊 Paid type:', typeof data?.paid);
 
       if (error) {
         console.error('❌ Error checking AI generator access:', error);
@@ -60,6 +66,8 @@ export const useAIGeneratorAccess = () => {
         setHasPaidUpgrade(true);
       } else {
         console.log('❌ No paid upgrade found - access denied');
+        console.log('❌ Data exists:', !!data);
+        console.log('❌ Paid value check:', data?.paid, 'strict equality:', data?.paid === true);
         setHasAccess(false);
         setHasPaidUpgrade(false);
       }
