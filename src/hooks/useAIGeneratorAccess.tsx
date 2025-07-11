@@ -11,6 +11,8 @@ export const useAIGeneratorAccess = () => {
   const [loading, setLoading] = useState(true);
 
   const checkAccess = async () => {
+    setLoading(true);
+    
     if (!user) {
       console.log('🔒 No user logged in');
       setHasAccess(false);
@@ -44,33 +46,28 @@ export const useAIGeneratorAccess = () => {
 
       console.log('📊 Database query completed');
       console.log('📊 Query result:', { data, error });
-      console.log('📊 Data:', data);
-      console.log('📊 Error:', error);
 
       if (error) {
         console.error('❌ Database error:', error.message);
-        // Set default access for testing since there might be a database issue
-        console.log('🔧 Setting default access due to database error');
+        // For testing purposes, grant access on errors
+        console.log('🔧 Setting default free access for testing');
         setHasAccess(true);
-        setHasPaidUpgrade(true);
+        setHasPaidUpgrade(false);
       } else if (data && data.paid === true) {
         console.log('✅ Found paid upgrade - granting access');
         setHasAccess(true);
         setHasPaidUpgrade(true);
       } else {
-        console.log('❌ No paid upgrade found');
-        console.log('❌ Data exists:', !!data);
-        console.log('❌ Paid value:', data?.paid);
-        // For now, grant access since we know the user should have it
-        console.log('🔧 Granting access for testing');
+        console.log('❌ No paid upgrade found - but granting access for testing');
+        // Grant access for testing since this is a demo
         setHasAccess(true);
-        setHasPaidUpgrade(true);
+        setHasPaidUpgrade(false);
       }
     } catch (error) {
       console.error('💥 Exception in checkAccess:', error);
-      console.log('🔧 Granting access due to exception');
+      console.log('🔧 Setting default free access for testing');
       setHasAccess(true);
-      setHasPaidUpgrade(true);
+      setHasPaidUpgrade(false);
     } finally {
       setLoading(false);
     }
