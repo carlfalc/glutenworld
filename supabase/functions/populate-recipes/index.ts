@@ -190,7 +190,7 @@ const getImageForRecipe = (recipeName: string, recipeType: string): string => {
 };
 
 
-// Recipe name lists for AI generation - REDUCED COUNT FOR BETTER PERFORMANCE
+// Recipe name lists for AI generation - 100 RECIPES PER CATEGORY
 const generateRecipeNames = (category: string, count: number): string[] => {
   const bases = {
     Breakfast: [
@@ -253,10 +253,10 @@ const generateRecipeNames = (category: string, count: number): string[] => {
 };
 
 const recipeNames = {
-  Breakfast: generateRecipeNames('Breakfast', 20),
-  Snacks: generateRecipeNames('Snacks', 20),
-  Lunch: generateRecipeNames('Lunch', 20),
-  Dinner: generateRecipeNames('Dinner', 20)
+  Breakfast: generateRecipeNames('Breakfast', 100),
+  Snacks: generateRecipeNames('Snacks', 100),
+  Lunch: generateRecipeNames('Lunch', 100),
+  Dinner: generateRecipeNames('Dinner', 100)
 };
 
 serve(async (req) => {

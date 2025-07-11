@@ -71,26 +71,26 @@ export const AIRecipeGenerator = () => {
           AI Recipe Generator
         </CardTitle>
         <CardDescription className="text-sm">
-          Generate 80 unique, detailed gluten-free recipes using AI
+          Generate 400 unique, detailed gluten-free recipes using AI
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-muted-foreground space-y-2">
           <p className="flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <strong>20 Breakfast</strong> recipes
+            <strong>100 Breakfast</strong> recipes
           </p>
           <p className="flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <strong>20 Snack</strong> recipes  
+            <strong>100 Snack</strong> recipes  
           </p>
           <p className="flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <strong>20 Lunch</strong> recipes
+            <strong>100 Lunch</strong> recipes
           </p>
           <p className="flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <strong>20 Dinner</strong> recipes
+            <strong>100 Dinner</strong> recipes
           </p>
         </div>
         
@@ -111,7 +111,7 @@ export const AIRecipeGenerator = () => {
           ) : hasAccess ? (
             <>
               <Brain className="w-4 h-4 mr-2" />
-              Generate 80 AI Recipes
+              Generate 400 AI Recipes
             </>
           ) : (
             <>
@@ -138,12 +138,12 @@ export const AIRecipeGenerator = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Unlock AI Recipe Generator</AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
-                <p>Get yearly access to generate 80 unique AI-powered gluten-free recipes for just <strong>$4.99</strong>!</p>
+                <p>Get yearly access to generate 400 unique AI-powered gluten-free recipes for just <strong>$4.99</strong>!</p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>20 Breakfast recipes</li>
-                  <li>20 Snack recipes</li>
-                  <li>20 Lunch recipes</li>
-                  <li>20 Dinner recipes</li>
+                  <li>100 Breakfast recipes</li>
+                  <li>100 Snack recipes</li>
+                  <li>100 Lunch recipes</li>
+                  <li>100 Dinner recipes</li>
                 </ul>
                 <p className="text-sm">Each recipe includes detailed ingredients, instructions, nutritional information, and cooking times.</p>
               </AlertDialogDescription>
@@ -161,14 +161,14 @@ export const AIRecipeGenerator = () => {
         <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Generate 80 AI-Powered Recipes?</AlertDialogTitle>
+              <AlertDialogTitle>Generate 400 AI-Powered Recipes?</AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
-                <p>This will generate 80 unique, detailed gluten-free recipes using AI:</p>
+                <p>This will generate 400 unique, detailed gluten-free recipes using AI:</p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>20 Breakfast recipes</li>
-                  <li>20 Snack recipes</li>
-                  <li>20 Lunch recipes</li>
-                  <li>20 Dinner recipes</li>
+                  <li>100 Breakfast recipes</li>
+                  <li>100 Snack recipes</li>
+                  <li>100 Lunch recipes</li>
+                  <li>100 Dinner recipes</li>
                 </ul>
                 <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
                   <strong>Note:</strong> Recipes will be generated in batches and added to your existing collection. This process may take several minutes to complete.
