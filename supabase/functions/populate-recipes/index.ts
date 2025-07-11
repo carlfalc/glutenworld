@@ -338,9 +338,8 @@ serve(async (req) => {
       
       const { data, error } = await supabaseClient
         .from('recipes')
-        .upsert(batch, { 
-          onConflict: 'title',
-          ignoreDuplicates: false 
+        .insert(batch, { 
+          ignoreDuplicates: true 
         });
 
       if (error) {
