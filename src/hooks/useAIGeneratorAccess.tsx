@@ -46,16 +46,15 @@ export const useAIGeneratorAccess = () => {
         .from('ai_generator_access')
         .select('paid')
         .eq('user_id', user.id)
-        .eq('paid', true)
-        .single();
+        .maybeSingle();
 
       console.log('📊 Database query result:', { data, error });
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('❌ Error checking AI generator access:', error);
         setHasAccess(false);
         setHasPaidUpgrade(false);
-      } else if (data) {
+      } else if (data && data.paid === true) {
         console.log('✅ Found paid upgrade - granting access');
         setHasAccess(true);
         setHasPaidUpgrade(true);
