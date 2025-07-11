@@ -70,8 +70,8 @@ const RecipeMenu = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            Gluten-Free Recipe Menu
+          <h1 className="text-4xl font-bold text-primary mb-4">
+            AI Recipe Generator
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Discover delicious gluten-free recipes for every meal of the day. 
@@ -134,13 +134,6 @@ const RecipeMenu = () => {
                 </div>
               </div>
 
-              {/* Loading State */}
-              {loading && (
-                <div className="flex items-center justify-center py-12">
-                  <Loader className="h-8 w-8 animate-spin text-primary" />
-                  <span className="ml-2 text-muted-foreground">Loading recipes...</span>
-                </div>
-              )}
 
               {/* Recipe Grid */}
               {!loading && searchResult && searchResult.recipes.length > 0 && (
