@@ -44,18 +44,10 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    // Check if customer exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Found existing customer", { customerId });
-    }
-
-    // Create checkout session for $4.99 AI Generator upgrade
+    // Optimize: Skip customer lookup and create session directly with email
+    // This reduces one API call to Stripe
     const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: user.email,
       line_items: [
         {
           price_data: {
@@ -80,17 +72,19 @@ serve(async (req) => {
 
     logStep("Checkout session created", { sessionId: session.id });
 
-    // Record the pending upgrade in our database
-    await supabaseClient.from("ai_generator_access").upsert({
-      user_id: user.id,
-      email: user.email,
-      stripe_payment_intent_id: session.payment_intent as string,
-      paid: false,
-      amount: 499,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' });
+    // Run database upsert in background to not block response
+    EdgeRuntime.waitUntil(
+      supabaseClient.from("ai_generator_access").upsert({
+        user_id: user.id,
+        email: user.email,
+        stripe_payment_intent_id: session.payment_intent as string,
+        paid: false,
+        amount: 499,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' })
+    );
 
-    logStep("Database record created");
+    logStep("Database record queued for background processing");
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
