@@ -1,5 +1,5 @@
 
-import { ChefHat, Sparkles, User, LogOut, Settings, Crown, AlignJustify } from 'lucide-react';
+import { ChefHat, Sparkles, User, LogOut, Settings, Crown, AlignJustify, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -88,10 +88,12 @@ const Header = () => {
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                       <NavigationMenuLink
-                        className={cn(navigationMenuTriggerStyle(), "cursor-pointer")}
+                        className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1 text-gluten-primary")}
                         onClick={() => navigate('/recipe-menu')}
                       >
-                        Recipe Menu
+                        <Crown className="w-4 h-4" />
+                        <Brain className="w-4 h-4" />
+                        AI Recipe Generator
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
@@ -147,10 +149,12 @@ const Header = () => {
                       </Button>
                       <Button 
                         variant="ghost" 
-                        className="justify-start text-lg"
+                        className="justify-start text-lg flex items-center gap-2 text-gluten-primary"
                         onClick={() => navigate('/recipe-menu')}
                       >
-                        Recipe Menu
+                        <Crown className="w-4 h-4" />
+                        <Brain className="w-4 h-4" />
+                        AI Recipe Generator
                       </Button>
                       <Button 
                         variant="ghost" 
