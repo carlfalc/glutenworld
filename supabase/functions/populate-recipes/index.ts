@@ -192,60 +192,152 @@ const getImageForRecipe = (recipeName: string, recipeType: string): string => {
 
 // Recipe name lists for AI generation - 100 RECIPES PER CATEGORY
 const generateRecipeNames = (category: string, count: number): string[] => {
+  // Expanded recipe bases to ensure 100+ unique base recipes per category
   const bases = {
     Breakfast: [
+      // Pancakes (10)
       "Blueberry Pancakes", "Banana Pancakes", "Strawberry Pancakes", "Chocolate Chip Pancakes", "Vanilla Pancakes",
+      "Buttermilk Pancakes", "Protein Pancakes", "Oat Pancakes", "Almond Pancakes", "Coconut Pancakes",
+      // Waffles (10)
       "Belgian Waffles", "Cinnamon Waffles", "Berry Waffles", "Protein Waffles", "Coconut Waffles",
+      "Chocolate Waffles", "Vanilla Waffles", "Banana Waffles", "Pecan Waffles", "Sweet Potato Waffles",
+      // Muffins (15)
       "Blueberry Muffins", "Banana Muffins", "Chocolate Muffins", "Lemon Muffins", "Apple Muffins",
+      "Cranberry Muffins", "Orange Muffins", "Pumpkin Muffins", "Carrot Muffins", "Zucchini Muffins",
+      "Bran Muffins", "Poppy Seed Muffins", "Raspberry Muffins", "Peach Muffins", "Cherry Muffins",
+      // Bowls (15)
       "Berry Smoothie Bowl", "Tropical Smoothie Bowl", "Green Smoothie Bowl", "Protein Smoothie Bowl", "Acai Bowl",
+      "Granola Bowl", "Quinoa Breakfast Bowl", "Chia Pudding", "Overnight Oats", "Fruit Salad Bowl",
+      "Yogurt Parfait", "Power Bowl", "Buddha Bowl", "Breakfast Bowl", "Energy Bowl",
+      // Eggs (15)
       "Scrambled Eggs", "Cheese Omelette", "Veggie Omelette", "Herb Omelette", "Spanish Omelette",
+      "Mushroom Omelette", "Spinach Omelette", "Western Omelette", "Frittata", "Quiche",
+      "Egg Benedict", "Deviled Eggs", "Poached Eggs", "Sunny Side Up", "Egg Sandwich",
+      // Toast & Bread (15)
       "Avocado Toast", "Cinnamon Toast", "Banana Toast", "Almond Butter Toast", "Honey Toast",
-      "Granola Bowl", "Quinoa Breakfast Bowl", "Chia Pudding", "Overnight Oats", "Breakfast Burrito",
-      "French Toast", "Breakfast Hash", "Egg Benedict", "Breakfast Sandwich", "Fruit Salad"
+      "French Toast", "Cream Cheese Toast", "Jam Toast", "Peanut Butter Toast", "Berry Toast",
+      "Bagel", "English Muffin", "Breakfast Bread", "Coffee Cake", "Scones",
+      // Other Breakfast (20)
+      "Breakfast Burrito", "Breakfast Hash", "Breakfast Sandwich", "Breakfast Wrap", "Cereal",
+      "Porridge", "Oatmeal", "Grits", "Hash Browns", "Breakfast Pizza",
+      "Pancake Bites", "Waffle Bites", "Breakfast Bars", "Granola", "Muesli",
+      "Smoothie", "Protein Shake", "Breakfast Cookies", "Danish", "Croissant"
     ],
     Snacks: [
+      // Energy Items (20)
       "Energy Balls", "Protein Balls", "Chocolate Balls", "Coconut Balls", "Almond Balls",
-      "Trail Mix", "Nut Mix", "Dried Fruit Mix", "Seed Mix", "Granola Mix",
+      "Date Balls", "Peanut Butter Balls", "Oat Balls", "Chia Balls", "Flax Balls",
       "Protein Bars", "Energy Bars", "Fruit Bars", "Nut Bars", "Chocolate Bars",
+      "Granola Bars", "Cereal Bars", "Rice Bars", "Quinoa Bars", "Seed Bars",
+      // Mixes (15)
+      "Trail Mix", "Nut Mix", "Dried Fruit Mix", "Seed Mix", "Granola Mix",
+      "Cereal Mix", "Protein Mix", "Chocolate Mix", "Tropical Mix", "Berry Mix",
+      "Spicy Mix", "Sweet Mix", "Crunchy Mix", "Power Mix", "Energy Mix",
+      // Dips (15)
       "Hummus Dip", "Veggie Dip", "Bean Dip", "Cheese Dip", "Avocado Dip",
+      "Spinach Dip", "Artichoke Dip", "Buffalo Dip", "Ranch Dip", "Salsa Dip",
+      "Yogurt Dip", "Tzatziki", "Guacamole", "Queso", "Pesto Dip",
+      // Chips (15)
       "Kale Chips", "Sweet Potato Chips", "Beet Chips", "Apple Chips", "Banana Chips",
+      "Zucchini Chips", "Carrot Chips", "Parsnip Chips", "Turnip Chips", "Radish Chips",
+      "Veggie Chips", "Fruit Chips", "Root Chips", "Herb Chips", "Spiced Chips",
+      // Baked Goods (20)
       "Cookies", "Crackers", "Biscuits", "Muffins", "Brownies",
-      "Smoothie", "Shake", "Juice", "Tea", "Latte"
+      "Macaroons", "Truffles", "Fudge", "Toffee", "Caramels",
+      "Pretzels", "Popcorn", "Rice Cakes", "Corn Cakes", "Oat Cakes",
+      "Protein Cookies", "Fruit Cookies", "Nut Cookies", "Seed Cookies", "Spice Cookies",
+      // Drinks (15)
+      "Smoothie", "Shake", "Juice", "Tea", "Latte",
+      "Frappe", "Iced Tea", "Kombucha", "Kefir", "Milk",
+      "Protein Drink", "Energy Drink", "Vitamin Water", "Coconut Water", "Herbal Tea"
     ],
     Lunch: [
+      // Salads (20)
       "Greek Salad", "Caesar Salad", "Garden Salad", "Quinoa Salad", "Pasta Salad",
+      "Potato Salad", "Coleslaw", "Spinach Salad", "Arugula Salad", "Kale Salad",
+      "Waldorf Salad", "Cobb Salad", "Nicoise Salad", "Asian Salad", "Mexican Salad",
+      "Tuna Salad", "Chicken Salad", "Egg Salad", "Bean Salad", "Fruit Salad",
+      // Soups (20)
       "Chicken Soup", "Vegetable Soup", "Lentil Soup", "Tomato Soup", "Mushroom Soup",
+      "Minestrone", "Chili", "Stew", "Bisque", "Chowder",
+      "Pho", "Ramen", "Miso Soup", "Gazpacho", "Pumpkin Soup",
+      "Broccoli Soup", "Carrot Soup", "Onion Soup", "Bean Soup", "Seafood Soup",
+      // Sandwiches (20)
       "Turkey Sandwich", "Chicken Sandwich", "Veggie Sandwich", "BLT Sandwich", "Club Sandwich",
+      "Grilled Cheese", "Panini", "Sub", "Hoagie", "Melt",
+      "Reuben", "Monte Cristo", "Po'boy", "Banh Mi", "Cubano",
+      "Philly Cheesesteak", "Italian Sub", "Meatball Sub", "Tuna Melt", "Egg Salad Sandwich",
+      // Wraps (15)
       "Chicken Wrap", "Turkey Wrap", "Veggie Wrap", "Tuna Wrap", "Salmon Wrap",
+      "Ham Wrap", "Beef Wrap", "Egg Wrap", "Cheese Wrap", "Hummus Wrap",
+      "Buffalo Wrap", "Caesar Wrap", "Greek Wrap", "Asian Wrap", "Mexican Wrap",
+      // Pasta & Grains (15)
       "Pasta Primavera", "Chicken Pasta", "Seafood Pasta", "Veggie Pasta", "Pesto Pasta",
+      "Alfredo Pasta", "Carbonara", "Lasagna", "Ravioli", "Gnocchi",
+      "Rice Bowl", "Quinoa Bowl", "Grain Bowl", "Pilaf", "Risotto",
+      // International (10)
       "Chicken Curry", "Vegetable Curry", "Thai Curry", "Indian Curry", "Coconut Curry",
-      "Fish Tacos", "Chicken Tacos", "Beef Tacos", "Veggie Tacos", "Shrimp Tacos",
-      "Veggie Burger", "Turkey Burger", "Salmon Burger", "Black Bean Burger", "Quinoa Burger"
+      "Fish Tacos", "Chicken Tacos", "Beef Tacos", "Veggie Tacos", "Shrimp Tacos"
     ],
     Dinner: [
+      // Chicken (20)
       "Grilled Chicken", "Roasted Chicken", "Baked Chicken", "Fried Chicken", "BBQ Chicken",
+      "Teriyaki Chicken", "Lemon Chicken", "Herb Chicken", "Stuffed Chicken", "Blackened Chicken",
+      "Honey Chicken", "Garlic Chicken", "Parmesan Chicken", "Buffalo Chicken", "Cajun Chicken",
+      "Mediterranean Chicken", "Asian Chicken", "Mexican Chicken", "Indian Chicken", "Thai Chicken",
+      // Fish & Seafood (20)
       "Grilled Salmon", "Baked Salmon", "Pan Seared Salmon", "Teriyaki Salmon", "Lemon Salmon",
-      "Beef Steak", "Grilled Steak", "Ribeye Steak", "Sirloin Steak", "Filet Mignon",
-      "Pork Chops", "Grilled Pork", "Roasted Pork", "BBQ Pork", "Pork Tenderloin",
-      "Stuffed Peppers", "Stuffed Zucchini", "Stuffed Mushrooms", "Stuffed Tomatoes", "Stuffed Squash",
-      "BBQ Ribs", "Beef Ribs", "Pork Ribs", "Spare Ribs", "Short Ribs",
+      "Cedar Plank Salmon", "Glazed Salmon", "Smoked Salmon", "Poached Salmon", "Cajun Salmon",
       "Grilled Shrimp", "Garlic Shrimp", "Coconut Shrimp", "Spicy Shrimp", "Lemon Shrimp",
-      "Lamb Chops", "Roasted Lamb", "Grilled Lamb", "Mediterranean Lamb", "Herb Crusted Lamb"
+      "Crab Cakes", "Lobster Tail", "Scallops", "Fish Tacos", "Fish & Chips",
+      // Beef (20)
+      "Beef Steak", "Grilled Steak", "Ribeye Steak", "Sirloin Steak", "Filet Mignon",
+      "T-Bone Steak", "Strip Steak", "Flank Steak", "Skirt Steak", "Round Steak",
+      "Beef Roast", "Pot Roast", "Beef Stew", "Beef Stroganoff", "Beef Bourguignon",
+      "Meatloaf", "Meatballs", "Beef Tacos", "Beef Curry", "Beef Stir Fry",
+      // Pork (20)
+      "Pork Chops", "Grilled Pork", "Roasted Pork", "BBQ Pork", "Pork Tenderloin",
+      "Pork Shoulder", "Pork Ribs", "Pork Loin", "Pork Belly", "Pulled Pork",
+      "Ham", "Bacon", "Sausage", "Bratwurst", "Chorizo",
+      "Pork Stir Fry", "Pork Curry", "Carnitas", "Pork Schnitzel", "Pork Medallions",
+      // Stuffed Vegetables (10)
+      "Stuffed Peppers", "Stuffed Zucchini", "Stuffed Mushrooms", "Stuffed Tomatoes", "Stuffed Squash",
+      "Stuffed Eggplant", "Stuffed Cabbage", "Stuffed Portobello", "Stuffed Artichokes", "Stuffed Onions",
+      // Lamb & Other (10)
+      "Lamb Chops", "Roasted Lamb", "Grilled Lamb", "Mediterranean Lamb", "Herb Crusted Lamb",
+      "Duck Breast", "Venison", "Turkey Breast", "Cornish Hen", "Prime Rib"
     ]
   };
 
   const categoryBases = bases[category as keyof typeof bases] || bases.Breakfast;
   const recipes: string[] = [];
   
+  // Generate exactly 'count' unique recipe names
   for (let i = 0; i < count; i++) {
     const baseIndex = i % categoryBases.length;
     const base = categoryBases[baseIndex];
-    const variation = Math.floor(i / categoryBases.length) + 1;
     
-    if (variation === 1) {
-      recipes.push(`Gluten-Free ${base}`);
+    // Create variations using different prefixes/styles
+    const variations = [
+      `Gluten-Free ${base}`,
+      `Classic ${base}`,
+      `Homemade ${base}`,
+      `Healthy ${base}`,
+      `Traditional ${base}`,
+      `Gourmet ${base}`,
+      `Easy ${base}`,
+      `Quick ${base}`,
+      `Deluxe ${base}`,
+      `Premium ${base}`
+    ];
+    
+    const variationIndex = Math.floor(i / categoryBases.length);
+    if (variationIndex < variations.length) {
+      recipes.push(variations[variationIndex]);
     } else {
-      recipes.push(`Gluten-Free ${base} (Style ${variation})`);
+      // If we need even more variations, add numbered styles
+      const styleNum = (variationIndex - variations.length) + 1;
+      recipes.push(`Gluten-Free ${base} Style ${styleNum}`);
     }
   }
   
