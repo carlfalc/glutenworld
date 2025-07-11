@@ -28,31 +28,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Check subscription status when user signs in
+        // Defer async operations to prevent auth deadlock
         if (event === 'SIGNED_IN' && session) {
-          console.log('User signed in, checking subscription status...');
-          try {
-            await supabase.functions.invoke('check-subscription', {
-              headers: {
-                Authorization: `Bearer ${session.access_token}`,
-              },
-            });
-          } catch (error) {
-            console.error('Failed to check subscription on sign in:', error);
-          }
+          setTimeout(async () => {
+            console.log('User signed in, checking subscription status...');
+            try {
+              await supabase.functions.invoke('check-subscription', {
+                headers: {
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+              });
+            } catch (error) {
+              console.error('Failed to check subscription on sign in:', error);
+            }
+          }, 0);
         }
       }
     );
 
-    // Check for existing session
+    // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('Initial session:', session);
       setSession(session);
