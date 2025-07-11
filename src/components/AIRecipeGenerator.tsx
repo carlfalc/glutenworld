@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAIRecipePopulation } from '@/hooks/useAIRecipePopulation';
 import { useAIGeneratorAccess } from '@/hooks/useAIGeneratorAccess';
+import { supabase } from '@/integrations/supabase/client';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export const AIRecipeGenerator = () => {
@@ -23,6 +24,18 @@ export const AIRecipeGenerator = () => {
       await purchaseUpgrade();
     } catch (error) {
       console.error('Error upgrading:', error);
+    }
+  };
+
+  const handleGrantAccess = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('grant-access');
+      if (error) throw error;
+      console.log('Access granted:', data);
+      // Refresh access status
+      location.reload();
+    } catch (error) {
+      console.error('Error granting access:', error);
     }
   };
 
@@ -107,6 +120,17 @@ export const AIRecipeGenerator = () => {
             </>
           )}
         </Button>
+
+        {/* Temporary fix button - remove this after testing */}
+        {!hasAccess && (
+          <Button 
+            onClick={handleGrantAccess}
+            variant="outline"
+            className="w-full mt-2"
+          >
+            🔧 Fix Access (Temporary)
+          </Button>
+        )}
 
         {/* Upgrade Dialog */}
         <AlertDialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
