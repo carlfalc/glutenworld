@@ -40,13 +40,14 @@ export const useAIGeneratorAccess = () => {
       // Check if user has paid for AI generator upgrade
       const { data, error } = await supabase
         .from('ai_generator_access')
-        .select('paid, email, user_id')
+        .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
       console.log('📊 Database query completed');
       console.log('📊 Query looking for user_id:', user.id);
       console.log('📊 Query result:', { data, error });
+      console.log('📊 Raw data object:', JSON.stringify(data, null, 2));
       
       // Also try by email as fallback
       if (!data && !error) {
