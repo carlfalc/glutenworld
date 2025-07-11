@@ -190,7 +190,7 @@ const getImageForRecipe = (recipeName: string, recipeType: string): string => {
 };
 
 
-// Recipe name lists for AI generation - 100 RECIPES PER CATEGORY
+// Recipe name lists for AI generation - REDUCED COUNT FOR BETTER PERFORMANCE
 const generateRecipeNames = (category: string, count: number): string[] => {
   const bases = {
     Breakfast: [
@@ -253,10 +253,10 @@ const generateRecipeNames = (category: string, count: number): string[] => {
 };
 
 const recipeNames = {
-  Breakfast: generateRecipeNames('Breakfast', 100),
-  Snacks: generateRecipeNames('Snacks', 100),
-  Lunch: generateRecipeNames('Lunch', 100),
-  Dinner: generateRecipeNames('Dinner', 100)
+  Breakfast: generateRecipeNames('Breakfast', 20),
+  Snacks: generateRecipeNames('Snacks', 20),
+  Lunch: generateRecipeNames('Lunch', 20),
+  Dinner: generateRecipeNames('Dinner', 20)
 };
 
 serve(async (req) => {
@@ -298,25 +298,32 @@ serve(async (req) => {
     for (const [recipeType, names] of Object.entries(recipeNames)) {
       logStep(`Generating ${names.length} ${recipeType} recipes...`);
       
-      // Process in batches to avoid timeouts
-      const batchSize = 5;
+      // Process in smaller batches to reduce timeout risk
+      const batchSize = 3;
       for (let i = 0; i < names.length; i += batchSize) {
         const batch = names.slice(i, i + batchSize);
         logStep(`Processing ${recipeType} batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(names.length/batchSize)}`);
         
-        // Generate recipes in parallel for each batch
-        const batchPromises = batch.map(recipeName => 
-          generateAIRecipe(recipeType, recipeName)
-        );
+        // Generate recipes sequentially to avoid rate limits
+        const batchRecipes = [];
+        for (const recipeName of batch) {
+          try {
+            const recipe = await generateAIRecipe(recipeType, recipeName);
+            batchRecipes.push(recipe);
+            logStep(`Generated recipe: ${recipeName}`);
+            
+            // Add small delay between requests
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          } catch (error) {
+            logStep(`Error generating ${recipeName}:`, error.message);
+            // Continue with next recipe
+          }
+        }
         
-        try {
-          const batchRecipes = await Promise.all(batchPromises);
+        if (batchRecipes.length > 0) {
           allRecipes.push(...batchRecipes);
           totalGenerated += batchRecipes.length;
           logStep(`Generated ${batchRecipes.length} recipes. Total: ${totalGenerated}`);
-        } catch (error) {
-          logStep(`Error in batch:`, error.message);
-          // Continue with next batch even if some fail
         }
       }
     }

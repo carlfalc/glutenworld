@@ -17,9 +17,9 @@ export const useAIRecipePopulation = () => {
     try {
       console.log('Invoking populate-recipes function...');
       
-      // Add timeout and better error handling
+      // Increased timeout for longer generation process
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      const timeout = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
       
       const { data, error } = await supabase.functions.invoke('populate-recipes', {
         body: {},
