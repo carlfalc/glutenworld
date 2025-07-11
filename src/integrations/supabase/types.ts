@@ -198,6 +198,7 @@ export type Database = {
           cook_time: number | null
           created_at: string
           cuisine_type: string | null
+          dietary_labels: string[] | null
           difficulty_level: string | null
           fat_g: number | null
           fiber_g: number | null
@@ -227,6 +228,7 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           cuisine_type?: string | null
+          dietary_labels?: string[] | null
           difficulty_level?: string | null
           fat_g?: number | null
           fiber_g?: number | null
@@ -256,6 +258,7 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           cuisine_type?: string | null
+          dietary_labels?: string[] | null
           difficulty_level?: string | null
           fat_g?: number | null
           fiber_g?: number | null
