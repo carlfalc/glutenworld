@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
+import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
 import DatabaseRecipeCard from '@/components/DatabaseRecipeCard';
 import { useRecipeSearch } from '@/hooks/useRecipeSearch';
 import { Coffee, Apple, Utensils, Moon, Search, X, ChefHat, Loader } from 'lucide-react';
@@ -126,6 +127,11 @@ const RecipeMenu = () => {
                     </p>
                   </div>
                 )}
+                
+                {/* AI Recipe Generator */}
+                <div className="mb-8 max-w-md mx-auto">
+                  <AIRecipeGenerator />
+                </div>
               </div>
 
               {/* Loading State */}
