@@ -1,29 +1,30 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
-  console.log(`[POPULATE-RECIPES] ${step}${detailsStr}`);
+// Logging function with timestamp
+const logStep = (message: string, ...args: any[]) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${message}`, ...args);
 };
 
+// Type definitions
 interface Recipe {
   title: string;
   original_recipe: string;
   converted_recipe: string;
-  ingredients: any;
+  ingredients: Array<{name: string, amount: string, unit: string}>;
   instructions: string[];
   prep_time: number;
   cook_time: number;
   servings: number;
   difficulty_level: string;
   cuisine_type: string;
-  is_public: boolean;
   calories_per_serving: number;
   protein_g: number;
   carbs_g: number;
@@ -32,11 +33,13 @@ interface Recipe {
   sugar_g: number;
   sodium_mg: number;
   cholesterol_mg: number;
-  image_url: string;
   dietary_labels: string[];
+  is_public?: boolean;
+  user_id?: string | null;
+  image_url?: string;
 }
 
-// AI-powered recipe generation function
+// AI Recipe Generation Function
 const generateAIRecipe = async (recipeType: string, recipeName: string): Promise<Recipe> => {
   logStep(`Generating AI recipe for: ${recipeName}`);
   
@@ -99,31 +102,39 @@ const generateAIRecipe = async (recipeType: string, recipeName: string): Promise
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { 
-            role: 'system', 
-            content: 'You are a professional gluten-free chef. Generate complete, detailed recipes with accurate nutritional information. Respond only with valid JSON.' 
-          },
+          { role: 'system', content: 'You are a professional chef specializing in gluten-free cooking. Return only valid JSON with no additional text.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
-        max_tokens: 1500
+        temperature: 0.8,
+        max_tokens: 2000,
       }),
     });
 
     if (!response.ok) {
-      logStep(`OpenAI API error: ${response.status}`);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
-    const result = await response.json();
-    const recipeData = JSON.parse(result.choices[0].message.content);
+    const data = await response.json();
+    const content = data.choices[0].message.content.trim();
     
-    // Add image URL and public flag
+    // Clean up any markdown formatting
+    const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    let recipeData: Recipe;
+    try {
+      recipeData = JSON.parse(cleanContent);
+    } catch (parseError) {
+      logStep(`JSON parse error for ${recipeName}:`, cleanContent.substring(0, 200));
+      throw new Error(`Failed to parse recipe JSON: ${parseError.message}`);
+    }
+    
+    // Add image URL and set as public recipe with null user_id
     const imageId = getImageForRecipe(recipeName, recipeType);
     
     return {
       ...recipeData,
       is_public: true,
+      user_id: null, // Explicitly set to null for public AI-generated recipes
       image_url: `https://images.unsplash.com/${imageId}?w=400&h=300&fit=crop`
     };
     
@@ -178,19 +189,19 @@ const getImageForRecipe = (recipeName: string, recipeType: string): string => {
   if (recipeType === 'Dinner') {
     if (name.includes('chicken')) return 'photo-1598103442097-8b74394b95c6';
     if (name.includes('salmon') || name.includes('fish')) return 'photo-1519708227418-c8fd9a32b7a2';
-    if (name.includes('beef') || name.includes('steak')) return 'photo-1546833999-b9f581a1996d';
-    if (name.includes('pork') || name.includes('lamb')) return 'photo-1588168333986-5078d3ae3976';
-    if (name.includes('stuffed')) return 'photo-1571997478779-2adcbbe9ab2f';
-    if (name.includes('ribs')) return 'photo-1544025162-d76694265947';
-    if (name.includes('shrimp')) return 'photo-1615141982883-c7ad0e69fd62';
-    return 'photo-1603894584373-5ac82b2ae398';
+    if (name.includes('steak') || name.includes('beef')) return 'photo-1546833999-b9f581a1996d';
+    if (name.includes('pork')) return 'photo-1529193591184-b1d58069ecdd';
+    if (name.includes('lamb')) return 'photo-1546833999-b9f581a1996d';
+    if (name.includes('stuffed')) return 'photo-1571091718767-18b5b1457add';
+    if (name.includes('ribs')) return 'photo-1529193591184-b1d58069ecdd';
+    if (name.includes('shrimp')) return 'photo-1565680018434-b513d5e5fd47';
+    return 'photo-1598103442097-8b74394b95c6';
   }
   
-  return 'photo-1506084868230-bb9d95c24759'; // default
+  return 'photo-1506084868230-bb9d95c24759';
 };
 
-
-// Recipe name lists for AI generation - 100 RECIPES PER CATEGORY
+// Recipe name generation function with expanded variety
 const generateRecipeNames = (category: string, count: number): string[] => {
   // Expanded recipe bases to ensure 100+ unique base recipes per category
   const bases = {
@@ -344,13 +355,6 @@ const generateRecipeNames = (category: string, count: number): string[] => {
   return recipes;
 };
 
-const recipeNames = {
-  Breakfast: generateRecipeNames('Breakfast', 100),
-  Snacks: generateRecipeNames('Snacks', 100),
-  Lunch: generateRecipeNames('Lunch', 100),
-  Dinner: generateRecipeNames('Dinner', 100)
-};
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -358,7 +362,7 @@ serve(async (req) => {
   }
 
   try {
-    logStep('AI Recipe Generation Started');
+    logStep('AI Recipe Generation Started - Sequential Category Processing');
     
     const openAIApiKey = Deno.env.get('OPENAI') || Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
@@ -380,89 +384,116 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Skip clearing existing recipes to prevent data loss
-    logStep('Keeping existing recipes and adding new ones...');
+    // First, clean up any existing AI-generated recipes to avoid duplicates
+    logStep('Cleaning up existing AI-generated recipes...');
+    const { error: deleteError } = await supabaseClient
+      .from('recipes')
+      .delete()
+      .is('user_id', null)
+      .eq('is_public', true);
+    
+    if (deleteError) {
+      logStep('Warning: Could not clean up existing recipes:', deleteError.message);
+    }
 
-    const allRecipes: Recipe[] = [];
     let totalGenerated = 0;
-    const totalExpected = Object.values(recipeNames).reduce((sum, names) => sum + names.length, 0);
+    const categoryResults: Record<string, number> = {};
 
-    // Generate recipes for each category
-    for (const [recipeType, names] of Object.entries(recipeNames)) {
-      logStep(`Generating ${names.length} ${recipeType} recipes...`);
+    // Process each category sequentially for better reliability
+    const categories = ['Breakfast', 'Snacks', 'Lunch', 'Dinner'];
+    
+    for (const category of categories) {
+      logStep(`\n=== Starting ${category} Category (100 recipes) ===`);
+      
+      const categoryNames = generateRecipeNames(category, 100);
       let categoryGenerated = 0;
       
-      // Process in smaller batches to reduce timeout risk
-      const batchSize = 5;
-      for (let i = 0; i < names.length; i += batchSize) {
-        const batch = names.slice(i, i + batchSize);
-        logStep(`Processing ${recipeType} batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(names.length/batchSize)} - Items ${i + 1} to ${Math.min(i + batchSize, names.length)}`);
+      // Process in smaller batches of 3 for better reliability
+      const batchSize = 3;
+      
+      for (let i = 0; i < categoryNames.length; i += batchSize) {
+        const batch = categoryNames.slice(i, i + batchSize);
+        logStep(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(categoryNames.length/batchSize)} for ${category} (${batch.length} recipes)`);
         
-        // Generate recipes sequentially to avoid rate limits
-        const batchRecipes = [];
-        for (const recipeName of batch) {
-          try {
-            const recipe = await generateAIRecipe(recipeType, recipeName);
-            batchRecipes.push(recipe);
-            logStep(`✓ Generated recipe: ${recipeName}`);
-            
-            // Add small delay between requests to avoid rate limits
-            await new Promise(resolve => setTimeout(resolve, 500));
-          } catch (error) {
-            logStep(`✗ Error generating ${recipeName}:`, error.message);
-            // Continue with next recipe instead of stopping
-          }
-        }
-        
-        if (batchRecipes.length > 0) {
-          allRecipes.push(...batchRecipes);
-          categoryGenerated += batchRecipes.length;
-          totalGenerated += batchRecipes.length;
-          logStep(`✓ Batch complete! Generated ${batchRecipes.length} recipes. Category: ${categoryGenerated}/${names.length}, Total: ${totalGenerated}/${totalExpected}`);
+        try {
+          // Generate recipes in parallel within the small batch
+          const batchPromises = batch.map(name => 
+            generateAIRecipe(category, name).catch(error => {
+              logStep(`Failed to generate ${name}: ${error.message}`);
+              return null;
+            })
+          );
           
-          // Insert batch immediately to prevent loss
-          try {
-            const { error: insertError } = await supabaseClient
+          const batchResults = await Promise.all(batchPromises);
+          const validRecipes = batchResults.filter(recipe => recipe !== null);
+          
+          if (validRecipes.length > 0) {
+            // Insert batch to database immediately - FIXED: Set user_id to null explicitly for public recipes
+            const recipesToInsert = validRecipes.map(recipe => ({
+              ...recipe,
+              user_id: null, // Explicitly set to null for public AI-generated recipes
+              is_public: true
+            }));
+            
+            const { data: insertedRecipes, error: insertError } = await supabaseClient
               .from('recipes')
-              .insert(batchRecipes, { ignoreDuplicates: true });
+              .insert(recipesToInsert)
+              .select('id, title');
             
             if (insertError) {
-              logStep(`Insert error for batch:`, insertError.message);
+              logStep(`Database insert error for batch:`, insertError.message);
+              // Continue with next batch instead of failing completely
             } else {
-              logStep(`✓ Successfully inserted ${batchRecipes.length} recipes to database`);
+              categoryGenerated += validRecipes.length;
+              totalGenerated += validRecipes.length;
+              logStep(`✓ Successfully inserted ${validRecipes.length} recipes. Category progress: ${categoryGenerated}/${categoryNames.length}`);
             }
-          } catch (insertErr) {
-            logStep(`Database insert failed:`, insertErr.message);
           }
-        }
-        
-        // Longer delay between batches to ensure stability
-        if (i + batchSize < names.length) {
-          logStep(`Waiting before next batch...`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Brief pause between batches to avoid rate limits
+          if (i + batchSize < categoryNames.length) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
+          
+        } catch (batchError) {
+          logStep(`Batch processing error:`, batchError.message);
+          // Continue with next batch
         }
       }
       
-      logStep(`✓ Completed ${recipeType} category: generated ${categoryGenerated}/${names.length} recipes. Overall total: ${totalGenerated}/${totalExpected}`);
+      categoryResults[category] = categoryGenerated;
+      logStep(`✓ Completed ${category}: ${categoryGenerated}/${categoryNames.length} recipes generated`);
+      
+      // Pause between categories
+      if (category !== 'Dinner') {
+        logStep('Pausing before next category...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
 
-    if (allRecipes.length === 0) {
-      throw new Error('No recipes were generated successfully');
-    }
+    // Final verification - count actual inserted recipes
+    const { data: finalCount, error: countError } = await supabaseClient
+      .from('recipes')
+      .select('id', { count: 'exact' })
+      .is('user_id', null)
+      .eq('is_public', true);
 
-    logStep(`Successfully completed! Generated ${allRecipes.length} recipes across all categories`);
+    const actualCount = finalCount?.length || 0;
+
+    logStep(`\n=== GENERATION COMPLETE ===`);
+    logStep(`Expected: 400 recipes (100 per category)`);
+    logStep(`Generated: ${totalGenerated} recipes`);
+    logStep(`In Database: ${actualCount} recipes`);
+    logStep(`Breakdown: ${JSON.stringify(categoryResults)}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Successfully generated ${allRecipes.length} AI-powered gluten-free recipes`,
-        breakdown: {
-          breakfast: recipeNames.Breakfast.length,
-          snacks: recipeNames.Snacks.length,
-          lunch: recipeNames.Lunch.length,
-          dinner: recipeNames.Dinner.length
-        },
-        total_generated: allRecipes.length
+        message: `Successfully generated ${actualCount} AI-powered gluten-free recipes`,
+        breakdown: categoryResults,
+        total_generated: totalGenerated,
+        total_in_database: actualCount,
+        sequential_processing: true
       }),
       { 
         status: 200,
