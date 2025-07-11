@@ -2,3 +2,6 @@ project_id = "hfuyqkcbpkrcragnytdv"
 
 [functions.fix-recipe-consistency]
 verify_jwt = false
+
+[functions.populate-recipes]
+verify_jwt = false
