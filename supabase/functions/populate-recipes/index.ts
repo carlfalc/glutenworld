@@ -33,6 +33,7 @@ interface Recipe {
   sodium_mg: number;
   cholesterol_mg: number;
   image_url: string;
+  dietary_labels: string[];
 }
 
 // AI-powered recipe generation function
@@ -72,11 +73,17 @@ const generateAIRecipe = async (recipeType: string, recipeName: string): Promise
     "fiber_g": 5,
     "sugar_g": 8,
     "sodium_mg": 400,
-    "cholesterol_mg": 50
+    "cholesterol_mg": 50,
+    "dietary_labels": ["Gluten-Free"]
   }
   
   Requirements:
-  - All ingredients must be gluten-free
+  - ALL recipes must be 100% gluten-free (this is mandatory)
+  - Analyze ingredients and add appropriate dietary labels from: "Gluten-Free", "Vegan", "Vegetarian", "Dairy-Free", "Nut-Free", "Soy-Free"
+  - Always include "Gluten-Free" label for every recipe
+  - Add "Vegan" label if no animal products (no meat, dairy, eggs, honey)
+  - Add "Vegetarian" label if no meat but may contain dairy/eggs
+  - Add "Dairy-Free" label if no dairy products (milk, cheese, butter, etc.)
   - Instructions should be detailed (5-8 steps)
   - Nutritional values should be realistic
   - Use common cooking terms and measurements
