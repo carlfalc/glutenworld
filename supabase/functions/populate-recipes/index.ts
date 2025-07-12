@@ -40,8 +40,8 @@ interface Recipe {
 }
 
 // AI Recipe Generation Function
-const generateAIRecipe = async (recipeType: string, recipeName: string): Promise<Recipe> => {
-  logStep(`Generating AI recipe for: ${recipeName}`);
+const generateAIRecipe = async (recipeType: string, recipeName: string, retryCount = 0): Promise<Recipe> => {
+  logStep(`Generating AI recipe for: ${recipeName} (attempt ${retryCount + 1})`);
   
   const openAIApiKey = Deno.env.get('OPENAI') || Deno.env.get('OPENAI_API_KEY');
   if (!openAIApiKey) {
@@ -111,7 +111,21 @@ const generateAIRecipe = async (recipeType: string, recipeName: string): Promise
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      
+      // Handle rate limiting specifically
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('retry-after') || '60';
+        logStep(`Rate limited. Retry after: ${retryAfter} seconds`);
+        
+        if (retryCount < 3) {
+          logStep(`Retrying ${recipeName} after rate limit (attempt ${retryCount + 1})`);
+          await new Promise(resolve => setTimeout(resolve, parseInt(retryAfter) * 1000));
+          return generateAIRecipe(recipeType, recipeName, retryCount + 1);
+        }
+      }
+      
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -125,7 +139,15 @@ const generateAIRecipe = async (recipeType: string, recipeName: string): Promise
       recipeData = JSON.parse(cleanContent);
     } catch (parseError) {
       logStep(`JSON parse error for ${recipeName}:`, cleanContent.substring(0, 200));
-      throw new Error(`Failed to parse recipe JSON: ${parseError.message}`);
+      
+      // If first attempt fails and this is a retry, throw error
+      if (retryCount >= 2) {
+        throw new Error(`Failed to parse recipe JSON after retries: ${parseError.message}`);
+      }
+      
+      // Retry with a simpler prompt
+      logStep(`Retrying ${recipeName} with simpler prompt (attempt ${retryCount + 1})`);
+      return generateAIRecipe(recipeType, recipeName, retryCount + 1);
     }
     
     // Add image URL and set as public recipe with null user_id
