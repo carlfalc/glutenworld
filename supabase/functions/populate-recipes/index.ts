@@ -377,209 +377,199 @@ const generateRecipeNames = (category: string, count: number): string[] => {
   return recipes;
 };
 
-// Background recipe generation function
+// Background recipe generation function with improved timeout handling
 const generateRecipesInBackground = async (progressId: string) => {
-  const startTime = Date.now(); // Track start time for timeout handling
+  const startTime = Date.now();
+  const MAX_EXECUTION_TIME = 28 * 60 * 1000; // 28 minutes - safe buffer
   
   const supabaseClient = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
 
-  try {
-    // Update status to running
+  const updateProgress = async (updates: any) => {
     await supabaseClient
       .from('recipe_generation_progress')
-      .update({ status: 'running' })
+      .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', progressId);
+  };
 
-    // Check existing AI-generated recipes to avoid duplicates
-    logStep('Checking existing AI-generated recipes...');
-    const { data: existingRecipes, error: checkError } = await supabaseClient
+  const shouldStop = () => {
+    return (Date.now() - startTime) > MAX_EXECUTION_TIME;
+  };
+
+  try {
+    logStep('Starting background recipe generation...');
+    await updateProgress({ status: 'running' });
+
+    // Get current progress to continue from where we left off
+    const { data: currentProgress } = await supabaseClient
+      .from('recipe_generation_progress')
+      .select('*')
+      .eq('id', progressId)
+      .single();
+
+    let totalGenerated = currentProgress?.generated_recipes || 0;
+    const currentCategory = currentProgress?.current_category;
+
+    logStep(`Current progress: ${totalGenerated}/400 recipes, last category: ${currentCategory}`);
+
+    // Check existing recipes count
+    const { data: existingRecipes } = await supabaseClient
       .from('recipes')
       .select('cuisine_type')
       .is('user_id', null)
       .eq('is_public', true);
     
-    if (checkError) {
-      logStep('Warning: Could not check existing recipes:', checkError.message);
-    }
-    
-    const existingCategories = new Set(existingRecipes?.map(r => r.cuisine_type) || []);
-    logStep('Existing categories found:', Array.from(existingCategories));
+    const existingByCategory = (existingRecipes || []).reduce((acc, recipe) => {
+      acc[recipe.cuisine_type] = (acc[recipe.cuisine_type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
-    let totalGenerated = 0;
-    const categoryResults: Record<string, number> = {};
+    logStep('Existing recipes by category:', existingByCategory);
 
-    // Process each category sequentially for better reliability
     const categories = ['Breakfast', 'Snacks', 'Lunch', 'Dinner'];
     
-    for (const category of categories) {
-      // Skip categories that already have recipes
-      if (existingCategories.has(category)) {
-        logStep(`\n=== Skipping ${category} Category (already has recipes) ===`);
-        // Count existing recipes for this category
-        const { data: categoryCount } = await supabaseClient
-          .from('recipes')
-          .select('id', { count: 'exact' })
-          .is('user_id', null)
-          .eq('is_public', true)
-          .eq('cuisine_type', category);
-        
-        const existingCount = categoryCount?.length || 0;
-        categoryResults[category] = existingCount;
-        totalGenerated += existingCount;
-        logStep(`✓ Found ${existingCount} existing ${category} recipes`);
+    // Start from the current category or the first incomplete one
+    let startCategoryIndex = 0;
+    if (currentCategory) {
+      startCategoryIndex = categories.indexOf(currentCategory);
+    }
+
+    for (let catIndex = startCategoryIndex; catIndex < categories.length; catIndex++) {
+      if (shouldStop()) {
+        logStep('⏰ Timeout approaching, stopping gracefully...');
+        await updateProgress({ 
+          status: 'timeout_restart_needed',
+          error_message: `Generation paused at ${totalGenerated} recipes due to timeout. Will auto-restart.`
+        });
+        return;
+      }
+
+      const category = categories[catIndex];
+      const existingInCategory = existingByCategory[category] || 0;
+      
+      if (existingInCategory >= 100) {
+        logStep(`✓ ${category} already complete (${existingInCategory}/100)`);
         continue;
       }
+
+      logStep(`\n=== Processing ${category} Category (${existingInCategory}/100 existing) ===`);
+      await updateProgress({ current_category: category });
       
-      logStep(`\n=== Starting ${category} Category (100 recipes) ===`);
-      
-      // Update current category
-      await supabaseClient
-        .from('recipe_generation_progress')
-        .update({ current_category: category })
-        .eq('id', progressId);
-      
-      const categoryNames = generateRecipeNames(category, 100);
+      const recipesToGenerate = 100 - existingInCategory;
+      const categoryNames = generateRecipeNames(category, recipesToGenerate);
       let categoryGenerated = 0;
       
-      // Process in smaller batches of 3 for better reliability
-      const batchSize = 3;
+      // Smaller batches for better progress tracking and error recovery
+      const batchSize = 2;
       
       for (let i = 0; i < categoryNames.length; i += batchSize) {
+        if (shouldStop()) {
+          logStep('⏰ Timeout approaching during batch processing...');
+          await updateProgress({ 
+            status: 'timeout_restart_needed',
+            generated_recipes: totalGenerated,
+            error_message: `Generation paused at ${totalGenerated} recipes due to timeout. Will auto-restart.`
+          });
+          return;
+        }
+
         const batch = categoryNames.slice(i, i + batchSize);
-        logStep(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(categoryNames.length/batchSize)} for ${category} (${batch.length} recipes)`);
+        const batchNum = Math.floor(i/batchSize) + 1;
+        const totalBatches = Math.ceil(categoryNames.length/batchSize);
+        
+        logStep(`Batch ${batchNum}/${totalBatches} for ${category}: ${batch.join(', ')}`);
         
         try {
-          // Generate recipes in parallel within the small batch
-          const batchPromises = batch.map(name => 
-            generateAIRecipe(category, name).catch(error => {
-              logStep(`Failed to generate ${name}: ${error.message}`);
-              return null;
-            })
-          );
+          // Generate recipes sequentially to avoid rate limits
+          const validRecipes = [];
+          for (const recipeName of batch) {
+            try {
+              const recipe = await generateAIRecipe(category, recipeName);
+              if (recipe) {
+                validRecipes.push(recipe);
+                logStep(`✓ Generated: ${recipeName}`);
+              }
+            } catch (error) {
+              logStep(`✗ Failed to generate ${recipeName}: ${error.message}`);
+              // Continue with next recipe
+            }
+            
+            // Small delay between individual recipes
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
           
-          const batchResults = await Promise.all(batchPromises);
-          const validRecipes = batchResults.filter(recipe => recipe !== null);
-          
+          // Insert valid recipes to database
           if (validRecipes.length > 0) {
-            // Insert batch to database immediately
             const recipesToInsert = validRecipes.map(recipe => ({
               ...recipe,
-              user_id: null, // Explicitly set to null for public AI-generated recipes
+              user_id: null,
               is_public: true
             }));
             
-            const { data: insertedRecipes, error: insertError } = await supabaseClient
+            const { error: insertError } = await supabaseClient
               .from('recipes')
-              .insert(recipesToInsert)
-              .select('id, title');
+              .insert(recipesToInsert);
             
             if (insertError) {
-              logStep(`Database insert error for batch:`, insertError.message);
+              logStep(`Database insert error:`, insertError.message);
             } else {
               categoryGenerated += validRecipes.length;
               totalGenerated += validRecipes.length;
               
-              // Update progress
-              await supabaseClient
-                .from('recipe_generation_progress')
-                .update({ generated_recipes: totalGenerated })
-                .eq('id', progressId);
+              // Update progress after each successful batch
+              await updateProgress({ generated_recipes: totalGenerated });
               
-              logStep(`✓ Successfully inserted ${validRecipes.length} recipes. Total progress: ${totalGenerated}/400`);
+              logStep(`✅ Batch complete: +${validRecipes.length} recipes. Total: ${totalGenerated}/400`);
             }
           }
           
-          // Brief pause between batches to avoid rate limits
+          // Longer pause between batches to avoid rate limits
           if (i + batchSize < categoryNames.length) {
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
-          }
-          
-          // Check if we're approaching the edge function timeout limit
-          const elapsedTime = Date.now() - startTime;
-          if (elapsedTime > 25 * 60 * 1000) { // 25 minutes - leave 5 minutes buffer
-            logStep('⚠️ Approaching edge function timeout, will resume later...');
-            
-            // Update progress with partial completion
-            await supabaseClient
-              .from('recipe_generation_progress')
-              .update({ 
-                status: 'completed',
-                completed_at: new Date().toISOString(),
-                generated_recipes: totalGenerated,
-                error_message: `Partial completion: ${totalGenerated} recipes generated. Continue generation to reach 400.`
-              })
-              .eq('id', progressId);
-            
-            // Return partial success
-            return new Response(JSON.stringify({
-              success: true,
-              message: `Generated ${totalGenerated} recipes successfully. Continue generation to reach full 400.`,
-              progress: {
-                total_recipes: 400,
-                generated_recipes: totalGenerated,
-                status: 'partial_complete'
-              }
-            }), {
-              status: 200,
-              headers: corsHeaders
-            });
+            await new Promise(resolve => setTimeout(resolve, 3000));
           }
           
         } catch (batchError) {
-          logStep(`Batch processing error:`, batchError.message);
-          // Continue with next batch
+          logStep(`Batch error:`, batchError.message);
+          // Continue with next batch after a pause
+          await new Promise(resolve => setTimeout(resolve, 5000));
         }
       }
       
-      categoryResults[category] = categoryGenerated;
-      logStep(`✓ Completed ${category}: ${categoryGenerated}/${categoryNames.length} recipes generated`);
+      logStep(`✓ ${category} category complete: generated ${categoryGenerated} new recipes`);
       
       // Pause between categories
-      if (category !== 'Dinner') {
-        logStep('Pausing before next category...');
+      if (catIndex < categories.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
 
-    // Final verification - count actual inserted recipes
-    const { data: finalCount, error: countError } = await supabaseClient
+    // Final verification
+    const { data: finalCount } = await supabaseClient
       .from('recipes')
       .select('id', { count: 'exact' })
       .is('user_id', null)
       .eq('is_public', true);
 
-    const actualCount = finalCount?.length || 0;
+    const finalTotal = finalCount?.length || 0;
 
-    logStep(`\n=== GENERATION COMPLETE ===`);
-    logStep(`Expected: 400 recipes (100 per category)`);
-    logStep(`Generated: ${totalGenerated} recipes`);
-    logStep(`In Database: ${actualCount} recipes`);
-    logStep(`Breakdown: ${JSON.stringify(categoryResults)}`);
+    logStep(`\n🎉 GENERATION COMPLETE: ${finalTotal} total recipes in database`);
 
-    // Mark as completed
-    await supabaseClient
-      .from('recipe_generation_progress')
-      .update({ 
-        status: 'completed',
-        generated_recipes: actualCount,
-        completed_at: new Date().toISOString()
-      })
-      .eq('id', progressId);
+    await updateProgress({ 
+      status: 'completed',
+      generated_recipes: finalTotal,
+      completed_at: new Date().toISOString(),
+      error_message: null
+    });
 
   } catch (error) {
-    logStep('Background generation error:', error.message);
+    logStep('💥 Background generation error:', error.message, error.stack);
     
-    // Mark as failed
-    await supabaseClient
-      .from('recipe_generation_progress')
-      .update({ 
-        status: 'failed',
-        error_message: error.message
-      })
-      .eq('id', progressId);
+    await updateProgress({ 
+      status: 'failed',
+      error_message: `Generation failed: ${error.message}`
+    });
   }
 };
 

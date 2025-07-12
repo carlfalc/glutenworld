@@ -18,7 +18,7 @@ export const useAIRecipePopulation = () => {
       const { data: progressData } = await supabase
         .from('recipe_generation_progress')
         .select('*')
-        .in('status', ['pending', 'running', 'completed'])
+        .in('status', ['pending', 'running', 'completed', 'timeout_restart_needed'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -29,6 +29,17 @@ export const useAIRecipePopulation = () => {
           setIsGenerating(true);
           // Start polling for progress updates
           pollProgress(progressData.id);
+        } else if (progressData.status === 'timeout_restart_needed') {
+          // Auto-restart after timeout
+          setIsGenerating(true);
+          toast({
+            title: "Auto-restarting Generation",
+            description: "Continuing recipe generation from where it left off...",
+            variant: "default",
+          });
+          setTimeout(() => {
+            generateAIRecipes().catch(console.error);
+          }, 1000);
         } else if (progressData.status === 'completed') {
           // Check actual recipe count
           const { data: recipes } = await supabase
@@ -84,6 +95,28 @@ export const useAIRecipePopulation = () => {
               description: progressData.error_message || "Recipe generation encountered an error.",
               variant: "destructive",
             });
+          } else if (progressData.status === 'timeout_restart_needed') {
+            clearInterval(interval);
+            toast({
+              title: "Auto-restarting Generation",
+              description: "Generation paused due to timeout. Continuing from where it left off...",
+              variant: "default",
+            });
+            
+            // Auto-restart after a short delay
+            setTimeout(async () => {
+              try {
+                await generateAIRecipes();
+              } catch (restartError) {
+                console.error('Error restarting generation:', restartError);
+                setIsGenerating(false);
+                toast({
+                  title: "Restart Failed",
+                  description: "Failed to auto-restart generation. Please try again manually.",
+                  variant: "destructive",
+                });
+              }
+            }, 2000);
           }
         }
       } catch (error) {
