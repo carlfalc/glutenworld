@@ -165,6 +165,48 @@ export type Database = {
         }
         Relationships: []
       }
+      recipe_generation_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_category: string | null
+          error_message: string | null
+          generated_recipes: number | null
+          id: string
+          started_at: string
+          status: string
+          total_recipes: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_category?: string | null
+          error_message?: string | null
+          generated_recipes?: number | null
+          id?: string
+          started_at?: string
+          status?: string
+          total_recipes?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_category?: string | null
+          error_message?: string | null
+          generated_recipes?: number | null
+          id?: string
+          started_at?: string
+          status?: string
+          total_recipes?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       recipe_likes: {
         Row: {
           created_at: string

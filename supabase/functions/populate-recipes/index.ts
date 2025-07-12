@@ -355,34 +355,19 @@ const generateRecipeNames = (category: string, count: number): string[] => {
   return recipes;
 };
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+// Background recipe generation function
+const generateRecipesInBackground = async (progressId: string) => {
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
 
   try {
-    logStep('AI Recipe Generation Started - Sequential Category Processing');
-    
-    const openAIApiKey = Deno.env.get('OPENAI') || Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      logStep('OpenAI API key not found');
-      return new Response(
-        JSON.stringify({ 
-          error: 'OpenAI API key not configured. Please add OPENAI or OPENAI_API_KEY to Supabase secrets.',
-          success: false 
-        }), 
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // Update status to running
+    await supabaseClient
+      .from('recipe_generation_progress')
+      .update({ status: 'running' })
+      .eq('id', progressId);
 
     // First, clean up any existing AI-generated recipes to avoid duplicates
     logStep('Cleaning up existing AI-generated recipes...');
@@ -404,6 +389,12 @@ serve(async (req) => {
     
     for (const category of categories) {
       logStep(`\n=== Starting ${category} Category (100 recipes) ===`);
+      
+      // Update current category
+      await supabaseClient
+        .from('recipe_generation_progress')
+        .update({ current_category: category })
+        .eq('id', progressId);
       
       const categoryNames = generateRecipeNames(category, 100);
       let categoryGenerated = 0;
@@ -428,7 +419,7 @@ serve(async (req) => {
           const validRecipes = batchResults.filter(recipe => recipe !== null);
           
           if (validRecipes.length > 0) {
-            // Insert batch to database immediately - FIXED: Set user_id to null explicitly for public recipes
+            // Insert batch to database immediately
             const recipesToInsert = validRecipes.map(recipe => ({
               ...recipe,
               user_id: null, // Explicitly set to null for public AI-generated recipes
@@ -442,11 +433,17 @@ serve(async (req) => {
             
             if (insertError) {
               logStep(`Database insert error for batch:`, insertError.message);
-              // Continue with next batch instead of failing completely
             } else {
               categoryGenerated += validRecipes.length;
               totalGenerated += validRecipes.length;
-              logStep(`✓ Successfully inserted ${validRecipes.length} recipes. Category progress: ${categoryGenerated}/${categoryNames.length}`);
+              
+              // Update progress
+              await supabaseClient
+                .from('recipe_generation_progress')
+                .update({ generated_recipes: totalGenerated })
+                .eq('id', progressId);
+              
+              logStep(`✓ Successfully inserted ${validRecipes.length} recipes. Total progress: ${totalGenerated}/400`);
             }
           }
           
@@ -486,20 +483,141 @@ serve(async (req) => {
     logStep(`In Database: ${actualCount} recipes`);
     logStep(`Breakdown: ${JSON.stringify(categoryResults)}`);
 
+    // Mark as completed
+    await supabaseClient
+      .from('recipe_generation_progress')
+      .update({ 
+        status: 'completed',
+        generated_recipes: actualCount,
+        completed_at: new Date().toISOString()
+      })
+      .eq('id', progressId);
+
+  } catch (error) {
+    logStep('Background generation error:', error.message);
+    
+    // Mark as failed
+    await supabaseClient
+      .from('recipe_generation_progress')
+      .update({ 
+        status: 'failed',
+        error_message: error.message
+      })
+      .eq('id', progressId);
+  }
+};
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    logStep('AI Recipe Generation Request Received');
+    
+    const openAIApiKey = Deno.env.get('OPENAI') || Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      logStep('OpenAI API key not found');
+      return new Response(
+        JSON.stringify({ 
+          error: 'OpenAI API key not configured. Please add OPENAI or OPENAI_API_KEY to Supabase secrets.',
+          success: false 
+        }), 
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Check if generation is already in progress or completed
+    const { data: existingProgress } = await supabaseClient
+      .from('recipe_generation_progress')
+      .select('*')
+      .in('status', ['pending', 'running', 'completed'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (existingProgress) {
+      if (existingProgress.status === 'completed') {
+        // Check how many recipes actually exist
+        const { data: recipeCount } = await supabaseClient
+          .from('recipes')
+          .select('id', { count: 'exact' })
+          .is('user_id', null)
+          .eq('is_public', true);
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: `Recipes already generated! Found ${recipeCount?.length || 0} AI-generated recipes.`,
+            already_completed: true,
+            total_in_database: recipeCount?.length || 0,
+            progress_id: existingProgress.id
+          }),
+          { 
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      } else if (existingProgress.status === 'running' || existingProgress.status === 'pending') {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: `Recipe generation already in progress! Generated ${existingProgress.generated_recipes}/400 recipes.`,
+            already_running: true,
+            progress: existingProgress,
+            progress_id: existingProgress.id
+          }),
+          { 
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
+
+    // Create new progress entry
+    const { data: progressEntry, error: progressError } = await supabaseClient
+      .from('recipe_generation_progress')
+      .insert({
+        user_id: null, // Global generation for all users
+        status: 'pending',
+        total_recipes: 400,
+        generated_recipes: 0
+      })
+      .select()
+      .single();
+
+    if (progressError || !progressEntry) {
+      throw new Error('Failed to create progress tracking entry');
+    }
+
+    // Start background generation using EdgeRuntime.waitUntil
+    EdgeRuntime.waitUntil(generateRecipesInBackground(progressEntry.id));
+
+    logStep(`Started background recipe generation with progress ID: ${progressEntry.id}`);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Successfully generated ${actualCount} AI-powered gluten-free recipes`,
-        breakdown: categoryResults,
-        total_generated: totalGenerated,
-        total_in_database: actualCount,
-        sequential_processing: true
+        message: 'Recipe generation started in background! You can navigate away and check back later.',
+        started_in_background: true,
+        progress_id: progressEntry.id,
+        check_progress_tip: 'The progress will be tracked and recipes will continue generating even if you navigate away.'
       }),
       { 
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
-    )
+    );
 
   } catch (error) {
     logStep('Function error:', error.message);
@@ -512,6 +630,6 @@ serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
-    )
+    );
   }
 })

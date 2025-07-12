@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Brain, Sparkles, Lock } from 'lucide-react';
+import { Brain, Sparkles, Lock, CheckCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { useAIRecipePopulation } from '@/hooks/useAIRecipePopulation';
 import { useAIGeneratorAccess } from '@/hooks/useAIGeneratorAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export const AIRecipeGenerator = () => {
-  const { generateAIRecipes, isGenerating } = useAIRecipePopulation();
+  const { generateAIRecipes, isGenerating, progress, generatedRecipeCount } = useAIRecipePopulation();
   const { hasAccess, hasPaidUpgrade, loading, purchaseUpgrade } = useAIGeneratorAccess();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
@@ -98,6 +99,49 @@ export const AIRecipeGenerator = () => {
           Each recipe includes: detailed ingredients, step-by-step instructions, nutritional info, cooking times, and beautiful images.
         </div>
 
+        {/* Progress Display */}
+        {hasAccess && (progress || generatedRecipeCount > 0) && (
+          <div className="space-y-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
+            {progress?.status === 'completed' || generatedRecipeCount >= 400 ? (
+              <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-semibold">Generation Complete!</span>
+              </div>
+            ) : isGenerating ? (
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <Clock className="w-5 h-5" />
+                <span className="font-semibold">Generating in Background...</span>
+              </div>
+            ) : null}
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Progress: {progress?.generated_recipes || generatedRecipeCount}/400 recipes</span>
+                <span>{Math.round(((progress?.generated_recipes || generatedRecipeCount) / 400) * 100)}%</span>
+              </div>
+              <Progress 
+                value={((progress?.generated_recipes || generatedRecipeCount) / 400) * 100} 
+                className="h-2"
+              />
+              {progress?.current_category && (
+                <p className="text-xs text-muted-foreground">
+                  Currently generating: {progress.current_category} recipes
+                </p>
+              )}
+            </div>
+            
+            {progress?.status === 'completed' || generatedRecipeCount >= 400 ? (
+              <p className="text-sm text-green-700 dark:text-green-300">
+                ✨ {generatedRecipeCount || progress?.generated_recipes} AI-generated recipes are now available! Browse them using the category tabs above.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                💡 You can navigate away and come back - generation continues in the background!
+              </p>
+            )}
+          </div>
+        )}
+
         <Button 
           onClick={handleClick}
           className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-medium"
@@ -106,7 +150,12 @@ export const AIRecipeGenerator = () => {
           {isGenerating ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Generating Recipes...
+              Generating... ({progress?.generated_recipes || 0}/400)
+            </>
+          ) : progress?.status === 'completed' || generatedRecipeCount >= 400 ? (
+            <>
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Recipes Ready! ({generatedRecipeCount} Generated)
             </>
           ) : hasAccess ? (
             <>
@@ -170,8 +219,8 @@ export const AIRecipeGenerator = () => {
                   <li>100 Lunch recipes</li>
                   <li>100 Dinner recipes</li>
                 </ul>
-                <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
-                  <strong>Note:</strong> Recipes will be generated in batches and added to your existing collection. This process may take several minutes to complete.
+                <p className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-300 p-2 rounded">
+                  <strong>Background Generation:</strong> Recipes will be generated in the background - you can navigate away and come back to check progress! Generation continues even if you leave this page.
                 </p>
                 <p className="text-sm">Each recipe will include detailed ingredients, instructions, nutritional information, and cooking times.</p>
               </AlertDialogDescription>
