@@ -99,6 +99,9 @@ export const useAIRecipePopulation = () => {
     console.log('=== AI Recipe Population starting! ===');
     console.log('Button clicked - function called');
     
+    // Set generating state immediately for user feedback
+    setIsGenerating(true);
+    
     try {
       console.log('Invoking populate-recipes function...');
       
@@ -114,6 +117,7 @@ export const useAIRecipePopulation = () => {
 
       if (error) {
         console.error('Supabase function error:', error);
+        setIsGenerating(false); // Reset generating state on error
         toast({
           title: "Error",
           description: `Failed to start recipe generation: ${error.message}`,
@@ -126,6 +130,7 @@ export const useAIRecipePopulation = () => {
       
       if (data && data.error) {
         console.error('Function returned error:', data.error);
+        setIsGenerating(false); // Reset generating state on error
         toast({
           title: "Error",
           description: data.error,
@@ -163,6 +168,7 @@ export const useAIRecipePopulation = () => {
 
       return data;
     } catch (error: any) {
+      setIsGenerating(false); // Reset generating state on error
       console.error('Error in generateAIRecipes:', error);
       
       let errorMessage = "Failed to start recipe generation";
