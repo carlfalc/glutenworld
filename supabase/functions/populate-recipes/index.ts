@@ -369,17 +369,20 @@ const generateRecipesInBackground = async (progressId: string) => {
       .update({ status: 'running' })
       .eq('id', progressId);
 
-    // First, clean up any existing AI-generated recipes to avoid duplicates
-    logStep('Cleaning up existing AI-generated recipes...');
-    const { error: deleteError } = await supabaseClient
+    // Check existing AI-generated recipes to avoid duplicates
+    logStep('Checking existing AI-generated recipes...');
+    const { data: existingRecipes, error: checkError } = await supabaseClient
       .from('recipes')
-      .delete()
+      .select('cuisine_type')
       .is('user_id', null)
       .eq('is_public', true);
     
-    if (deleteError) {
-      logStep('Warning: Could not clean up existing recipes:', deleteError.message);
+    if (checkError) {
+      logStep('Warning: Could not check existing recipes:', checkError.message);
     }
+    
+    const existingCategories = new Set(existingRecipes?.map(r => r.cuisine_type) || []);
+    logStep('Existing categories found:', Array.from(existingCategories));
 
     let totalGenerated = 0;
     const categoryResults: Record<string, number> = {};
@@ -388,6 +391,24 @@ const generateRecipesInBackground = async (progressId: string) => {
     const categories = ['Breakfast', 'Snacks', 'Lunch', 'Dinner'];
     
     for (const category of categories) {
+      // Skip categories that already have recipes
+      if (existingCategories.has(category)) {
+        logStep(`\n=== Skipping ${category} Category (already has recipes) ===`);
+        // Count existing recipes for this category
+        const { data: categoryCount } = await supabaseClient
+          .from('recipes')
+          .select('id', { count: 'exact' })
+          .is('user_id', null)
+          .eq('is_public', true)
+          .eq('cuisine_type', category);
+        
+        const existingCount = categoryCount?.length || 0;
+        categoryResults[category] = existingCount;
+        totalGenerated += existingCount;
+        logStep(`✓ Found ${existingCount} existing ${category} recipes`);
+        continue;
+      }
+      
       logStep(`\n=== Starting ${category} Category (100 recipes) ===`);
       
       // Update current category
