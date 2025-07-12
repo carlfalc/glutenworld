@@ -620,19 +620,37 @@ serve(async (req) => {
           .is('user_id', null)
           .eq('is_public', true);
 
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: `Recipes already generated! Found ${recipeCount?.length || 0} AI-generated recipes.`,
-            already_completed: true,
-            total_in_database: recipeCount?.length || 0,
-            progress_id: existingProgress.id
-          }),
-          { 
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
+        const totalRecipes = recipeCount?.length || 0;
+        
+        // Only return as completed if we actually have 400 recipes
+        if (totalRecipes >= 400) {
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              message: `Recipes already generated! Found ${totalRecipes} AI-generated recipes.`,
+              already_completed: true,
+              total_in_database: totalRecipes,
+              progress_id: existingProgress.id
+            }),
+            { 
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        } else {
+          // Reset progress to continue generation
+          await supabaseClient
+            .from('recipe_generation_progress')
+            .update({ 
+              status: 'timeout_restart_needed',
+              generated_recipes: totalRecipes,
+              error_message: `Found ${totalRecipes}/400 recipes. Continuing generation...`,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingProgress.id);
+          
+          logStep(`Found incomplete generation: ${totalRecipes}/400 recipes. Restarting...`);
+        }
       } else if (existingProgress.status === 'running' || existingProgress.status === 'pending') {
         return new Response(
           JSON.stringify({ 
