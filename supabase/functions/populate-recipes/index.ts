@@ -183,7 +183,9 @@ function generateRecipeNames(category: string, count: number): string[] {
   for (let i = 0; i < count; i++) {
     const baseName = baseNames[i % baseNames.length];
     const variation = variations[Math.floor(i / baseNames.length) % variations.length];
-    names.push(`${variation} ${baseName}`);
+    const timestamp = Date.now();
+    const randomId = Math.floor(Math.random() * 1000);
+    names.push(`${variation} ${baseName} ${timestamp}_${randomId}`);
   }
 
   return names;
