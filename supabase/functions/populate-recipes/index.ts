@@ -229,10 +229,26 @@ async function generateRecipesInBackground(progressId: string) {
       console.log(`Found ${generatedCount} existing recipes, continuing from there...`);
     }
 
-    const totalRecipes = 400;
+    // Get target recipes from progress entry
+    const progressResponse = await fetch(`${supabaseUrl}/rest/v1/recipe_generation_progress?id=eq.${progressId}&select=total_recipes`, {
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'apikey': supabaseServiceKey,
+      }
+    });
+    
+    let totalRecipes = 400; // default
+    if (progressResponse.ok) {
+      const progressData = await progressResponse.json();
+      if (progressData.length > 0) {
+        totalRecipes = progressData[0].total_recipes;
+      }
+    }
+    
+    console.log(`Target: ${totalRecipes} recipes (currently have ${generatedCount})`);
     const categories = ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts', 'Beverages'];
 
-    // Generate one recipe at a time until we reach 400
+    // Generate recipes until we reach target
     while (generatedCount < totalRecipes) {
       const category = categories[generatedCount % categories.length];
       
@@ -253,9 +269,9 @@ async function generateRecipesInBackground(progressId: string) {
         })
       });
 
-      // Generate unique recipe name
+      // Generate unique recipe name with better uniqueness
       const timestamp = Date.now();
-      const randomId = Math.floor(Math.random() * 10000);
+      const randomId = Math.floor(Math.random() * 100000);
       const baseNames = generateRecipeNames(category, 1);
       const recipeName = `${baseNames[0]}_${timestamp}_${randomId}`;
 
@@ -263,27 +279,48 @@ async function generateRecipesInBackground(progressId: string) {
         console.log(`Generating: ${recipeName}`);
         const recipe = await generateAIRecipe(category, recipeName);
 
-        // Insert recipe
-        const insertResponse = await fetch(`${supabaseUrl}/rest/v1/recipes`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${supabaseServiceKey}`,
-            'Content-Type': 'application/json',
-            'apikey': supabaseServiceKey,
-          },
-          body: JSON.stringify(recipe)
-        });
+        // Make title even more unique to avoid duplicates
+        const uniqueTitle = `${recipe.title}_${timestamp}_${randomId}`;
+        recipe.title = uniqueTitle;
 
-        if (insertResponse.ok) {
-          generatedCount++;
-          console.log(`✓ SUCCESS: Recipe ${generatedCount}/${totalRecipes} created: ${recipe.title}`);
-        } else {
-          const errorText = await insertResponse.text();
-          console.error(`✗ FAILED to insert recipe: ${insertResponse.status} - ${errorText}`);
+        // Insert recipe with retry on duplicate
+        let insertSuccess = false;
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (!insertSuccess && retryCount < maxRetries) {
+          const insertResponse = await fetch(`${supabaseUrl}/rest/v1/recipes`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseServiceKey}`,
+              'Content-Type': 'application/json',
+              'apikey': supabaseServiceKey,
+            },
+            body: JSON.stringify(recipe)
+          });
+
+          if (insertResponse.ok) {
+            generatedCount++;
+            console.log(`✓ SUCCESS: Recipe ${generatedCount}/${totalRecipes} created: ${recipe.title}`);
+            insertSuccess = true;
+          } else {
+            const errorText = await insertResponse.text();
+            if (errorText.includes('unique_recipe_title') && retryCount < maxRetries - 1) {
+              // Duplicate title, modify and retry
+              retryCount++;
+              const newTimestamp = Date.now();
+              const newRandomId = Math.floor(Math.random() * 100000);
+              recipe.title = `${recipe.title}_retry${retryCount}_${newTimestamp}_${newRandomId}`;
+              console.log(`Duplicate title detected, retrying with: ${recipe.title}`);
+            } else {
+              console.error(`✗ FAILED to insert recipe after ${retryCount + 1} attempts: ${insertResponse.status} - ${errorText}`);
+              break;
+            }
+          }
         }
 
-        // Small delay between recipes
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Reduced delay for faster generation
+        await new Promise(resolve => setTimeout(resolve, 100));
 
       } catch (error) {
         console.error(`✗ ERROR generating recipe "${recipeName}":`, error);
@@ -341,7 +378,23 @@ Deno.serve(async (req) => {
 
     console.log('Populate recipes function called');
 
-    // Check if we already have 400 recipes
+    // Check for existing progress to get target
+    let targetRecipes = 400; // default
+    const progressCheckResponse = await fetch(`${supabaseUrl}/rest/v1/recipe_generation_progress?order=created_at.desc&limit=1`, {
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'apikey': supabaseServiceKey,
+      }
+    });
+    
+    if (progressCheckResponse.ok) {
+      const progressData = await progressCheckResponse.json();
+      if (progressData.length > 0) {
+        targetRecipes = progressData[0].total_recipes;
+      }
+    }
+
+    // Check if we already have target recipes
     const existingResponse = await fetch(`${supabaseUrl}/rest/v1/recipes?user_id=is.null&is_public=eq.true&select=id`, {
       headers: {
         'Authorization': `Bearer ${supabaseServiceKey}`,
@@ -351,12 +404,13 @@ Deno.serve(async (req) => {
 
     if (existingResponse.ok) {
       const existingRecipes = await existingResponse.json();
-      if (existingRecipes.length >= 400) {
+      if (existingRecipes.length >= targetRecipes) {
         return new Response(
           JSON.stringify({
             already_completed: true,
-            message: `Recipe generation already completed! Found ${existingRecipes.length} recipes in the database.`,
-            total_in_database: existingRecipes.length
+            message: `Recipe generation already completed! Found ${existingRecipes.length} recipes in the database (target: ${targetRecipes}).`,
+            total_in_database: existingRecipes.length,
+            target: targetRecipes
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -423,7 +477,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         status: 'pending',
-        total_recipes: 400,
+        total_recipes: targetRecipes,
         generated_recipes: 0,
         current_category: 'Starting',
         started_at: new Date().toISOString()
@@ -443,7 +497,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         started_in_background: true,
-        message: 'Recipe generation started in the background! This will take about 30-45 minutes to generate 400 recipes.',
+        message: `Recipe generation started in the background! This will take about ${Math.ceil(targetRecipes * 0.5)} minutes to generate ${targetRecipes} recipes.`,
         progress_id: progressId
       }),
       { 
