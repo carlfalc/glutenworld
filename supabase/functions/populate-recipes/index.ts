@@ -379,6 +379,8 @@ const generateRecipeNames = (category: string, count: number): string[] => {
 
 // Background recipe generation function
 const generateRecipesInBackground = async (progressId: string) => {
+  const startTime = Date.now(); // Track start time for timeout handling
+  
   const supabaseClient = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -492,7 +494,38 @@ const generateRecipesInBackground = async (progressId: string) => {
           
           // Brief pause between batches to avoid rate limits
           if (i + batchSize < categoryNames.length) {
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Increased to 2 seconds
+          }
+          
+          // Check if we're approaching the edge function timeout limit
+          const elapsedTime = Date.now() - startTime;
+          if (elapsedTime > 25 * 60 * 1000) { // 25 minutes - leave 5 minutes buffer
+            logStep('⚠️ Approaching edge function timeout, will resume later...');
+            
+            // Update progress with partial completion
+            await supabaseClient
+              .from('recipe_generation_progress')
+              .update({ 
+                status: 'completed',
+                completed_at: new Date().toISOString(),
+                generated_recipes: totalGenerated,
+                error_message: `Partial completion: ${totalGenerated} recipes generated. Continue generation to reach 400.`
+              })
+              .eq('id', progressId);
+            
+            // Return partial success
+            return new Response(JSON.stringify({
+              success: true,
+              message: `Generated ${totalGenerated} recipes successfully. Continue generation to reach full 400.`,
+              progress: {
+                total_recipes: 400,
+                generated_recipes: totalGenerated,
+                status: 'partial_complete'
+              }
+            }), {
+              status: 200,
+              headers: corsHeaders
+            });
           }
           
         } catch (batchError) {
