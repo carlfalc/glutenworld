@@ -16,7 +16,8 @@ export const AIRecipeGenerator = () => {
 
   const handleGenerate = async () => {
     setShowConfirmDialog(false);
-    await generateAIRecipes();
+    // Start generation - this will update isGenerating state immediately
+    generateAIRecipes();
   };
 
   const handleUpgrade = async () => {
@@ -100,7 +101,7 @@ export const AIRecipeGenerator = () => {
         </div>
 
         {/* Progress Display */}
-        {hasAccess && (progress || generatedRecipeCount > 0) && (
+        {hasAccess && (isGenerating || progress || generatedRecipeCount > 0) && (
           <div className="space-y-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
             {progress?.status === 'completed' || generatedRecipeCount >= 400 ? (
               <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
@@ -220,7 +221,7 @@ export const AIRecipeGenerator = () => {
                   <li>100 Dinner recipes</li>
                 </ul>
                 <p className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-300 p-2 rounded">
-                  <strong>Background Generation:</strong> Recipes will be generated in the background - you can navigate away and come back to check progress! Generation continues even if you leave this page.
+                  <strong>Background Generation:</strong> This process takes several minutes. You can navigate away and come back to check progress - generation continues in the background!
                 </p>
                 <p className="text-sm">Each recipe will include detailed ingredients, instructions, nutritional information, and cooking times.</p>
               </AlertDialogDescription>
