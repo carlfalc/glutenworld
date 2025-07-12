@@ -10,49 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChefHat, Search, Filter, Plus, Clock, Users, Star, BookOpen, Heart } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useRecipes } from '@/hooks/useRecipes';
 
 const MyRecipes = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const { data: favoritedRecipes = [] } = useFavorites('recipe');
-
-  // Mock data for recipes - in a real app, this would come from your backend
-  const myRecipes = [
-    {
-      id: 1,
-      title: "Gluten-Free Chocolate Chip Cookies",
-      description: "Converted from traditional recipe using almond flour",
-      cookTime: "25 min",
-      servings: 12,
-      rating: 4.8,
-      category: "Desserts",
-      dateCreated: "2024-01-15",
-      isGlutenFree: true
-    },
-    {
-      id: 2,
-      title: "GF Banana Bread",
-      description: "Moist and delicious gluten-free banana bread",
-      cookTime: "60 min",
-      servings: 8,
-      rating: 4.6,
-      category: "Baking",
-      dateCreated: "2024-01-10",
-      isGlutenFree: true
-    },
-    {
-      id: 3,
-      title: "Quinoa Stuffed Bell Peppers",
-      description: "Healthy and naturally gluten-free dinner option",
-      cookTime: "45 min",
-      servings: 4,
-      rating: 4.7,
-      category: "Main Dishes",
-      dateCreated: "2024-01-08",
-      isGlutenFree: true
-    }
-  ];
+  const { data: myRecipes = [], isLoading } = useRecipes();
 
   const favoriteRecipes = [
     {
@@ -69,7 +34,7 @@ const MyRecipes = () => {
 
   const filteredRecipes = myRecipes.filter(recipe =>
     recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipe.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (recipe.converted_recipe && recipe.converted_recipe.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -150,34 +115,36 @@ const MyRecipes = () => {
                             type="recipe" 
                             itemId={recipe.id.toString()} 
                           />
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                            {recipe.rating}
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{recipe.description}</p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-4">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {recipe.cookTime}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            {recipe.servings}
-                          </span>
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                          Gluten-Free
-                        </span>
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-border/50">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-muted-foreground">
-                            Created {new Date(recipe.dateCreated).toLocaleDateString()}
+                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                             <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                             {recipe.average_rating?.toFixed(1) || 'N/A'}
+                           </div>
+                         </div>
+                       </div>
+                       <p className="text-sm text-muted-foreground line-clamp-2">
+                         {recipe.converted_recipe || recipe.original_recipe || 'No description available'}
+                       </p>
+                     </CardHeader>
+                     <CardContent>
+                       <div className="flex items-center justify-between text-sm text-muted-foreground">
+                         <div className="flex items-center gap-4">
+                           <span className="flex items-center gap-1">
+                             <Clock className="w-4 h-4" />
+                             {recipe.cook_time ? `${recipe.cook_time} min` : 'N/A'}
+                           </span>
+                           <span className="flex items-center gap-1">
+                             <Users className="w-4 h-4" />
+                             {recipe.servings || 'N/A'}
+                           </span>
+                         </div>
+                         <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                           Gluten-Free
+                         </span>
+                       </div>
+                       <div className="mt-4 pt-4 border-t border-border/50">
+                         <div className="flex justify-between items-center">
+                           <span className="text-xs text-muted-foreground">
+                             Created {new Date(recipe.created_at).toLocaleDateString()}
                           </span>
                           <Button size="sm" variant="outline">
                             View Recipe
