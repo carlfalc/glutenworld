@@ -9,16 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export const AIRecipeGenerator = () => {
-  const { generateAIRecipes, isGenerating, progress, generatedRecipeCount } = useAIRecipePopulation();
   const { hasAccess, hasPaidUpgrade, loading, purchaseUpgrade } = useAIGeneratorAccess();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-
-  const handleGenerate = async () => {
-    setShowConfirmDialog(false);
-    // Start generation - this will update isGenerating state immediately
-    generateAIRecipes();
-  };
 
   const handleUpgrade = async () => {
     try {
@@ -42,9 +34,7 @@ export const AIRecipeGenerator = () => {
   };
 
   const handleClick = () => {
-    if (hasAccess) {
-      setShowConfirmDialog(true);
-    } else {
+    if (!hasAccess) {
       setShowUpgradeDialog(true);
     }
   };
@@ -100,73 +90,33 @@ export const AIRecipeGenerator = () => {
           Each recipe includes: detailed ingredients, step-by-step instructions, nutritional info, cooking times, and beautiful images.
         </div>
 
-        {/* Progress Display */}
-        {hasAccess && (isGenerating || progress || generatedRecipeCount > 0) && (
+        {/* Access Status Display */}
+        {hasAccess ? (
           <div className="space-y-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
-            {progress?.status === 'completed' || generatedRecipeCount >= 400 ? (
-              <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-semibold">Generation Complete!</span>
-              </div>
-            ) : isGenerating ? (
-              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                <Clock className="w-5 h-5" />
-                <span className="font-semibold">Generating in Background...</span>
-              </div>
-            ) : null}
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Progress: {progress?.generated_recipes || generatedRecipeCount}/400 recipes</span>
-                <span>{Math.round(((progress?.generated_recipes || generatedRecipeCount) / 400) * 100)}%</span>
-              </div>
-              <Progress 
-                value={((progress?.generated_recipes || generatedRecipeCount) / 400) * 100} 
-                className="h-2"
-              />
-              {progress?.current_category && (
-                <p className="text-xs text-muted-foreground">
-                  Currently generating: {progress.current_category} recipes
-                </p>
-              )}
+            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-semibold">Premium Access Activated!</span>
             </div>
-            
-            {progress?.status === 'completed' || generatedRecipeCount >= 400 ? (
-              <p className="text-sm text-green-700 dark:text-green-300">
-                ✨ {generatedRecipeCount || progress?.generated_recipes} AI-generated recipes are now available! Browse them using the category tabs above.
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                💡 You can navigate away and come back - generation continues in the background!
-              </p>
-            )}
+            <p className="text-sm text-green-700 dark:text-green-300">
+              ✨ You now have access to our curated collection of AI-generated gluten-free recipes! Browse them using the category tabs above.
+            </p>
           </div>
-        )}
+        ) : null}
 
         <Button 
           onClick={handleClick}
           className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-medium"
-          disabled={isGenerating || loading}
+          disabled={loading}
         >
-          {isGenerating ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Generating... ({progress?.generated_recipes || 0}/400)
-            </>
-          ) : progress?.status === 'completed' || generatedRecipeCount >= 400 ? (
+          {hasAccess ? (
             <>
               <CheckCircle className="w-4 h-4 mr-2" />
-              Recipes Ready! ({generatedRecipeCount} Generated)
-            </>
-          ) : hasAccess ? (
-            <>
-              <Brain className="w-4 h-4 mr-2" />
-              Generate 400 AI Recipes
+              Access Granted - Browse Recipes Above
             </>
           ) : (
             <>
               <Lock className="w-4 h-4 mr-2" />
-              Unlock for $4.99/year
+              Unlock Premium Recipes for $4.99/year
             </>
           )}
         </Button>
@@ -186,14 +136,14 @@ export const AIRecipeGenerator = () => {
         <AlertDialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Unlock AI Recipe Generator</AlertDialogTitle>
+              <AlertDialogTitle>Unlock Premium AI Recipes</AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
-                <p>Get yearly access to generate 400 unique AI-powered gluten-free recipes for just <strong>$4.99</strong>!</p>
+                <p>Get yearly access to our curated collection of AI-generated gluten-free recipes for just <strong>$4.99</strong>!</p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>100 Breakfast recipes</li>
-                  <li>100 Snack recipes</li>
-                  <li>100 Lunch recipes</li>
-                  <li>100 Dinner recipes</li>
+                  <li>Breakfast recipes</li>
+                  <li>Snack recipes</li>
+                  <li>Lunch recipes</li>
+                  <li>Dinner recipes</li>
                 </ul>
                 <p className="text-sm">Each recipe includes detailed ingredients, instructions, nutritional information, and cooking times.</p>
               </AlertDialogDescription>
@@ -202,34 +152,6 @@ export const AIRecipeGenerator = () => {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleUpgrade} className="bg-gluten-primary hover:bg-gluten-primary/90">
                 Purchase for $4.99
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Generate Dialog */}
-        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Generate 400 AI-Powered Recipes?</AlertDialogTitle>
-              <AlertDialogDescription className="space-y-2">
-                <p>This will generate 400 unique, detailed gluten-free recipes using AI:</p>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>100 Breakfast recipes</li>
-                  <li>100 Snack recipes</li>
-                  <li>100 Lunch recipes</li>
-                  <li>100 Dinner recipes</li>
-                </ul>
-                <p className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-300 p-2 rounded">
-                  <strong>Background Generation:</strong> This process takes several minutes. You can navigate away and come back to check progress - generation continues in the background!
-                </p>
-                <p className="text-sm">Each recipe will include detailed ingredients, instructions, nutritional information, and cooking times.</p>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleGenerate}>
-                Generate Recipes
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

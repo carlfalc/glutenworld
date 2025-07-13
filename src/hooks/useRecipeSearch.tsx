@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAIGeneratorAccess } from '@/hooks/useAIGeneratorAccess';
 
 export interface DatabaseRecipe {
   id: string;
@@ -49,6 +50,7 @@ export const useRecipeSearch = () => {
   const [loading, setLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const { toast } = useToast();
+  const { hasAccess } = useAIGeneratorAccess();
 
   const searchRecipes = useCallback(async (
     query: string = '',
@@ -60,6 +62,19 @@ export const useRecipeSearch = () => {
     setLoading(true);
     
     try {
+      // Check if user has access to premium recipes
+      if (!hasAccess) {
+        console.log('🔍 User does not have access to premium recipes');
+        setSearchResult({
+          recipes: [],
+          totalCount: 0,
+          currentPage: page,
+          totalPages: 0
+        });
+        setLoading(false);
+        return;
+      }
+
       console.log('🔍 Building query for recipes table...');
       let queryBuilder = supabase
         .from('recipes')
@@ -162,7 +177,7 @@ export const useRecipeSearch = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]); // Add toast back but it shouldn't cause infinite loops now
+  }, [toast, hasAccess]); // Add hasAccess dependency
 
   const populateDatabase = useCallback(async () => {
     try {
