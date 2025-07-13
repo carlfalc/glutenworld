@@ -185,14 +185,33 @@ const ChatInterface = () => {
     const currentInput = inputValue;
     setInputValue('');
 
+    // Check if we're in recipe-creator mode and user is providing a recipe name
+    // (serving size has been selected and we're not awaiting it anymore)
+    const isRecipeNameRequest = chatMode === 'recipe-creator' && !isAwaitingServingSize && servingSize;
+
     try {
+      // If user is providing a recipe name, first acknowledge with the "whizz this up" message
+      if (isRecipeNameRequest) {
+        const acknowledgmentMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: "Great! let me whizz this up, I'll be right back!",
+          isUser: false,
+          timestamp: new Date(),
+          mode: chatMode,
+        };
+        addMessage(acknowledgmentMessage);
+        
+        // Small delay before generating the recipe for better UX
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
       const response = await contextualAI.mutateAsync({ 
         message: currentInput,
         context: { servingSize, chatMode }
       });
 
       const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
+        id: (Date.now() + 2).toString(),
         text: response.response || "I'm sorry, I couldn't process that request. Please try again.",
         isUser: false,
         timestamp: new Date(),

@@ -4,14 +4,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Users, User, UserPlus, Coffee } from 'lucide-react';
 import { useChatContext } from '@/contexts/ChatContext';
+import { usePersistentChat } from '@/hooks/usePersistentChat';
 
 const ServingSizeSelector = () => {
   const { setServingSize, setIsAwaitingServingSize } = useChatContext();
+  const { addMessage } = usePersistentChat();
   const [customSize, setCustomSize] = useState('');
 
   const handleServingSelection = (size: number) => {
     setServingSize(size);
     setIsAwaitingServingSize(false);
+    
+    // Add follow-up message from AI after serving size is selected
+    const followUpMessage = {
+      id: `followup-${Date.now()}`,
+      text: "Recipe Creator mode activated! I'll help you create amazing Gluten Free recipes, thanks for the serving size you have selected. Now tell me what recipe would you like?",
+      isUser: false,
+      timestamp: new Date(),
+      mode: 'recipe-creator',
+    };
+    
+    // Add the message after a short delay for better UX
+    setTimeout(() => {
+      addMessage(followUpMessage);
+    }, 500);
   };
 
   const handleCustomSize = () => {
