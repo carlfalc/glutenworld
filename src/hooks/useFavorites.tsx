@@ -30,7 +30,7 @@ export const useFavorites = (type?: 'recipe' | 'product') => {
   return useQuery({
     queryKey: ['favorites', user?.id, type],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) throw new Error('User not authenticated');
       
       let query = supabase
         .from('user_favorites')
@@ -48,6 +48,7 @@ export const useFavorites = (type?: 'recipe' | 'product') => {
       return data || [];
     },
     enabled: !!user,
+    retry: false, // Don't retry auth errors
   });
 };
 
@@ -147,5 +148,6 @@ export const useIsFavorite = (type: 'recipe' | 'product', identifier: { productN
       return !!data;
     },
     enabled: !!user && ((type === 'recipe' && !!identifier.itemId) || (type === 'product' && !!identifier.productName)),
+    retry: false, // Don't retry auth errors
   });
 };
