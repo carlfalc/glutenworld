@@ -142,9 +142,9 @@ export const useIsFavorite = (type: 'recipe' | 'product', identifier: { productN
         return false;
       }
 
-      const { data, error } = await query.single();
+      const { data, error } = await query.maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
       return !!data;
     },
     enabled: !!user && ((type === 'recipe' && !!identifier.itemId) || (type === 'product' && !!identifier.productName)),
