@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { Brain, Sparkles, Lock, CheckCircle, Clock } from 'lucide-react';
+import { Brain, Sparkles, Lock, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { useAIRecipePopulation } from '@/hooks/useAIRecipePopulation';
 import { useAIGeneratorAccess } from '@/hooks/useAIGeneratorAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -87,7 +85,7 @@ export const AIRecipeGenerator = () => {
         </div>
         
         <div className="text-xs text-muted-foreground bg-accent/20 p-2 rounded">
-          Each recipe includes: detailed ingredients, step-by-step instructions, nutritional info, cooking times, and beautiful images.
+          Each recipe includes: detailed ingredients, step-by-step instructions, nutritional info, and cooking times.
         </div>
 
         {/* Access Status Display */}
