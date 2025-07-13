@@ -73,26 +73,26 @@ export const AIRecipeGenerator = () => {
           AI Generated Recipes
         </CardTitle>
         <CardDescription className="text-sm">
-          Browse 400 unique, detailed gluten-free recipes powered by AI
+          Browse unique, detailed gluten-free recipes powered by AI
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-muted-foreground space-y-2">
           <p className="flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <strong>100 Breakfast</strong> recipes
+            <strong>Breakfast</strong> recipes
           </p>
           <p className="flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <strong>100 Snack</strong> recipes  
+            <strong>Snack</strong> recipes  
           </p>
           <p className="flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <strong>100 Lunch</strong> recipes
+            <strong>Lunch</strong> recipes
           </p>
           <p className="flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <strong>100 Dinner</strong> recipes
+            <strong>Dinner</strong> recipes
           </p>
         </div>
         
