@@ -69,8 +69,9 @@ const ChatInterface = () => {
   const contextualAI = useContextualAI();
   const recipeConversion = useRecipeConversion();
 
-  console.log('ChatInterface render - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
-  console.log('Messages count:', messages.length);
+  console.log('🔴 ChatInterface render - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
+  console.log('🔴 ChatInterface render - isAwaitingServingSize:', isAwaitingServingSize, 'servingSize:', servingSize);
+  console.log('🔴 Messages count:', messages.length);
 
   // Voice recognition setup
   const voiceRecognition = useVoiceRecognition({

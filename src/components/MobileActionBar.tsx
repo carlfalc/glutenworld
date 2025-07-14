@@ -15,8 +15,9 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
   const [showFavorites, setShowFavorites] = useState(false);
 
   const handleRecipeCreator = () => {
-    console.log('Recipe Creator button clicked');
+    console.log('🟢 MobileActionBar: Recipe Creator button clicked');
     setChatMode('recipe-creator');
+    console.log('🟢 MobileActionBar: Set chat mode to recipe-creator');
     // Don't set setIsAwaitingServingSize here - let ChatInterface handle it
   };
 
