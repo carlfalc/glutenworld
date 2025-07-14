@@ -154,10 +154,13 @@ const ChatInterface = () => {
         mode: chatMode,
       };
 
+      console.log('Adding mode message:', modeMessages[chatMode]);
       addMessage(modeMessage);
       setModeMessageSent(chatMode);
 
-      if (chatMode === 'recipe-creator') {
+      // For recipe creator mode, show serving size selector only if no serving size is set
+      if (chatMode === 'recipe-creator' && !servingSize) {
+        console.log('Setting isAwaitingServingSize to true - no serving size set');
         setIsAwaitingServingSize(true);
       }
     }
