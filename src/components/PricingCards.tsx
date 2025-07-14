@@ -52,7 +52,7 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       description: "Best value for committed users",
       features: [
         "Everything in Quarterly",
-        "AI Recipe Generator (400 recipes)",
+        "Library of tested recipes",
         "Advanced nutrition tracking",
         "Custom recipe collections",
         "Early access to new features",
