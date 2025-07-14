@@ -162,7 +162,7 @@ const ChatInterface = () => {
         setIsAwaitingServingSize(true);
       }
     }
-  }, [chatMode, modeMessageSent, addMessage, setIsAwaitingServingSize, servingSize]);
+  }, [chatMode, addMessage, setIsAwaitingServingSize, servingSize]);
 
   // Reset mode message tracking when mode changes to general
   useEffect(() => {
