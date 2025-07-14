@@ -134,7 +134,7 @@ const ChatInterface = () => {
 
   // Add mode indicator message when mode changes
   useEffect(() => {
-    console.log('🎯 ChatInterface: Mode change effect triggered - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent, 'servingSize:', servingSize, 'isAwaitingServingSize:', isAwaitingServingSize);
+    console.log('🎯 ChatInterface: Mode change effect triggered - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
     
     if (chatMode !== 'general' && modeMessageSent !== chatMode) {
       console.log('🎯 ChatInterface: Adding mode indicator message for:', chatMode);
@@ -160,13 +160,13 @@ const ChatInterface = () => {
 
       // For recipe creator mode, show serving size selector
       if (chatMode === 'recipe-creator') {
-        console.log('🎯 ChatInterface: Setting isAwaitingServingSize to true - no serving size set');
+        console.log('🎯 ChatInterface: Setting isAwaitingServingSize to true');
         setIsAwaitingServingSize(true);
       }
     } else {
       console.log('🎯 ChatInterface: Mode change effect - NOT adding message. Conditions not met.');
     }
-  }, [chatMode, addMessage, setIsAwaitingServingSize, servingSize]);
+  }, [chatMode, addMessage, setIsAwaitingServingSize]);
 
   // Reset mode message tracking when mode changes to general OR when serving size is set for recipe-creator
   useEffect(() => {
