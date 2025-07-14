@@ -136,15 +136,7 @@ const ChatInterface = () => {
   useEffect(() => {
     console.log('🎯 ChatInterface: Mode change effect triggered - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent, 'servingSize:', servingSize, 'isAwaitingServingSize:', isAwaitingServingSize);
     
-    // Only add mode message if we haven't sent it yet AND we're still awaiting serving size (for recipe-creator mode)
     if (chatMode !== 'general' && modeMessageSent !== chatMode) {
-      // For recipe-creator mode, only show the mode message if we're still awaiting serving size
-      if (chatMode === 'recipe-creator' && !isAwaitingServingSize) {
-        console.log('🎯 ChatInterface: Skipping mode message for recipe-creator since serving size already selected');
-        setModeMessageSent(chatMode);
-        return;
-      }
-      
       console.log('🎯 ChatInterface: Adding mode indicator message for:', chatMode);
       
       const modeMessages = {
@@ -166,8 +158,8 @@ const ChatInterface = () => {
       addMessage(modeMessage);
       setModeMessageSent(chatMode);
 
-      // For recipe creator mode, show serving size selector only if no serving size is set
-      if (chatMode === 'recipe-creator' && !servingSize) {
+      // For recipe creator mode, show serving size selector
+      if (chatMode === 'recipe-creator') {
         console.log('🎯 ChatInterface: Setting isAwaitingServingSize to true - no serving size set');
         setIsAwaitingServingSize(true);
       }
@@ -176,13 +168,17 @@ const ChatInterface = () => {
     }
   }, [chatMode, addMessage, setIsAwaitingServingSize, servingSize]);
 
-  // Reset mode message tracking when mode changes to general
+  // Reset mode message tracking when mode changes to general OR when serving size is set for recipe-creator
   useEffect(() => {
     if (chatMode === 'general') {
       console.log('Resetting mode message tracking - switched to general mode');
       setModeMessageSent(null);
+    } else if (chatMode === 'recipe-creator' && servingSize && !isAwaitingServingSize) {
+      // Reset the mode message sent flag when serving size is completed to prevent re-showing
+      console.log('Recipe creator serving size completed - preventing mode message re-trigger');
+      setModeMessageSent('recipe-creator');
     }
-  }, [chatMode]);
+  }, [chatMode, servingSize, isAwaitingServingSize]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
