@@ -138,7 +138,9 @@ const ChatInterface = () => {
       console.log('Adding mode indicator message for:', chatMode);
       
       const modeMessages = {
-        'recipe-creator': "🍳 Recipe Creator Mode Activated! I'll help you create amazing gluten-free recipes. How many servings do you need?",
+        'recipe-creator': servingSize ? 
+          "🍳 Recipe Creator mode activated! I'll help you create amazing Gluten Free recipes, thanks for the serving size you have selected. Now tell me what recipe would you like?" :
+          "🍳 Recipe Creator Mode Activated! I'll help you create amazing gluten-free recipes. How many servings do you need?",
         'conversion': "🔄 Recipe Conversion Mode! Share a recipe and I'll convert it to be gluten-free.",
         'nutrition': "🥗 Nutrition Mode! Ask me about the nutritional aspects of gluten-free ingredients and dishes.",
         'ingredient-scan': "📷 Ingredient Scan Mode! Take a photo of any ingredient label and I'll analyze it for gluten, allergens, and provide detailed nutritional information."
@@ -159,7 +161,7 @@ const ChatInterface = () => {
         setIsAwaitingServingSize(true);
       }
     }
-  }, [chatMode, modeMessageSent, addMessage, setIsAwaitingServingSize]);
+  }, [chatMode, modeMessageSent, addMessage, setIsAwaitingServingSize, servingSize]);
 
   // Reset mode message tracking when mode changes to general
   useEffect(() => {
