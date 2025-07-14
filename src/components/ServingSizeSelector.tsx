@@ -20,7 +20,7 @@ const ServingSizeSelector = () => {
     // Add follow-up message from AI after serving size is selected
     const followUpMessage = {
       id: `followup-${Date.now()}`,
-      text: "Recipe Creator mode activated! I'll help you create amazing Gluten Free recipes, thanks for the serving size you have selected. Now tell me what recipe would you like?",
+      text: "Thanks for the Serving Size for the recipe, what amazing gluten free recipe can i create for you?",
       isUser: false,
       timestamp: new Date(),
       mode: 'recipe-creator',
