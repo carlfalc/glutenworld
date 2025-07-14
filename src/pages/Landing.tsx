@@ -150,9 +150,7 @@ const Landing = () => {
           <h3 className="text-4xl font-bold text-foreground mb-4">
             Complete Gluten-Free Solution
           </h3>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to master gluten-free cooking and connect with a supportive community
-          </p>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Everything you need to master gluten-free cooking and connect with a supportive community, just type, take pictures or talk to our AI! Its that simple</p>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
