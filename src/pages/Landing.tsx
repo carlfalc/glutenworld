@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,12 +7,12 @@ import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clo
 import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import PricingCards from '@/components/PricingCards';
 import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
-
 const Landing = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const [showFeatureDetails, setShowFeatureDetails] = useState(false);
-
   const handleGetStarted = () => {
     if (user) {
       navigate('/dashboard');
@@ -21,57 +20,43 @@ const Landing = () => {
       navigate('/auth?tab=signup');
     }
   };
-
   const handleSignIn = () => {
     navigate('/auth?tab=signin');
   };
-
-  const features = [
-    {
-      icon: <ChefHat className="w-8 h-8 text-gluten-primary" />,
-      title: "Recipe Conversion",
-      description: "Transform any recipe into a delicious gluten-free alternative with our AI-powered conversion technology."
-    },
-    {
-      icon: <BookOpen className="w-8 h-8 text-gluten-primary" />,
-      title: "Extensive Recipe Library",
-      description: "Access thousands of tested gluten-free recipes for baking, meals, breakfasts, snacks, and smoothies."
-    },
-    {
-      icon: <Users className="w-8 h-8 text-gluten-primary" />,
-      title: "Gluten World",
-      description: "Our community support portal - connect with fellow gluten-free enthusiasts, share experiences, and discover new favorites together."
-    },
-    {
-      icon: <Heart className="w-8 h-8 text-gluten-primary" />,
-      title: "Personalized Experience",
-      description: "Get tailored recipe suggestions based on your preferences, dietary needs, and cooking skill level."
-    }
-  ];
-
-  const keyFeatures = [
-    {
-      icon: <Zap className="w-12 h-12 text-gluten-primary" />,
-      title: "Instant AI Conversion",
-      description: "Convert any recipe to gluten-free in seconds with our advanced AI technology",
-      highlight: "Save hours of research"
-    },
-    {
-      icon: <Shield className="w-12 h-12 text-gluten-primary" />,
-      title: "Safe & Tested",
-      description: "All conversions are verified by nutritionists and tested by our community",
-      highlight: "100% gluten-free guarantee"
-    },
-    {
-      icon: <Clock className="w-12 h-12 text-gluten-primary" />,
-      title: "Quick & Easy",
-      description: "Get started in minutes with our intuitive interface and step-by-step guidance",
-      highlight: "No learning curve"
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
+  const features = [{
+    icon: <ChefHat className="w-8 h-8 text-gluten-primary" />,
+    title: "Recipe Conversion",
+    description: "Transform any recipe into a delicious gluten-free alternative with our AI-powered conversion technology."
+  }, {
+    icon: <BookOpen className="w-8 h-8 text-gluten-primary" />,
+    title: "Extensive Recipe Library",
+    description: "Access thousands of tested gluten-free recipes for baking, meals, breakfasts, snacks, and smoothies."
+  }, {
+    icon: <Users className="w-8 h-8 text-gluten-primary" />,
+    title: "Gluten World",
+    description: "Our community support portal - connect with fellow gluten-free enthusiasts, share experiences, and discover new favorites together."
+  }, {
+    icon: <Heart className="w-8 h-8 text-gluten-primary" />,
+    title: "Personalized Experience",
+    description: "Get tailored recipe suggestions based on your preferences, dietary needs, and cooking skill level."
+  }];
+  const keyFeatures = [{
+    icon: <Zap className="w-12 h-12 text-gluten-primary" />,
+    title: "Instant AI Conversion",
+    description: "Convert any recipe to gluten-free in seconds with our advanced AI technology",
+    highlight: "Save hours of research"
+  }, {
+    icon: <Shield className="w-12 h-12 text-gluten-primary" />,
+    title: "Safe & Tested",
+    description: "All conversions are verified by nutritionists and tested by our community",
+    highlight: "100% gluten-free guarantee"
+  }, {
+    icon: <Clock className="w-12 h-12 text-gluten-primary" />,
+    title: "Quick & Easy",
+    description: "Get started in minutes with our intuitive interface and step-by-step guidance",
+    highlight: "No learning curve"
+  }];
+  return <div className="min-h-screen bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
       {/* Header */}
       <header className="container mx-auto px-4 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -85,30 +70,16 @@ const Landing = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          {user ? (
-            <Button 
-              onClick={() => navigate('/dashboard')}
-              className="bg-gluten-primary hover:bg-gluten-primary/90"
-            >
+          {user ? <Button onClick={() => navigate('/dashboard')} className="bg-gluten-primary hover:bg-gluten-primary/90">
               Go to Dashboard
-            </Button>
-          ) : (
-            <>
-              <Button 
-                variant="ghost" 
-                onClick={handleSignIn}
-                className="text-foreground hover:text-gluten-primary"
-              >
+            </Button> : <>
+              <Button variant="ghost" onClick={handleSignIn} className="text-foreground hover:text-gluten-primary">
                 Sign In
               </Button>
-              <Button 
-                onClick={handleGetStarted}
-                className="bg-gluten-primary hover:bg-gluten-primary/90"
-              >
+              <Button onClick={handleGetStarted} className="bg-gluten-primary hover:bg-gluten-primary/90">
                 Launch
               </Button>
-            </>
-          )}
+            </>}
         </div>
       </header>
 
@@ -121,26 +92,15 @@ const Landing = () => {
             <br />
             <span className="text-foreground">& Scan Labels to Get Precise Information</span>
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Navigate the tricky world of gluten-laden products with confidence. 
-            GlutenConvert provides scrumptious alternative recipes that don't contain gluten, 
-            making your favorite dishes accessible and delicious.
-          </p>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Navigate the tricky world of gluten-laden products with confidence. You can scan ingedient labels that will illustrate also whether the product is GF/VEGAN/VEGETARIAN/ DAIRY FREE  GlutenConvert provides scrumptious alternative recipes that don't contain gluten, making your favorite dishes accessible and delicious.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              onClick={handleGetStarted}
-              className="bg-gluten-primary hover:bg-gluten-primary/90 text-lg px-8 py-4"
-            >
+            <Button size="lg" onClick={handleGetStarted} className="bg-gluten-primary hover:bg-gluten-primary/90 text-lg px-8 py-4">
               Start Free Trial
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-lg px-8 py-4 border-gluten-primary text-gluten-primary hover:bg-gluten-primary/10"
-            >
+            <Button size="lg" variant="outline" onClick={() => document.getElementById('features')?.scrollIntoView({
+            behavior: 'smooth'
+          })} className="text-lg px-8 py-4 border-gluten-primary text-gluten-primary hover:bg-gluten-primary/10">
               Learn More
             </Button>
           </div>
@@ -159,27 +119,17 @@ const Landing = () => {
         </div>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {keyFeatures.map((feature, index) => (
-            <Card 
-              key={index} 
-              className="text-center hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-gluten-primary/5 to-gluten-secondary/5 border-gluten-primary/20 relative"
-            >
+          {keyFeatures.map((feature, index) => <Card key={index} className="text-center hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-gluten-primary/5 to-gluten-secondary/5 border-gluten-primary/20 relative">
               <CardHeader className="pb-4">
                 <div className="mx-auto mb-4 p-4 bg-gluten-primary/10 rounded-full w-fit">
                   {feature.icon}
                 </div>
                 <div className="flex items-center justify-between mb-2">
                   <CardTitle className="text-2xl flex-1">{feature.title}</CardTitle>
-                  {index === 0 && (
-                    <Button
-                      onClick={() => setShowFeatureDetails(true)}
-                      className="ml-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 flex items-center gap-1"
-                      size="sm"
-                    >
+                  {index === 0 && <Button onClick={() => setShowFeatureDetails(true)} className="ml-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 flex items-center gap-1" size="sm">
                       <Info className="w-3 h-3" />
                       See More
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
                 <div className="inline-block bg-gluten-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium mb-3">
                   {feature.highlight}
@@ -190,8 +140,7 @@ const Landing = () => {
                   {feature.description}
                 </CardDescription>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </section>
 
@@ -207,11 +156,7 @@ const Landing = () => {
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, index) => (
-            <Card 
-              key={index} 
-              className="text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50"
-            >
+          {features.map((feature, index) => <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50">
               <CardHeader>
                 <div className="mx-auto mb-4 p-3 bg-gluten-primary/10 rounded-full w-fit">
                   {feature.icon}
@@ -223,8 +168,7 @@ const Landing = () => {
                   {feature.description}
                 </CardDescription>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </section>
 
@@ -267,14 +211,7 @@ const Landing = () => {
         </div>
       </footer>
 
-      <FeatureDetailsPopup 
-        open={showFeatureDetails} 
-        onOpenChange={setShowFeatureDetails}
-        isFromLanding={true}
-        onStartScanning={handleGetStarted}
-      />
-    </div>
-  );
+      <FeatureDetailsPopup open={showFeatureDetails} onOpenChange={setShowFeatureDetails} isFromLanding={true} onStartScanning={handleGetStarted} />
+    </div>;
 };
-
 export default Landing;
