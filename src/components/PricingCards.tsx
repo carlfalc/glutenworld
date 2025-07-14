@@ -56,7 +56,6 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
         "Advanced nutrition tracking",
         "Custom recipe collections",
         "Early access to new features",
-        "1-on-1 nutritionist chat",
         "Recipe video tutorials"
       ],
       popular: false,
