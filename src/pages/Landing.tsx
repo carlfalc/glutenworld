@@ -92,7 +92,7 @@ const Landing = () => {
             <br />
             <span className="text-foreground">& Scan Labels to Get Precise Information</span>
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Navigate the tricky world of Gluten-laden & Allergen products with confidence. You can scan ingedient labels that will quickly illustrate whether the product is GF/VEGAN/VEGETARIAN/ DAIRY FREE 😊 GlutenConvert converts your favorite recipes without Gluten & our Recipe Creator - Creates recipes that don't contain gluten, making your favorite dishes accessible and delicious.</p>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Navigate the tricky world of Gluten-laden & Allergen products with confidence. You can scan ingedient labels that will quickly illustrate whether the product is GF/VEGAN/VEGETARIAN/ DAIRY FREE 😊 'GlutenConvert' converts your favorite recipes uploaded without gluten & our 'Recipe Creator' - Creates recipes that don't contain gluten, making your favorite dishes accessible and delicious.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" onClick={handleGetStarted} className="bg-gluten-primary hover:bg-gluten-primary/90 text-lg px-8 py-4">
               Start Free Trial
