@@ -62,7 +62,8 @@ const ChatInterface = () => {
     setChatMode, 
     isAwaitingServingSize, 
     setIsAwaitingServingSize,
-    servingSize 
+    servingSize,
+    setServingSize
   } = useChatContext();
 
   const contextualAI = useContextualAI();
@@ -132,10 +133,10 @@ const ChatInterface = () => {
 
   // Add mode indicator message when mode changes
   useEffect(() => {
-    console.log('Mode change effect - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
+    console.log('🎯 ChatInterface: Mode change effect triggered - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent, 'servingSize:', servingSize, 'isAwaitingServingSize:', isAwaitingServingSize);
     
     if (chatMode !== 'general' && modeMessageSent !== chatMode) {
-      console.log('Adding mode indicator message for:', chatMode);
+      console.log('🎯 ChatInterface: Adding mode indicator message for:', chatMode);
       
       const modeMessages = {
         'recipe-creator': "🍳 Recipe Creator mode activated! Now just select the serving size",
@@ -152,15 +153,17 @@ const ChatInterface = () => {
         mode: chatMode,
       };
 
-      console.log('Adding mode message:', modeMessages[chatMode]);
+      console.log('🎯 ChatInterface: Adding mode message:', modeMessages[chatMode]);
       addMessage(modeMessage);
       setModeMessageSent(chatMode);
 
       // For recipe creator mode, show serving size selector only if no serving size is set
       if (chatMode === 'recipe-creator' && !servingSize) {
-        console.log('Setting isAwaitingServingSize to true - no serving size set');
+        console.log('🎯 ChatInterface: Setting isAwaitingServingSize to true - no serving size set');
         setIsAwaitingServingSize(true);
       }
+    } else {
+      console.log('🎯 ChatInterface: Mode change effect - NOT adding message. Conditions not met.');
     }
   }, [chatMode, addMessage, setIsAwaitingServingSize, servingSize]);
 
@@ -411,8 +414,9 @@ const ChatInterface = () => {
   };
 
   const resetChat = () => {
-    console.log('Resetting chat - clearing mode and messages');
+    console.log('🔄 ChatInterface: Resetting chat - clearing mode and messages');
     setChatMode('general');
+    setServingSize(null); // Reset serving size when resetting chat
     setIsAwaitingServingSize(false);
     setConversionResult(null);
     setActiveConvertedRecipeId(null);

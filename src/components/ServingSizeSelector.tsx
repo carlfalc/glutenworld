@@ -12,10 +12,10 @@ const ServingSizeSelector = () => {
   const [customSize, setCustomSize] = useState('');
 
   const handleServingSelection = (size: number) => {
-    console.log('Serving size selected:', size);
+    console.log('🍽️ ServingSizeSelector: Serving size selected:', size);
     setServingSize(size);
     setIsAwaitingServingSize(false);
-    console.log('Set serving size and awaiting to false');
+    console.log('🍽️ ServingSizeSelector: Set serving size to', size, 'and awaiting to false');
     
     // Add follow-up message from AI after serving size is selected
     const followUpMessage = {
@@ -26,10 +26,11 @@ const ServingSizeSelector = () => {
       mode: 'recipe-creator',
     };
     
-    console.log('Adding follow-up message after serving size selection');
+    console.log('🍽️ ServingSizeSelector: Adding follow-up message after serving size selection');
     // Add the message after a short delay for better UX
     setTimeout(() => {
       addMessage(followUpMessage);
+      console.log('🍽️ ServingSizeSelector: Follow-up message added successfully');
     }, 500);
   };
 
