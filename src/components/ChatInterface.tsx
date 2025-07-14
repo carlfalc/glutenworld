@@ -136,7 +136,15 @@ const ChatInterface = () => {
   useEffect(() => {
     console.log('🎯 ChatInterface: Mode change effect triggered - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent, 'servingSize:', servingSize, 'isAwaitingServingSize:', isAwaitingServingSize);
     
+    // Only add mode message if we haven't sent it yet AND we're still awaiting serving size (for recipe-creator mode)
     if (chatMode !== 'general' && modeMessageSent !== chatMode) {
+      // For recipe-creator mode, only show the mode message if we're still awaiting serving size
+      if (chatMode === 'recipe-creator' && !isAwaitingServingSize) {
+        console.log('🎯 ChatInterface: Skipping mode message for recipe-creator since serving size already selected');
+        setModeMessageSent(chatMode);
+        return;
+      }
+      
       console.log('🎯 ChatInterface: Adding mode indicator message for:', chatMode);
       
       const modeMessages = {
