@@ -30,7 +30,7 @@ const Landing = () => {
   }, {
     icon: <BookOpen className="w-8 h-8 text-gluten-primary" />,
     title: "Extensive Recipe Library",
-    description: "Access thousands of tested gluten-free recipes for baking, meals, breakfasts, snacks, and smoothies."
+    description: "Our library of tested gluten-free recipes for baking, meals, breakfasts, snacks, and smoothies."
   }, {
     icon: <Users className="w-8 h-8 text-gluten-primary" />,
     title: "Gluten World",
