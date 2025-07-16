@@ -35,10 +35,6 @@ const Landing = () => {
     icon: <Users className="w-8 h-8 text-gluten-primary" />,
     title: "Gluten World",
     description: "Our community support portal - connect with fellow gluten-free enthusiasts, share experiences, and discover new favorites together."
-  }, {
-    icon: <Heart className="w-8 h-8 text-gluten-primary" />,
-    title: "Personalized Experience",
-    description: "Get tailored recipe suggestions based on your preferences, dietary needs, and cooking skill level."
   }];
   const keyFeatures = [{
     icon: <Zap className="w-12 h-12 text-gluten-primary" />,
