@@ -8,8 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite, useFavorites } from '@/hooks/useFavorites';
-import { useCreateRecipe } from '@/hooks/useRecipes';
+import { useCreateRecipe, useRecipes, useDeleteRecipe } from '@/hooks/useRecipes';
 import { useToast } from '@/hooks/use-toast';
 import ShareRecipe from './ShareRecipe';
 import { cn } from '@/lib/utils';
@@ -38,21 +37,29 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   const [isShareOpen, setIsShareOpen] = useState(false);
   const { toast } = useToast();
   
-  const addToFavoritesMutation = useAddToFavorites();
-  const removeFromFavoritesMutation = useRemoveFromFavorites();
   const createRecipeMutation = useCreateRecipe();
-  const { data: isFav } = useIsFavorite('recipe', { itemId: recipe.id });
-  const { data: favorites = [] } = useFavorites('recipe');
+  const deleteRecipeMutation = useDeleteRecipe();
+  const { data: userRecipes } = useRecipes();
+  
+  // Check if recipe exists in My Recipes
+  const isFav = userRecipes?.some(r => r.title === recipe.title) || false;
 
   const handleFavoriteToggle = async () => {
     if (isFav) {
-      // Find the favorite record to remove
-      const favoriteToRemove = favorites.find(fav => fav.recipe_id === recipe.id);
-      if (favoriteToRemove) {
-        removeFromFavoritesMutation.mutate(favoriteToRemove.id);
+      // Remove from My Recipes
+      const existingRecipe = userRecipes?.find(r => r.title === recipe.title);
+      if (existingRecipe) {
+        deleteRecipeMutation.mutate(existingRecipe.id, {
+          onSuccess: () => {
+            toast({
+              title: "Recipe Removed",
+              description: "Recipe removed from My Recipes!",
+            });
+          }
+        });
       }
     } else {
-      // Save recipe to My Recipes first
+      // Save recipe to My Recipes
       const recipeData = {
         title: recipe.title,
         original_recipe: recipe.original_recipe || '',
@@ -71,15 +78,17 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
       };
 
       createRecipeMutation.mutate(recipeData, {
-        onSuccess: (savedRecipe) => {
-          // Then add to favorites using the saved recipe ID
-          addToFavoritesMutation.mutate({
-            type: 'recipe',
-            recipe_id: savedRecipe.id, // Use the actual saved recipe ID
-            product_name: recipe.title,
-            product_description: recipe.converted_recipe || JSON.stringify(recipe),
-            product_category: 'ai-generated-recipe',
-            product_scanned_at: new Date().toISOString(),
+        onSuccess: () => {
+          toast({
+            title: "Recipe Saved",
+            description: "Recipe added to My Recipes!",
+          });
+        },
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Failed to save recipe. Please try again.",
+            variant: "destructive",
           });
         }
       });
@@ -262,7 +271,7 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
             ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100" 
             : "hover:bg-red-50 hover:border-red-200 hover:text-red-600"
         )}
-        disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending || createRecipeMutation.isPending}
+        disabled={createRecipeMutation.isPending || deleteRecipeMutation.isPending}
       >
         <Heart className={cn("w-4 h-4", isFav && "fill-current")} />
         {size !== 'sm' && (isFav ? "Saved" : "Save")}

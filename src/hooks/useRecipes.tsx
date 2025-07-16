@@ -119,3 +119,25 @@ export const useCreateRecipe = () => {
     },
   });
 };
+
+export const useDeleteRecipe = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (recipeId: string) => {
+      if (!user) throw new Error('User not authenticated');
+
+      const { error } = await supabase
+        .from('user_recipes')
+        .delete()
+        .eq('id', recipeId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+    },
+  });
+};

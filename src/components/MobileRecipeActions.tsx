@@ -9,8 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite, useFavorites } from '@/hooks/useFavorites';
-import { useCreateRecipe } from '@/hooks/useRecipes';
+import { useCreateRecipe, useRecipes, useDeleteRecipe } from '@/hooks/useRecipes';
 import { useToast } from '@/hooks/use-toast';
 import ShareRecipe from './ShareRecipe';
 import { cn } from '@/lib/utils';
@@ -39,21 +38,29 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
   
-  const addToFavoritesMutation = useAddToFavorites();
-  const removeFromFavoritesMutation = useRemoveFromFavorites();
   const createRecipeMutation = useCreateRecipe();
-  const { data: isFav } = useIsFavorite('recipe', { itemId: recipe.id });
-  const { data: favorites = [] } = useFavorites('recipe');
+  const deleteRecipeMutation = useDeleteRecipe();
+  const { data: userRecipes } = useRecipes();
+  
+  // Check if recipe exists in My Recipes
+  const isFav = userRecipes?.some(r => r.title === recipe.title) || false;
 
   const handleFavoriteToggle = async () => {
     if (isFav) {
-      // Find the favorite record to remove
-      const favoriteToRemove = favorites.find(fav => fav.recipe_id === recipe.id);
-      if (favoriteToRemove) {
-        removeFromFavoritesMutation.mutate(favoriteToRemove.id);
+      // Remove from My Recipes
+      const existingRecipe = userRecipes?.find(r => r.title === recipe.title);
+      if (existingRecipe) {
+        deleteRecipeMutation.mutate(existingRecipe.id, {
+          onSuccess: () => {
+            toast({
+              title: "Recipe Removed",
+              description: "Recipe removed from My Recipes!",
+            });
+          }
+        });
       }
     } else {
-      // Save recipe to My Recipes first
+      // Save recipe to My Recipes
       const recipeData = {
         title: recipe.title,
         original_recipe: recipe.original_recipe || '',
@@ -72,28 +79,10 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
       };
 
       createRecipeMutation.mutate(recipeData, {
-        onSuccess: (savedRecipe) => {
-          // Then add to favorites using the saved recipe ID
-          addToFavoritesMutation.mutate({
-            type: 'recipe',
-            recipe_id: savedRecipe.id, // Use the actual saved recipe ID
-            product_name: recipe.title,
-            product_description: recipe.converted_recipe || JSON.stringify(recipe),
-            product_category: 'ai-generated-recipe',
-            product_scanned_at: new Date().toISOString(),
-          }, {
-            onSuccess: () => {
-              toast({
-                title: "Success!",
-                description: "Recipe saved to My Recipes and added to favorites!",
-              });
-            },
-            onError: () => {
-              toast({
-                title: "Partially Saved",
-                description: "Recipe saved to My Recipes successfully!",
-              });
-            }
+        onSuccess: () => {
+          toast({
+            title: "Recipe Saved",
+            description: "Recipe added to My Recipes!",
           });
         },
         onError: () => {
@@ -294,7 +283,7 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
             ? "text-red-600 hover:text-red-700" 
             : "text-gray-600 hover:text-red-600"
         )}
-        disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending || createRecipeMutation.isPending}
+        disabled={createRecipeMutation.isPending || deleteRecipeMutation.isPending}
       >
         <Heart className={cn("w-5 h-5", isFav && "fill-current")} />
       </Button>
@@ -319,10 +308,10 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
               variant="outline"
               className="flex flex-col items-center gap-2 h-20 touch-manipulation active:scale-95 transition-transform"
               onClick={handleFavoriteToggle}
-              disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending || createRecipeMutation.isPending}
+              disabled={createRecipeMutation.isPending || deleteRecipeMutation.isPending}
             >
               <Heart className={cn("w-6 h-6", isFav && "fill-current text-red-600")} />
-              <span className="text-sm font-medium">{isFav ? "Remove from Favorites" : "Add to Favorites"}</span>
+              <span className="text-sm font-medium">{isFav ? "Remove from My Recipes" : "Save to My Recipes"}</span>
             </Button>
 
             <Button
