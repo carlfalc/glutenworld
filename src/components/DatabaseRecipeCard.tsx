@@ -10,6 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { DatabaseRecipe } from '@/hooks/useRecipeSearch';
 import StarRating from './StarRating';
 import SimpleRecipeModal from './SimpleRecipeModal';
+import RecipeActions from './RecipeActions';
+import MobileRecipeActions from './MobileRecipeActions';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DatabaseRecipeCardProps {
   recipe: DatabaseRecipe;
@@ -17,6 +20,7 @@ interface DatabaseRecipeCardProps {
 
 const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const isMobile = useIsMobile();
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
   const createRecipeMutation = useCreateRecipe();
@@ -242,22 +246,31 @@ const DatabaseRecipeCard = ({ recipe }: DatabaseRecipeCardProps) => {
           ))}
         </div>
 
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            className="flex-1" 
-            onClick={handleAddToMyRecipes}
-            disabled={createRecipeMutation.isPending}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Add to My Recipes
-          </Button>
-          <Button 
-            className="flex-1 group-hover:bg-primary/90 transition-colors"
-            onClick={() => setIsModalOpen(true)}
-          >
-            View Recipe
-          </Button>
+        {/* Recipe Actions - Mobile vs Desktop */}
+        <div className="space-y-3">
+          {isMobile ? (
+            <MobileRecipeActions recipe={recipe} />
+          ) : (
+            <RecipeActions recipe={recipe} size="sm" />
+          )}
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className="flex-1" 
+              onClick={handleAddToMyRecipes}
+              disabled={createRecipeMutation.isPending}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add to My Recipes
+            </Button>
+            <Button 
+              className="flex-1 group-hover:bg-primary/90 transition-colors"
+              onClick={() => setIsModalOpen(true)}
+            >
+              View Recipe
+            </Button>
+          </div>
         </div>
       </CardContent>
 
