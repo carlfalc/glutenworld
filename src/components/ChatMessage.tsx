@@ -86,6 +86,17 @@ const ChatMessage = ({ message, onViewRecipe }: ChatMessageProps) => {
 
   const shouldShowRecipeActions = !message.isUser && isGeneratedRecipe(message.text, message.mode);
   const recipeData = shouldShowRecipeActions ? parseRecipeFromText(message.text, message.id) : null;
+  
+  // Debug logging
+  console.log('ChatMessage Debug:', {
+    messageId: message.id,
+    isUser: message.isUser,
+    mode: message.mode,
+    shouldShowRecipeActions,
+    isMobile,
+    hasRecipeData: !!recipeData,
+    textLength: message.text.length
+  });
 
   return (
     <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`}>
