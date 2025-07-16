@@ -7,7 +7,6 @@ import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clo
 import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import PricingCards from '@/components/PricingCards';
 import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
-import DebugRecipeSave from '@/components/DebugRecipeSave';
 const Landing = () => {
   const navigate = useNavigate();
   const {
@@ -54,13 +53,6 @@ const Landing = () => {
     highlight: "No learning curve"
   }];
    return <div className="min-h-screen bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
-      {/* Debug Tool - TEMPORARY for testing recipe save */}
-      {user && (
-        <div className="container mx-auto px-4 py-4">
-          <DebugRecipeSave />
-        </div>
-      )}
-      
       {/* Header */}
       <header className="container mx-auto px-4 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">

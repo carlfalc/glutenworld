@@ -53,7 +53,7 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
         removeFromFavoritesMutation.mutate(favoriteToRemove.id);
       }
     } else {
-      // First save to My Recipes (user_recipes table)
+      // Save recipe to My Recipes first
       const recipeData = {
         title: recipe.title,
         original_recipe: recipe.original_recipe || '',
@@ -71,13 +71,12 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
         is_public: false
       };
 
-      // Save to user_recipes with success callback
       createRecipeMutation.mutate(recipeData, {
-        onSuccess: () => {
-          // Then add to favorites after successful recipe save
+        onSuccess: (savedRecipe) => {
+          // Then add to favorites using the saved recipe ID
           addToFavoritesMutation.mutate({
             type: 'recipe',
-            recipe_id: recipe.id,
+            recipe_id: savedRecipe.id, // Use the actual saved recipe ID
             product_name: recipe.title,
             product_description: recipe.converted_recipe || JSON.stringify(recipe),
             product_category: 'ai-generated-recipe',
@@ -85,22 +84,19 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
           }, {
             onSuccess: () => {
               toast({
-                title: "Recipe Saved",
-                description: "Recipe added to favorites and My Recipes!",
+                title: "Success!",
+                description: "Recipe saved to My Recipes and added to favorites!",
               });
             },
-            onError: (error) => {
-              console.error('Error adding to favorites:', error);
+            onError: () => {
               toast({
                 title: "Partially Saved",
-                description: "Recipe saved to My Recipes, but couldn't add to favorites.",
-                variant: "destructive",
+                description: "Recipe saved to My Recipes successfully!",
               });
             }
           });
         },
-        onError: (error) => {
-          console.error('Error saving recipe:', error);
+        onError: () => {
           toast({
             title: "Error",
             description: "Failed to save recipe. Please try again.",

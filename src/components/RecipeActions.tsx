@@ -52,7 +52,7 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         removeFromFavoritesMutation.mutate(favoriteToRemove.id);
       }
     } else {
-      // First save to My Recipes (user_recipes table)
+      // Save recipe to My Recipes first
       const recipeData = {
         title: recipe.title,
         original_recipe: recipe.original_recipe || '',
@@ -70,21 +70,17 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         is_public: false
       };
 
-      // Save to user_recipes with success callback
       createRecipeMutation.mutate(recipeData, {
-        onSuccess: () => {
-          // Then add to favorites after successful recipe save
+        onSuccess: (savedRecipe) => {
+          // Then add to favorites using the saved recipe ID
           addToFavoritesMutation.mutate({
             type: 'recipe',
-            recipe_id: recipe.id,
+            recipe_id: savedRecipe.id, // Use the actual saved recipe ID
             product_name: recipe.title,
             product_description: recipe.converted_recipe || JSON.stringify(recipe),
             product_category: 'ai-generated-recipe',
             product_scanned_at: new Date().toISOString(),
           });
-        },
-        onError: (error) => {
-          console.error('Error saving recipe:', error);
         }
       });
     }
