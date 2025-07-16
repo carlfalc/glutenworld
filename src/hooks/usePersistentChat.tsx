@@ -16,18 +16,25 @@ const CHAT_STORAGE_KEY = 'gluten_convert_chat_history';
 
 export const usePersistentChat = () => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
-      isUser: false,
-      timestamp: new Date(),
-    }
-  ]);
+  
+  // CRITICAL: Initialize messages as empty and load from storage immediately
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  console.log('🔥 usePersistentChat HOOK CALLED - isInitialized:', isInitialized, 'messages length:', messages.length);
 
   // Load messages from localStorage when component mounts or user changes
   useEffect(() => {
+    // Only run if not already initialized or if user changes
+    if (isInitialized && messages.length > 0) {
+      console.log('🚀 Skipping load - already initialized with', messages.length, 'messages');
+      return;
+    }
+    
+    console.log('🚀 usePersistentChat useEffect TRIGGERED - user changed:', user?.id);
+    console.log('🚀 Current messages count before loading:', messages.length);
     const loadMessages = () => {
+      console.log('🔍 loadMessages() called - checking localStorage...');
       let storageKey = CHAT_STORAGE_KEY;
       
       // Use user-specific storage if user is logged in
@@ -73,20 +80,39 @@ export const usePersistentChat = () => {
           if (filteredMessages.length > 0) {
             console.log('🔒 FORCE RESTORING CHAT MESSAGES - NO EXCEPTIONS');
             setMessages(filteredMessages);
+            setIsInitialized(true);
             console.log('✅ PERMANENT CHAT: Restored', filteredMessages.length, 'messages from storage');
           } else {
-            console.log('⚠️ No stored messages found, keeping default welcome message');
+            console.log('⚠️ No stored messages found, setting default welcome message');
+            const welcomeMessage = {
+              id: '1',
+              text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
+              isUser: false,
+              timestamp: new Date(),
+            };
+            setMessages([welcomeMessage]);
+            setIsInitialized(true);
           }
         } catch (error) {
           console.error('❌ Failed to parse stored chat messages:', error);
         }
       } else {
         console.log('📭 No stored chat messages found in localStorage for key:', storageKey);
+        if (!isInitialized) {
+          const welcomeMessage = {
+            id: '1',
+            text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
+            isUser: false,
+            timestamp: new Date(),
+          };
+          setMessages([welcomeMessage]);
+          setIsInitialized(true);
+        }
       }
     };
 
     // CRITICAL: Load messages immediately and FORCEFULLY
-    console.log('🚀 INITIALIZING CHAT PERSISTENCE - LOADING NOW');
+    console.log('🚀 INITIALIZING CHAT PERSISTENCE - LOADING NOW - messages count before:', messages.length);
     loadMessages();
     
     // Also load messages when user state changes - but with protection against double loading
@@ -96,7 +122,7 @@ export const usePersistentChat = () => {
         loadMessages();
       }, 100); // Small delay to ensure user is fully loaded
     }
-  }, [user]);
+  }, [user]); // Remove isInitialized to prevent dependency loop
 
   // Save messages to localStorage whenever messages change - PERMANENT STORAGE
   useEffect(() => {
@@ -167,6 +193,7 @@ export const usePersistentChat = () => {
       }
     }
     
+    console.log('🔴 addMessage called - current messages length:', messages.length, 'adding:', message.id);
     setMessages(prev => [...prev, message]);
   };
 
