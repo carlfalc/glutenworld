@@ -52,50 +52,36 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         removeFromFavoritesMutation.mutate(favoriteToRemove.id);
       }
     } else {
-      try {
-        // First add to favorites
-        addToFavoritesMutation.mutate({
-          type: 'recipe',
-          recipe_id: recipe.id,
-          // Store the recipe data as JSON in the product fields for AI recipes
-          product_name: recipe.title,
-          product_description: recipe.converted_recipe || JSON.stringify(recipe),
-          product_category: 'ai-generated-recipe',
-          product_scanned_at: new Date().toISOString(),
-        });
+      // Add to favorites
+      addToFavoritesMutation.mutate({
+        type: 'recipe',
+        recipe_id: recipe.id,
+        // Store the recipe data as JSON in the product fields for AI recipes
+        product_name: recipe.title,
+        product_description: recipe.converted_recipe || JSON.stringify(recipe),
+        product_category: 'ai-generated-recipe',
+        product_scanned_at: new Date().toISOString(),
+      });
 
-        // Also save to My Recipes (user_recipes table)
-        const recipeData = {
-          title: recipe.title,
-          original_recipe: recipe.original_recipe || '',
-          converted_recipe: recipe.converted_recipe || '',
-          ingredients: recipe.ingredients || null,
-          instructions: recipe.instructions || null,
-          servings: recipe.servings || null,
-          prep_time: recipe.prep_time || null,
-          cook_time: recipe.cook_time || null,
-          calories_per_serving: recipe.calories_per_serving || null,
-          protein_g: recipe.protein_g || null,
-          carbs_g: recipe.carbs_g || null,
-          fat_g: recipe.fat_g || null,
-          difficulty_level: 'Medium' as const,
-          is_public: false
-        };
+      // Also save to My Recipes (user_recipes table)
+      const recipeData = {
+        title: recipe.title,
+        original_recipe: recipe.original_recipe || '',
+        converted_recipe: recipe.converted_recipe || '',
+        ingredients: recipe.ingredients || null,
+        instructions: recipe.instructions || null,
+        servings: recipe.servings || null,
+        prep_time: recipe.prep_time || null,
+        cook_time: recipe.cook_time || null,
+        calories_per_serving: recipe.calories_per_serving || null,
+        protein_g: recipe.protein_g || null,
+        carbs_g: recipe.carbs_g || null,
+        fat_g: recipe.fat_g || null,
+        difficulty_level: 'Medium' as const,
+        is_public: false
+      };
 
-        createRecipeMutation.mutate(recipeData);
-
-        toast({
-          title: "Recipe Saved!",
-          description: "Recipe has been added to both Favorites and My Recipes.",
-        });
-      } catch (error) {
-        console.error('Error saving recipe:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save recipe completely. Please try again.",
-          variant: "destructive",
-        });
-      }
+      createRecipeMutation.mutate(recipeData);
     }
   };
 
