@@ -51,9 +51,15 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
         removeFromFavoritesMutation.mutate(favoriteToRemove.id);
       }
     } else {
+      // For AI-generated recipes, store them with all necessary data
       addToFavoritesMutation.mutate({
         type: 'recipe',
         recipe_id: recipe.id,
+        // Store the recipe data as JSON in the product fields for AI recipes
+        product_name: recipe.title,
+        product_description: recipe.converted_recipe || JSON.stringify(recipe),
+        product_category: 'ai-generated-recipe',
+        product_scanned_at: new Date().toISOString(),
       });
     }
     setIsSheetOpen(false);
