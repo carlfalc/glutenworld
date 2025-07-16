@@ -280,12 +280,12 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
         className={cn(
           "p-2 touch-manipulation active:scale-95 transition-all duration-150",
           isFav 
-            ? "text-red-600 hover:text-red-700" 
-            : "text-gray-600 hover:text-red-600"
+            ? "text-red-500 hover:text-red-600" 
+            : "text-muted-foreground hover:text-red-500"
         )}
         disabled={createRecipeMutation.isPending || deleteRecipeMutation.isPending}
       >
-        <Heart className={cn("w-5 h-5", isFav && "fill-current")} />
+        <Heart className={cn("w-5 h-5", isFav ? "fill-current" : "")} />
       </Button>
 
       {/* More Actions Sheet */}
@@ -310,7 +310,7 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
               onClick={handleFavoriteToggle}
               disabled={createRecipeMutation.isPending || deleteRecipeMutation.isPending}
             >
-              <Heart className={cn("w-6 h-6", isFav && "fill-current text-red-600")} />
+              <Heart className={cn("w-6 h-6", isFav ? "fill-current text-red-500" : "text-muted-foreground")} />
               <span className="text-sm font-medium">{isFav ? "Remove from My Recipes" : "Save to My Recipes"}</span>
             </Button>
 

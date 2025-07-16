@@ -268,12 +268,12 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         className={cn(
           "transition-all duration-200 touch-manipulation active:scale-95",
           isFav 
-            ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100" 
-            : "hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+            ? "bg-red-50 border-red-200 text-red-500 hover:bg-red-100" 
+            : "text-muted-foreground hover:bg-red-50 hover:border-red-200 hover:text-red-500"
         )}
         disabled={createRecipeMutation.isPending || deleteRecipeMutation.isPending}
       >
-        <Heart className={cn("w-4 h-4", isFav && "fill-current")} />
+        <Heart className={cn("w-4 h-4", isFav ? "fill-current" : "")} />
         {size !== 'sm' && (isFav ? "Saved" : "Save")}
       </Button>
 
