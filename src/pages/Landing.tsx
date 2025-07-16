@@ -114,7 +114,7 @@ const Landing = () => {
             Why Thousands Choose Gluten World
           </h3>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Experience the future of gluten-free cooking with our revolutionary platform
+            Take pictures of your labels when shopping and see all warnings, create recipes free of gluten, save recipes and much more. Simple mobile app!
           </p>
         </div>
         
