@@ -54,94 +54,121 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   };
 
   const handlePrint = () => {
-    const printContent = generatePrintableRecipe(recipe);
-    const printWindow = window.open('', '_blank');
+    // Enhanced mobile detection and handling
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${recipe.title} - Recipe</title>
-            <style>
-              body { 
-                font-family: Arial, sans-serif; 
-                margin: 20px; 
-                line-height: 1.6;
-                color: #333;
-              }
-              .recipe-header { 
-                border-bottom: 2px solid #333; 
-                padding-bottom: 10px; 
-                margin-bottom: 20px; 
-              }
-              .recipe-title { 
-                font-size: 24px; 
-                font-weight: bold; 
-                margin: 0; 
-              }
-              .recipe-info { 
-                margin: 10px 0; 
-                display: flex; 
-                gap: 20px; 
-                flex-wrap: wrap;
-              }
-              .info-item { 
-                font-size: 14px; 
-                color: #666; 
-              }
-              .section { 
-                margin: 20px 0; 
-              }
-              .section-title { 
-                font-size: 18px; 
-                font-weight: bold; 
-                margin-bottom: 10px; 
-                color: #444;
-              }
-              .ingredients { 
-                list-style-type: disc; 
-                margin-left: 20px; 
-              }
-              .instructions { 
-                list-style-type: decimal; 
-                margin-left: 20px; 
-              }
-              .ingredients li, .instructions li { 
-                margin: 5px 0; 
-              }
-              .nutritional-info {
-                background-color: #f5f5f5;
-                padding: 15px;
-                border-radius: 5px;
-                margin-top: 20px;
-              }
-              .nutrition-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 10px;
-                margin-top: 10px;
-              }
-              .nutrition-item {
-                text-align: center;
-                padding: 5px;
-                background: white;
-                border-radius: 3px;
-              }
-              @media print {
-                body { margin: 0; }
-                .recipe-header { page-break-after: avoid; }
-              }
-            </style>
-          </head>
-          <body>
-            ${printContent}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
+    if (isMobileDevice && navigator.share) {
+      // For mobile devices with share capability, use text sharing for printing
+      const printableContent = generateMobilePrintContent(recipe);
+      navigator.share({
+        title: `${recipe.title} - Recipe`,
+        text: printableContent,
+      }).then(() => {
+        toast({
+          title: "Recipe Shared",
+          description: "You can now print from the shared app or save as PDF.",
+        });
+      }).catch((error) => {
+        console.log('Share failed, falling back to print dialog:', error);
+        // Fallback to standard print
+        setTimeout(() => window.print(), 100);
+      });
+    } else {
+      // Standard print dialog for desktop and non-share mobile
+      const printContent = generatePrintableRecipe(recipe);
+      const printWindow = window.open('', '_blank');
+      
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${recipe.title} - Recipe</title>
+              <style>
+                body { 
+                  font-family: Arial, sans-serif; 
+                  margin: 20px; 
+                  line-height: 1.6;
+                  color: #333;
+                }
+                .recipe-header { 
+                  border-bottom: 2px solid #333; 
+                  padding-bottom: 10px; 
+                  margin-bottom: 20px; 
+                }
+                .recipe-title { 
+                  font-size: 24px; 
+                  font-weight: bold; 
+                  margin: 0; 
+                }
+                .recipe-info { 
+                  margin: 10px 0; 
+                  display: flex; 
+                  gap: 20px; 
+                  flex-wrap: wrap;
+                }
+                .info-item { 
+                  font-size: 14px; 
+                  color: #666; 
+                }
+                .section { 
+                  margin: 20px 0; 
+                }
+                .section-title { 
+                  font-size: 18px; 
+                  font-weight: bold; 
+                  margin-bottom: 10px; 
+                  color: #444;
+                }
+                .ingredients { 
+                  list-style-type: disc; 
+                  margin-left: 20px; 
+                }
+                .instructions { 
+                  list-style-type: decimal; 
+                  margin-left: 20px; 
+                }
+                .ingredients li, .instructions li { 
+                  margin: 5px 0; 
+                }
+                .nutritional-info {
+                  background-color: #f5f5f5;
+                  padding: 15px;
+                  border-radius: 5px;
+                  margin-top: 20px;
+                }
+                .nutrition-grid {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                  gap: 10px;
+                  margin-top: 10px;
+                }
+                .nutrition-item {
+                  text-align: center;
+                  padding: 5px;
+                  background: white;
+                  border-radius: 3px;
+                }
+                @media print {
+                  body { margin: 0; }
+                  .recipe-header { page-break-after: avoid; }
+                }
+                @media screen and (max-width: 768px) {
+                  body { margin: 10px; font-size: 14px; }
+                  .recipe-title { font-size: 20px; }
+                  .section-title { font-size: 16px; }
+                }
+              </style>
+            </head>
+            <body>
+              ${printContent}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      }
     }
   };
 
@@ -207,7 +234,7 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         size={buttonSize}
         onClick={handleFavoriteToggle}
         className={cn(
-          "transition-colors",
+          "transition-all duration-200 touch-manipulation active:scale-95",
           isFav 
             ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100" 
             : "hover:bg-red-50 hover:border-red-200 hover:text-red-600"
@@ -408,6 +435,62 @@ const generateShareableRecipe = (recipe: any): string => {
   }
   
   content += `✨ Generated by Gluten World - Your gluten-free recipe companion!`;
+  
+  return content;
+};
+
+// Mobile-optimized print content (plain text for sharing/printing)
+const generateMobilePrintContent = (recipe: any): string => {
+  let content = `📄 ${recipe.title}\n`;
+  content += `${'─'.repeat(30)}\n\n`;
+  
+  if (recipe.servings || recipe.prep_time || recipe.cook_time) {
+    content += `📋 RECIPE INFO:\n`;
+    if (recipe.servings) content += `• Servings: ${recipe.servings}\n`;
+    if (recipe.prep_time) content += `• Prep Time: ${recipe.prep_time} minutes\n`;
+    if (recipe.cook_time) content += `• Cook Time: ${recipe.cook_time} minutes\n`;
+    content += `\n`;
+  }
+  
+  const ingredients = Array.isArray(recipe.ingredients) 
+    ? recipe.ingredients 
+    : typeof recipe.ingredients === 'string' 
+    ? recipe.ingredients.split('\n') 
+    : [];
+    
+  if (ingredients.length > 0) {
+    content += `🥄 INGREDIENTS:\n`;
+    ingredients.forEach(ingredient => {
+      content += `• ${ingredient}\n`;
+    });
+    content += `\n`;
+  }
+  
+  const instructions = recipe.instructions || [];
+  if (instructions.length > 0) {
+    content += `👩‍🍳 INSTRUCTIONS:\n`;
+    instructions.forEach((instruction, index) => {
+      content += `${index + 1}. ${instruction}\n`;
+    });
+    content += `\n`;
+  }
+  
+  if (recipe.converted_recipe) {
+    content += `📝 RECIPE DETAILS:\n`;
+    content += `${recipe.converted_recipe}\n\n`;
+  }
+  
+  if (recipe.calories_per_serving || recipe.protein_g || recipe.carbs_g || recipe.fat_g) {
+    content += `📊 NUTRITION (per serving):\n`;
+    if (recipe.calories_per_serving) content += `• Calories: ${recipe.calories_per_serving}\n`;
+    if (recipe.protein_g) content += `• Protein: ${recipe.protein_g}g\n`;
+    if (recipe.carbs_g) content += `• Carbs: ${recipe.carbs_g}g\n`;
+    if (recipe.fat_g) content += `• Fat: ${recipe.fat_g}g\n`;
+    content += `\n`;
+  }
+  
+  content += `✨ From Gluten World App\n`;
+  content += `📱 Your gluten-free recipe companion`;
   
   return content;
 };

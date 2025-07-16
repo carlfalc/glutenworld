@@ -55,91 +55,163 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
   };
 
   const handlePrint = () => {
-    const printContent = generatePrintableRecipe(recipe);
-    const printWindow = window.open('', '_blank');
+    // Check if we're on mobile and handle accordingly
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${recipe.title} - Recipe</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-              body { 
-                font-family: Arial, sans-serif; 
-                margin: 15px; 
-                line-height: 1.5;
-                color: #333;
-                font-size: 14px;
-              }
-              .recipe-header { 
-                border-bottom: 2px solid #333; 
-                padding-bottom: 8px; 
-                margin-bottom: 15px; 
-              }
-              .recipe-title { 
-                font-size: 20px; 
-                font-weight: bold; 
-                margin: 0; 
-              }
-              .recipe-info { 
-                margin: 8px 0; 
-                font-size: 12px;
-                color: #666;
-              }
-              .section { 
-                margin: 15px 0; 
-              }
-              .section-title { 
-                font-size: 16px; 
-                font-weight: bold; 
-                margin-bottom: 8px; 
-                color: #444;
-              }
-              .ingredients, .instructions { 
-                margin-left: 15px; 
-                padding-left: 0;
-              }
-              .ingredients li, .instructions li { 
-                margin: 3px 0; 
-                font-size: 13px;
-              }
-              @media print {
-                body { margin: 5px; font-size: 12px; }
-                .recipe-title { font-size: 18px; }
-                .section-title { font-size: 14px; }
-              }
-            </style>
-          </head>
-          <body>
-            ${printContent}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
+    if (isMobileDevice) {
+      // For mobile devices, create a shareable version for printing
+      const printableContent = generateMobilePrintContent(recipe);
+      
+      // Try to use native share API first (works well on mobile)
+      if (navigator.share) {
+        navigator.share({
+          title: `${recipe.title} - Recipe`,
+          text: printableContent,
+        }).then(() => {
+          toast({
+            title: "Recipe Shared",
+            description: "You can now print from the shared app or save as PDF.",
+          });
+        }).catch((error) => {
+          console.log('Share failed, falling back to copy:', error);
+          copyToClipboard(printableContent);
+        });
+      } else {
+        // Fallback: copy to clipboard and open print dialog
+        copyToClipboard(printableContent);
+        setTimeout(() => {
+          window.print();
+        }, 100);
+      }
+    } else {
+      // Desktop printing (original implementation)
+      const printContent = generatePrintableRecipe(recipe);
+      const printWindow = window.open('', '_blank');
+      
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${recipe.title} - Recipe</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { 
+                  font-family: Arial, sans-serif; 
+                  margin: 15px; 
+                  line-height: 1.5;
+                  color: #333;
+                  font-size: 14px;
+                }
+                .recipe-header { 
+                  border-bottom: 2px solid #333; 
+                  padding-bottom: 8px; 
+                  margin-bottom: 15px; 
+                }
+                .recipe-title { 
+                  font-size: 20px; 
+                  font-weight: bold; 
+                  margin: 0; 
+                }
+                .recipe-info { 
+                  margin: 8px 0; 
+                  font-size: 12px;
+                  color: #666;
+                }
+                .section { 
+                  margin: 15px 0; 
+                }
+                .section-title { 
+                  font-size: 16px; 
+                  font-weight: bold; 
+                  margin-bottom: 8px; 
+                  color: #444;
+                }
+                .ingredients, .instructions { 
+                  margin-left: 15px; 
+                  padding-left: 0;
+                }
+                .ingredients li, .instructions li { 
+                  margin: 3px 0; 
+                  font-size: 13px;
+                }
+                @media print {
+                  body { margin: 5px; font-size: 12px; }
+                  .recipe-title { font-size: 18px; }
+                  .section-title { font-size: 14px; }
+                }
+              </style>
+            </head>
+            <body>
+              ${printContent}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      }
     }
     setIsSheetOpen(false);
   };
 
   const handleDownload = () => {
     const content = generateDownloadableRecipe(recipe);
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${recipe.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_recipe.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
     
-    toast({
-      title: "Recipe Downloaded",
-      description: "Recipe saved to your device.",
-    });
+    // Mobile-optimized download handling
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobileDevice) {
+      // For mobile devices, use different approaches
+      if (navigator.share) {
+        // Modern mobile browsers with Web Share API
+        const blob = new Blob([content], { type: 'text/plain' });
+        const file = new File([blob], `${recipe.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_recipe.txt`, { type: 'text/plain' });
+        
+        navigator.share({
+          title: `${recipe.title} - Recipe`,
+          text: `Download this recipe from Gluten World`,
+          files: [file]
+        }).then(() => {
+          toast({
+            title: "Recipe Shared",
+            description: "Recipe file shared successfully!",
+          });
+        }).catch((error) => {
+          console.log('File sharing not supported, falling back:', error);
+          // Fallback to text sharing
+          navigator.share({
+            title: `${recipe.title} - Recipe`,
+            text: content
+          }).catch(() => {
+            copyToClipboard(content);
+          });
+        });
+      } else {
+        // Fallback for older mobile browsers
+        copyToClipboard(content);
+        toast({
+          title: "Recipe Copied",
+          description: "Recipe copied to clipboard. You can paste it in any app to save it!",
+        });
+      }
+    } else {
+      // Desktop download (original implementation)
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${recipe.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_recipe.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Recipe Downloaded",
+        description: "Recipe saved to your device.",
+      });
+    }
     setIsSheetOpen(false);
   };
 
@@ -182,7 +254,7 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
         size="sm"
         onClick={handleFavoriteToggle}
         className={cn(
-          "p-2",
+          "p-2 touch-manipulation active:scale-95 transition-all duration-150",
           isFav 
             ? "text-red-600 hover:text-red-700" 
             : "text-gray-600 hover:text-red-600"
@@ -195,7 +267,7 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
       {/* More Actions Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="sm" className="p-2">
+          <Button variant="ghost" size="sm" className="p-2 touch-manipulation active:scale-95 transition-all duration-150">
             <MoreHorizontal className="w-5 h-5" />
           </Button>
         </SheetTrigger>
@@ -207,54 +279,54 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
             </SheetDescription>
           </SheetHeader>
           
-          <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="grid grid-cols-2 gap-4 mt-6 pb-6">
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-2 h-20"
+              className="flex flex-col items-center gap-2 h-20 touch-manipulation active:scale-95 transition-transform"
               onClick={handleFavoriteToggle}
               disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending}
             >
               <Heart className={cn("w-6 h-6", isFav && "fill-current text-red-600")} />
-              <span className="text-sm">{isFav ? "Remove from Favorites" : "Add to Favorites"}</span>
+              <span className="text-sm font-medium">{isFav ? "Remove from Favorites" : "Add to Favorites"}</span>
             </Button>
 
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-2 h-20"
+              className="flex flex-col items-center gap-2 h-20 touch-manipulation active:scale-95 transition-transform"
               onClick={handleShareToMessenger}
             >
-              <MessageCircle className="w-6 h-6" />
-              <span className="text-sm">Share to Apps</span>
+              <MessageCircle className="w-6 h-6 text-blue-600" />
+              <span className="text-sm font-medium">Share to Apps</span>
             </Button>
 
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-2 h-20"
+              className="flex flex-col items-center gap-2 h-20 touch-manipulation active:scale-95 transition-transform"
               onClick={() => {
                 setIsShareOpen(true);
                 setIsSheetOpen(false);
               }}
             >
-              <Share className="w-6 h-6" />
-              <span className="text-sm">Social Media</span>
+              <Share className="w-6 h-6 text-green-600" />
+              <span className="text-sm font-medium">Social Media</span>
             </Button>
 
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-2 h-20"
+              className="flex flex-col items-center gap-2 h-20 touch-manipulation active:scale-95 transition-transform"
               onClick={handlePrint}
             >
-              <Printer className="w-6 h-6" />
-              <span className="text-sm">Print Recipe</span>
+              <Printer className="w-6 h-6 text-purple-600" />
+              <span className="text-sm font-medium">Print Recipe</span>
             </Button>
 
             <Button
               variant="outline"
-              className="flex flex-col items-center gap-2 h-20 col-span-2"
+              className="flex flex-col items-center gap-2 h-20 col-span-2 touch-manipulation active:scale-95 transition-transform"
               onClick={handleDownload}
             >
-              <Download className="w-6 h-6" />
-              <span className="text-sm">Download to Device</span>
+              <Download className="w-6 h-6 text-orange-600" />
+              <span className="text-sm font-medium">Download to Device</span>
             </Button>
           </div>
         </SheetContent>
@@ -368,6 +440,62 @@ const generateDownloadableRecipe = (recipe: any): string => {
   }
   
   content += `\n---\nGenerated by Gluten World\n`;
+  
+  return content;
+};
+
+// Mobile-optimized print content (plain text for sharing/printing)
+const generateMobilePrintContent = (recipe: any): string => {
+  let content = `📄 ${recipe.title}\n`;
+  content += `${'─'.repeat(30)}\n\n`;
+  
+  if (recipe.servings || recipe.prep_time || recipe.cook_time) {
+    content += `📋 RECIPE INFO:\n`;
+    if (recipe.servings) content += `• Servings: ${recipe.servings}\n`;
+    if (recipe.prep_time) content += `• Prep Time: ${recipe.prep_time} minutes\n`;
+    if (recipe.cook_time) content += `• Cook Time: ${recipe.cook_time} minutes\n`;
+    content += `\n`;
+  }
+  
+  const ingredients = Array.isArray(recipe.ingredients) 
+    ? recipe.ingredients 
+    : typeof recipe.ingredients === 'string' 
+    ? recipe.ingredients.split('\n') 
+    : [];
+    
+  if (ingredients.length > 0) {
+    content += `🥄 INGREDIENTS:\n`;
+    ingredients.forEach(ingredient => {
+      content += `• ${ingredient}\n`;
+    });
+    content += `\n`;
+  }
+  
+  const instructions = recipe.instructions || [];
+  if (instructions.length > 0) {
+    content += `👩‍🍳 INSTRUCTIONS:\n`;
+    instructions.forEach((instruction, index) => {
+      content += `${index + 1}. ${instruction}\n`;
+    });
+    content += `\n`;
+  }
+  
+  if (recipe.converted_recipe) {
+    content += `📝 RECIPE DETAILS:\n`;
+    content += `${recipe.converted_recipe}\n\n`;
+  }
+  
+  if (recipe.calories_per_serving || recipe.protein_g || recipe.carbs_g || recipe.fat_g) {
+    content += `📊 NUTRITION (per serving):\n`;
+    if (recipe.calories_per_serving) content += `• Calories: ${recipe.calories_per_serving}\n`;
+    if (recipe.protein_g) content += `• Protein: ${recipe.protein_g}g\n`;
+    if (recipe.carbs_g) content += `• Carbs: ${recipe.carbs_g}g\n`;
+    if (recipe.fat_g) content += `• Fat: ${recipe.fat_g}g\n`;
+    content += `\n`;
+  }
+  
+  content += `✨ From Gluten World App\n`;
+  content += `📱 Your gluten-free recipe companion`;
   
   return content;
 };
