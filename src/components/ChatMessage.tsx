@@ -2,6 +2,9 @@
 import { Clock, Eye, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import IngredientAnalysis from './IngredientAnalysis';
+import RecipeActions from './RecipeActions';
+import MobileRecipeActions from './MobileRecipeActions';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Message {
   id: string;
@@ -31,12 +34,58 @@ interface ChatMessageProps {
 }
 
 const ChatMessage = ({ message, onViewRecipe }: ChatMessageProps) => {
+  const isMobile = useIsMobile();
+  
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   // Debug log for image display
   console.log(`Message ${message.id} - Has image:`, !!message.image, 'Image length:', message.image?.length || 0);
+
+  // Helper function to detect if a message contains a generated recipe
+  const isGeneratedRecipe = (text: string, mode?: string): boolean => {
+    // Check if it's from recipe-creator mode
+    if (mode === 'recipe-creator') return true;
+    
+    // Check for recipe-like content patterns
+    const recipePatterns = [
+      /\*\*INGREDIENTS:\*\*/i,
+      /\*\*INSTRUCTIONS:\*\*/i,
+      /\*\*GLUTEN-FREE/i,
+      /\*\*SERVING INFORMATION:\*\*/i,
+      /Prep Time:/i,
+      /Cook Time:/i,
+      /Serves:/i,
+      /Difficulty:/i
+    ];
+    
+    return recipePatterns.some(pattern => pattern.test(text));
+  };
+
+  // Helper function to parse recipe data from message text
+  const parseRecipeFromText = (text: string, messageId: string) => {
+    // Extract recipe title
+    const titleMatch = text.match(/^([^*\n]+)/);
+    const title = titleMatch ? titleMatch[1].trim() : "Gluten-Free Recipe";
+    
+    // Extract serving information
+    const servesMatch = text.match(/Serves:\s*(\d+)/i);
+    const prepMatch = text.match(/Prep Time:\s*(\d+)/i);
+    const cookMatch = text.match(/Cook Time:\s*(\d+)/i);
+    
+    return {
+      id: messageId,
+      title: title,
+      converted_recipe: text,
+      servings: servesMatch ? parseInt(servesMatch[1]) : undefined,
+      prep_time: prepMatch ? parseInt(prepMatch[1]) : undefined,
+      cook_time: cookMatch ? parseInt(cookMatch[1]) : undefined,
+    };
+  };
+
+  const shouldShowRecipeActions = !message.isUser && isGeneratedRecipe(message.text, message.mode);
+  const recipeData = shouldShowRecipeActions ? parseRecipeFromText(message.text, message.id) : null;
 
   return (
     <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -108,6 +157,20 @@ const ChatMessage = ({ message, onViewRecipe }: ChatMessageProps) => {
               <Eye className="w-4 h-4 mr-2" />
               View Recipe
             </Button>
+          </div>
+        )}
+        
+        {/* Recipe Actions for Generated Recipes */}
+        {shouldShowRecipeActions && recipeData && (
+          <div className="mt-3 pt-3 border-t border-border/20">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-muted-foreground">Recipe Actions</span>
+            </div>
+            {isMobile ? (
+              <MobileRecipeActions recipe={recipeData} />
+            ) : (
+              <RecipeActions recipe={recipeData} size="sm" />
+            )}
           </div>
         )}
         
