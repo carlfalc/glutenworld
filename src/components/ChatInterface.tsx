@@ -134,19 +134,13 @@ const ChatInterface = () => {
 
   // Add mode indicator message when mode changes
   useEffect(() => {
-    console.log('🎯 ChatInterface: Mode change effect triggered - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent, 'servingSize:', servingSize);
-    
-    // Don't add recipe-creator mode message if serving size has already been selected
-    if (chatMode === 'recipe-creator' && servingSize) {
-      console.log('🎯 ChatInterface: Skipping recipe-creator mode message - serving size already selected');
-      return;
-    }
+    console.log('🎯 ChatInterface: Mode change effect triggered - chatMode:', chatMode, 'modeMessageSent:', modeMessageSent);
     
     if (chatMode !== 'general' && modeMessageSent !== chatMode) {
       console.log('🎯 ChatInterface: Adding mode indicator message for:', chatMode);
       
       const modeMessages = {
-        'recipe-creator': "🍳 Recipe Creator mode activated! Now just select the serving size",
+        'recipe-creator': "🍳 I'm ready to create a custom gluten-free recipe for you! Please tell me:\n\n1. How many servings do you need?\n2. What type of recipe would you like? (e.g., pasta dish, soup, dessert, etc.)\n\nJust describe what you're looking for and I'll create a delicious recipe for you!",
         'conversion': "🔄 Recipe Conversion Mode! Share a recipe and I'll convert it to be gluten-free.",
         'nutrition': "🥗 Nutrition Mode! Ask me about the nutritional aspects of gluten-free ingredients and dishes.",
         'ingredient-scan': "📷 Ingredient Scan Mode! Take a photo of any ingredient label and I'll analyze it for gluten, allergens, and provide detailed nutritional information."
@@ -163,16 +157,10 @@ const ChatInterface = () => {
       console.log('🎯 ChatInterface: Adding mode message:', modeMessages[chatMode]);
       addMessage(modeMessage);
       setModeMessageSent(chatMode);
-
-      // For recipe creator mode, show serving size selector
-      if (chatMode === 'recipe-creator') {
-        console.log('🎯 ChatInterface: Setting isAwaitingServingSize to true');
-        setIsAwaitingServingSize(true);
-      }
     } else {
       console.log('🎯 ChatInterface: Mode change effect - NOT adding message. Conditions not met.');
     }
-  }, [chatMode, addMessage, setIsAwaitingServingSize, servingSize]);
+  }, [chatMode, addMessage]);
 
   // Reset mode message tracking when mode changes to general OR when serving size is set for recipe-creator
   useEffect(() => {
@@ -202,16 +190,12 @@ const ChatInterface = () => {
     const currentInput = inputValue;
     setInputValue('');
 
-    // Check if we're in recipe-creator mode and user is providing a recipe name
-    // (serving size has been selected and we're not awaiting it anymore)
-    const isRecipeNameRequest = chatMode === 'recipe-creator' && !isAwaitingServingSize && servingSize;
-
     try {
-      // If user is providing a recipe name, first acknowledge with the "whizz this up" message
-      if (isRecipeNameRequest) {
+      // If user is in recipe-creator mode, acknowledge their request
+      if (chatMode === 'recipe-creator') {
         const acknowledgmentMessage: Message = {
           id: (Date.now() + 1).toString(),
-          text: "Great! let me whizz this up, I'll be right back!",
+          text: "Perfect! Let me create that delicious gluten-free recipe for you. I'll be right back with something amazing! 🍳✨",
           isUser: false,
           timestamp: new Date(),
           mode: chatMode,
@@ -224,7 +208,7 @@ const ChatInterface = () => {
 
       const response = await contextualAI.mutateAsync({ 
         message: currentInput,
-        context: { servingSize, chatMode }
+        context: { chatMode }
       });
 
       const aiResponse: Message = {
@@ -493,10 +477,6 @@ const ChatInterface = () => {
           );
         })}
         
-        {/* Serving Size Selector */}
-        {isAwaitingServingSize && chatMode === 'recipe-creator' && (
-          <ServingSizeSelector />
-        )}
         
         <div ref={messagesEndRef} />
 
