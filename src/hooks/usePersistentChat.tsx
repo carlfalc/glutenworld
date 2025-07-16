@@ -27,9 +27,15 @@ export const usePersistentChat = () => {
 
   // Load messages from localStorage when component mounts or user changes
   useEffect(() => {
-    if (user) {
-      const userStorageKey = `${CHAT_STORAGE_KEY}_${user.id}`;
-      const storedMessages = localStorage.getItem(userStorageKey);
+    const loadMessages = () => {
+      let storageKey = CHAT_STORAGE_KEY;
+      
+      // Use user-specific storage if user is logged in
+      if (user) {
+        storageKey = `${CHAT_STORAGE_KEY}_${user.id}`;
+      }
+      
+      const storedMessages = localStorage.getItem(storageKey);
       
       if (storedMessages) {
         try {
@@ -53,7 +59,7 @@ export const usePersistentChat = () => {
             return index === firstModeIndex;
           });
           
-          console.log('Loaded messages from storage:', parsedMessages.length, 'filtered to:', filteredMessages.length);
+          console.log('🔄 Loaded messages from storage:', parsedMessages.length, 'filtered to:', filteredMessages.length);
           
           // Log image data for debugging
           filteredMessages.forEach(msg => {
@@ -62,18 +68,34 @@ export const usePersistentChat = () => {
             }
           });
           
-          setMessages(filteredMessages);
+          // Only update if we have more than just the welcome message
+          if (filteredMessages.length > 1) {
+            setMessages(filteredMessages);
+          }
         } catch (error) {
           console.error('Failed to parse stored chat messages:', error);
         }
       }
+    };
+
+    // Load messages immediately
+    loadMessages();
+    
+    // Also load messages when user state changes
+    if (user) {
+      setTimeout(loadMessages, 100); // Small delay to ensure user is fully loaded
     }
   }, [user]);
 
   // Save messages to localStorage whenever messages change
   useEffect(() => {
-    if (user && messages.length > 1) { // Don't save if only welcome message
-      const userStorageKey = `${CHAT_STORAGE_KEY}_${user.id}`;
+    if (messages.length > 1) { // Don't save if only welcome message
+      let storageKey = CHAT_STORAGE_KEY;
+      
+      // Use user-specific storage if user is logged in, otherwise use general storage
+      if (user) {
+        storageKey = `${CHAT_STORAGE_KEY}_${user.id}`;
+      }
       
       // Filter out duplicate mode messages before saving
       const messagesToSave = messages.filter((msg, index) => {
@@ -92,23 +114,23 @@ export const usePersistentChat = () => {
       
       // Log storage operation
       const imagesCount = messagesToSave.filter(msg => msg.image).length;
-      console.log(`Saving ${messagesToSave.length} messages to storage (${imagesCount} with images)`);
+      console.log(`💾 Saving ${messagesToSave.length} messages to storage (${imagesCount} with images) with key: ${storageKey}`);
       
       try {
-        localStorage.setItem(userStorageKey, JSON.stringify(messagesToSave));
-        console.log('Messages saved successfully to storage');
+        localStorage.setItem(storageKey, JSON.stringify(messagesToSave));
+        console.log('✅ Messages saved successfully to storage');
       } catch (error) {
-        console.error('Failed to save messages to storage:', error);
+        console.error('❌ Failed to save messages to storage:', error);
         // If storage is full, try to save without images
         const messagesWithoutImages = messagesToSave.map(msg => ({
           ...msg,
           image: undefined
         }));
         try {
-          localStorage.setItem(userStorageKey, JSON.stringify(messagesWithoutImages));
-          console.log('Messages saved without images due to storage constraints');
+          localStorage.setItem(storageKey, JSON.stringify(messagesWithoutImages));
+          console.log('✅ Messages saved without images due to storage constraints');
         } catch (fallbackError) {
-          console.error('Failed to save messages even without images:', fallbackError);
+          console.error('❌ Failed to save messages even without images:', fallbackError);
         }
       }
     }
@@ -143,13 +165,16 @@ export const usePersistentChat = () => {
       timestamp: new Date(),
     };
     
-    console.log('Clearing chat history');
-    setMessages([welcomeMessage]);
+    console.log('🗑️ Clearing chat history');
     
+    // Clear both user-specific and general storage
     if (user) {
       const userStorageKey = `${CHAT_STORAGE_KEY}_${user.id}`;
       localStorage.removeItem(userStorageKey);
     }
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    
+    setMessages([welcomeMessage]);
   };
 
   return {
