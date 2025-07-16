@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite, useFavorites } from '@/hooks/useFavorites';
+import { useCreateRecipe } from '@/hooks/useRecipes';
 import { useToast } from '@/hooks/use-toast';
 import ShareRecipe from './ShareRecipe';
 import { cn } from '@/lib/utils';
@@ -40,10 +41,11 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
   
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
+  const createRecipeMutation = useCreateRecipe();
   const { data: isFav } = useIsFavorite('recipe', { itemId: recipe.id });
   const { data: favorites = [] } = useFavorites('recipe');
 
-  const handleFavoriteToggle = () => {
+  const handleFavoriteToggle = async () => {
     if (isFav) {
       // Find the favorite record to remove
       const favoriteToRemove = favorites.find(fav => fav.recipe_id === recipe.id);
@@ -51,16 +53,50 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
         removeFromFavoritesMutation.mutate(favoriteToRemove.id);
       }
     } else {
-      // For AI-generated recipes, store them with all necessary data
-      addToFavoritesMutation.mutate({
-        type: 'recipe',
-        recipe_id: recipe.id,
-        // Store the recipe data as JSON in the product fields for AI recipes
-        product_name: recipe.title,
-        product_description: recipe.converted_recipe || JSON.stringify(recipe),
-        product_category: 'ai-generated-recipe',
-        product_scanned_at: new Date().toISOString(),
-      });
+      try {
+        // First add to favorites
+        addToFavoritesMutation.mutate({
+          type: 'recipe',
+          recipe_id: recipe.id,
+          // Store the recipe data as JSON in the product fields for AI recipes
+          product_name: recipe.title,
+          product_description: recipe.converted_recipe || JSON.stringify(recipe),
+          product_category: 'ai-generated-recipe',
+          product_scanned_at: new Date().toISOString(),
+        });
+
+        // Also save to My Recipes (user_recipes table)
+        const recipeData = {
+          title: recipe.title,
+          original_recipe: recipe.original_recipe || '',
+          converted_recipe: recipe.converted_recipe || '',
+          ingredients: recipe.ingredients || null,
+          instructions: recipe.instructions || null,
+          servings: recipe.servings || null,
+          prep_time: recipe.prep_time || null,
+          cook_time: recipe.cook_time || null,
+          calories_per_serving: recipe.calories_per_serving || null,
+          protein_g: recipe.protein_g || null,
+          carbs_g: recipe.carbs_g || null,
+          fat_g: recipe.fat_g || null,
+          difficulty_level: 'Medium' as const,
+          is_public: false
+        };
+
+        createRecipeMutation.mutate(recipeData);
+
+        toast({
+          title: "Recipe Saved!",
+          description: "Recipe has been added to both Favorites and My Recipes.",
+        });
+      } catch (error) {
+        console.error('Error saving recipe:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save recipe completely. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
     setIsSheetOpen(false);
   };
@@ -251,7 +287,7 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
             ? "text-red-600 hover:text-red-700" 
             : "text-gray-600 hover:text-red-600"
         )}
-        disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending}
+        disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending || createRecipeMutation.isPending}
       >
         <Heart className={cn("w-5 h-5", isFav && "fill-current")} />
       </Button>
@@ -276,7 +312,7 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
               variant="outline"
               className="flex flex-col items-center gap-2 h-20 touch-manipulation active:scale-95 transition-transform"
               onClick={handleFavoriteToggle}
-              disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending}
+              disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending || createRecipeMutation.isPending}
             >
               <Heart className={cn("w-6 h-6", isFav && "fill-current text-red-600")} />
               <span className="text-sm font-medium">{isFav ? "Remove from Favorites" : "Add to Favorites"}</span>

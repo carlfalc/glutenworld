@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite, useFavorites } from '@/hooks/useFavorites';
+import { useCreateRecipe } from '@/hooks/useRecipes';
 import { useToast } from '@/hooks/use-toast';
 import ShareRecipe from './ShareRecipe';
 import { cn } from '@/lib/utils';
@@ -39,10 +40,11 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
+  const createRecipeMutation = useCreateRecipe();
   const { data: isFav } = useIsFavorite('recipe', { itemId: recipe.id });
   const { data: favorites = [] } = useFavorites('recipe');
 
-  const handleFavoriteToggle = () => {
+  const handleFavoriteToggle = async () => {
     if (isFav) {
       // Find the favorite record to remove
       const favoriteToRemove = favorites.find(fav => fav.recipe_id === recipe.id);
@@ -50,16 +52,50 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         removeFromFavoritesMutation.mutate(favoriteToRemove.id);
       }
     } else {
-      // For AI-generated recipes, store them with all necessary data
-      addToFavoritesMutation.mutate({
-        type: 'recipe',
-        recipe_id: recipe.id,
-        // Store the recipe data as JSON in the product fields for AI recipes
-        product_name: recipe.title,
-        product_description: recipe.converted_recipe || JSON.stringify(recipe),
-        product_category: 'ai-generated-recipe',
-        product_scanned_at: new Date().toISOString(),
-      });
+      try {
+        // First add to favorites
+        addToFavoritesMutation.mutate({
+          type: 'recipe',
+          recipe_id: recipe.id,
+          // Store the recipe data as JSON in the product fields for AI recipes
+          product_name: recipe.title,
+          product_description: recipe.converted_recipe || JSON.stringify(recipe),
+          product_category: 'ai-generated-recipe',
+          product_scanned_at: new Date().toISOString(),
+        });
+
+        // Also save to My Recipes (user_recipes table)
+        const recipeData = {
+          title: recipe.title,
+          original_recipe: recipe.original_recipe || '',
+          converted_recipe: recipe.converted_recipe || '',
+          ingredients: recipe.ingredients || null,
+          instructions: recipe.instructions || null,
+          servings: recipe.servings || null,
+          prep_time: recipe.prep_time || null,
+          cook_time: recipe.cook_time || null,
+          calories_per_serving: recipe.calories_per_serving || null,
+          protein_g: recipe.protein_g || null,
+          carbs_g: recipe.carbs_g || null,
+          fat_g: recipe.fat_g || null,
+          difficulty_level: 'Medium' as const,
+          is_public: false
+        };
+
+        createRecipeMutation.mutate(recipeData);
+
+        toast({
+          title: "Recipe Saved!",
+          description: "Recipe has been added to both Favorites and My Recipes.",
+        });
+      } catch (error) {
+        console.error('Error saving recipe:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save recipe completely. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -239,7 +275,7 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
             ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100" 
             : "hover:bg-red-50 hover:border-red-200 hover:text-red-600"
         )}
-        disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending}
+        disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending || createRecipeMutation.isPending}
       >
         <Heart className={cn("w-4 h-4", isFav && "fill-current")} />
         {size !== 'sm' && (isFav ? "Saved" : "Save")}
