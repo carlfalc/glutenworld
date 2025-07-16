@@ -53,61 +53,61 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
         removeFromFavoritesMutation.mutate(favoriteToRemove.id);
       }
     } else {
-      try {
-        // First save to My Recipes (user_recipes table)
-        const recipeData = {
-          title: recipe.title,
-          original_recipe: recipe.original_recipe || '',
-          converted_recipe: recipe.converted_recipe || '',
-          ingredients: recipe.ingredients || null,
-          instructions: recipe.instructions || null,
-          servings: recipe.servings || null,
-          prep_time: recipe.prep_time || null,
-          cook_time: recipe.cook_time || null,
-          calories_per_serving: recipe.calories_per_serving || null,
-          protein_g: recipe.protein_g || null,
-          carbs_g: recipe.carbs_g || null,
-          fat_g: recipe.fat_g || null,
-          difficulty_level: 'Medium' as const,
-          is_public: false
-        };
+      // First save to My Recipes (user_recipes table)
+      const recipeData = {
+        title: recipe.title,
+        original_recipe: recipe.original_recipe || '',
+        converted_recipe: recipe.converted_recipe || '',
+        ingredients: recipe.ingredients || null,
+        instructions: recipe.instructions || null,
+        servings: recipe.servings || null,
+        prep_time: recipe.prep_time || null,
+        cook_time: recipe.cook_time || null,
+        calories_per_serving: recipe.calories_per_serving || null,
+        protein_g: recipe.protein_g || null,
+        carbs_g: recipe.carbs_g || null,
+        fat_g: recipe.fat_g || null,
+        difficulty_level: 'Medium' as const,
+        is_public: false
+      };
 
-        // Save to user_recipes first
-        await new Promise((resolve, reject) => {
-          createRecipeMutation.mutate(recipeData, {
-            onSuccess: resolve,
-            onError: reject
-          });
-        });
-
-        // Then add to favorites
-        await new Promise((resolve, reject) => {
+      // Save to user_recipes with success callback
+      createRecipeMutation.mutate(recipeData, {
+        onSuccess: () => {
+          // Then add to favorites after successful recipe save
           addToFavoritesMutation.mutate({
             type: 'recipe',
             recipe_id: recipe.id,
-            // Store the recipe data as JSON in the product fields for AI recipes
             product_name: recipe.title,
             product_description: recipe.converted_recipe || JSON.stringify(recipe),
             product_category: 'ai-generated-recipe',
             product_scanned_at: new Date().toISOString(),
           }, {
-            onSuccess: resolve,
-            onError: reject
+            onSuccess: () => {
+              toast({
+                title: "Recipe Saved",
+                description: "Recipe added to favorites and My Recipes!",
+              });
+            },
+            onError: (error) => {
+              console.error('Error adding to favorites:', error);
+              toast({
+                title: "Partially Saved",
+                description: "Recipe saved to My Recipes, but couldn't add to favorites.",
+                variant: "destructive",
+              });
+            }
           });
-        });
-
-        toast({
-          title: "Recipe Saved",
-          description: "Recipe added to favorites and My Recipes!",
-        });
-      } catch (error) {
-        console.error('Error saving recipe:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save recipe. Please try again.",
-          variant: "destructive",
-        });
-      }
+        },
+        onError: (error) => {
+          console.error('Error saving recipe:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save recipe. Please try again.",
+            variant: "destructive",
+          });
+        }
+      });
     }
     setIsSheetOpen(false);
   };
