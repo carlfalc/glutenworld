@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite } from '@/hooks/useFavorites';
+import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite, useFavorites } from '@/hooks/useFavorites';
 import { useToast } from '@/hooks/use-toast';
 import ShareRecipe from './ShareRecipe';
 import { cn } from '@/lib/utils';
@@ -40,11 +40,15 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
   const { data: isFav } = useIsFavorite('recipe', { itemId: recipe.id });
+  const { data: favorites = [] } = useFavorites('recipe');
 
   const handleFavoriteToggle = () => {
     if (isFav) {
       // Find the favorite record to remove
-      removeFromFavoritesMutation.mutate(recipe.id);
+      const favoriteToRemove = favorites.find(fav => fav.recipe_id === recipe.id);
+      if (favoriteToRemove) {
+        removeFromFavoritesMutation.mutate(favoriteToRemove.id);
+      }
     } else {
       addToFavoritesMutation.mutate({
         type: 'recipe',
@@ -54,121 +58,111 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   };
 
   const handlePrint = () => {
-    // Enhanced mobile detection and handling
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // Always use proper print dialog instead of share for printing
+    const printContent = generatePrintableRecipe(recipe);
+    const printWindow = window.open('', '_blank');
     
-    if (isMobileDevice && navigator.share) {
-      // For mobile devices with share capability, use text sharing for printing
-      const printableContent = generateMobilePrintContent(recipe);
-      navigator.share({
-        title: `${recipe.title} - Recipe`,
-        text: printableContent,
-      }).then(() => {
-        toast({
-          title: "Recipe Shared",
-          description: "You can now print from the shared app or save as PDF.",
-        });
-      }).catch((error) => {
-        console.log('Share failed, falling back to print dialog:', error);
-        // Fallback to standard print
-        setTimeout(() => window.print(), 100);
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${recipe.title} - Recipe</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                margin: 20px; 
+                line-height: 1.6;
+                color: #333;
+              }
+              .recipe-header { 
+                border-bottom: 2px solid #333; 
+                padding-bottom: 10px; 
+                margin-bottom: 20px; 
+              }
+              .recipe-title { 
+                font-size: 24px; 
+                font-weight: bold; 
+                margin: 0; 
+              }
+              .recipe-info { 
+                margin: 10px 0; 
+                display: flex; 
+                gap: 20px; 
+                flex-wrap: wrap;
+              }
+              .info-item { 
+                font-size: 14px; 
+                color: #666; 
+              }
+              .section { 
+                margin: 20px 0; 
+              }
+              .section-title { 
+                font-size: 18px; 
+                font-weight: bold; 
+                margin-bottom: 10px; 
+                color: #444;
+              }
+              .ingredients { 
+                list-style-type: disc; 
+                margin-left: 20px; 
+              }
+              .instructions { 
+                list-style-type: decimal; 
+                margin-left: 20px; 
+              }
+              .ingredients li, .instructions li { 
+                margin: 5px 0; 
+              }
+              .nutritional-info {
+                background-color: #f5f5f5;
+                padding: 15px;
+                border-radius: 5px;
+                margin-top: 20px;
+              }
+              .nutrition-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+                margin-top: 10px;
+              }
+              .nutrition-item {
+                text-align: center;
+                padding: 5px;
+                background: white;
+                border-radius: 3px;
+              }
+              @media print {
+                body { margin: 0; }
+                .recipe-header { page-break-after: avoid; }
+              }
+              @media screen and (max-width: 768px) {
+                body { margin: 10px; font-size: 14px; }
+                .recipe-title { font-size: 20px; }
+                .section-title { font-size: 16px; }
+              }
+            </style>
+          </head>
+          <body>
+            ${printContent}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      
+      toast({
+        title: "Recipe Print Ready",
+        description: "Print dialog opened for the recipe.",
       });
     } else {
-      // Standard print dialog for desktop and non-share mobile
-      const printContent = generatePrintableRecipe(recipe);
-      const printWindow = window.open('', '_blank');
-      
-      if (printWindow) {
-        printWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>${recipe.title} - Recipe</title>
-              <style>
-                body { 
-                  font-family: Arial, sans-serif; 
-                  margin: 20px; 
-                  line-height: 1.6;
-                  color: #333;
-                }
-                .recipe-header { 
-                  border-bottom: 2px solid #333; 
-                  padding-bottom: 10px; 
-                  margin-bottom: 20px; 
-                }
-                .recipe-title { 
-                  font-size: 24px; 
-                  font-weight: bold; 
-                  margin: 0; 
-                }
-                .recipe-info { 
-                  margin: 10px 0; 
-                  display: flex; 
-                  gap: 20px; 
-                  flex-wrap: wrap;
-                }
-                .info-item { 
-                  font-size: 14px; 
-                  color: #666; 
-                }
-                .section { 
-                  margin: 20px 0; 
-                }
-                .section-title { 
-                  font-size: 18px; 
-                  font-weight: bold; 
-                  margin-bottom: 10px; 
-                  color: #444;
-                }
-                .ingredients { 
-                  list-style-type: disc; 
-                  margin-left: 20px; 
-                }
-                .instructions { 
-                  list-style-type: decimal; 
-                  margin-left: 20px; 
-                }
-                .ingredients li, .instructions li { 
-                  margin: 5px 0; 
-                }
-                .nutritional-info {
-                  background-color: #f5f5f5;
-                  padding: 15px;
-                  border-radius: 5px;
-                  margin-top: 20px;
-                }
-                .nutrition-grid {
-                  display: grid;
-                  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                  gap: 10px;
-                  margin-top: 10px;
-                }
-                .nutrition-item {
-                  text-align: center;
-                  padding: 5px;
-                  background: white;
-                  border-radius: 3px;
-                }
-                @media print {
-                  body { margin: 0; }
-                  .recipe-header { page-break-after: avoid; }
-                }
-                @media screen and (max-width: 768px) {
-                  body { margin: 10px; font-size: 14px; }
-                  .recipe-title { font-size: 20px; }
-                  .section-title { font-size: 16px; }
-                }
-              </style>
-            </head>
-            <body>
-              ${printContent}
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-      }
+      toast({
+        title: "Print Failed",
+        description: "Unable to open print dialog. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -245,25 +239,16 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         {size !== 'sm' && (isFav ? "Saved" : "Save")}
       </Button>
 
-      {/* Share Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size={buttonSize} className="hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600">
-            <Share className="w-4 h-4" />
-            {size !== 'sm' && "Share"}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleShareToMessenger}>
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Share to Messenger
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsShareOpen(true)}>
-            <Share className="w-4 h-4 mr-2" />
-            Social Media & Email
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Share to Apps Button */}
+      <Button
+        variant="outline"
+        size={buttonSize}
+        onClick={handleShareToMessenger}
+        className="hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600"
+      >
+        <MessageCircle className="w-4 h-4" />
+        {size !== 'sm' && "Share to Apps"}
+      </Button>
 
       {/* Print Button */}
       <Button

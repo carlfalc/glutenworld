@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite } from '@/hooks/useFavorites';
+import { useAddToFavorites, useRemoveFromFavorites, useIsFavorite, useFavorites } from '@/hooks/useFavorites';
 import { useToast } from '@/hooks/use-toast';
 import ShareRecipe from './ShareRecipe';
 import { cn } from '@/lib/utils';
@@ -41,10 +41,15 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
   const addToFavoritesMutation = useAddToFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
   const { data: isFav } = useIsFavorite('recipe', { itemId: recipe.id });
+  const { data: favorites = [] } = useFavorites('recipe');
 
   const handleFavoriteToggle = () => {
     if (isFav) {
-      removeFromFavoritesMutation.mutate(recipe.id);
+      // Find the favorite record to remove
+      const favoriteToRemove = favorites.find(fav => fav.recipe_id === recipe.id);
+      if (favoriteToRemove) {
+        removeFromFavoritesMutation.mutate(favoriteToRemove.id);
+      }
     } else {
       addToFavoritesMutation.mutate({
         type: 'recipe',
@@ -55,102 +60,83 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
   };
 
   const handlePrint = () => {
-    // Check if we're on mobile and handle accordingly
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // Always use proper print dialog instead of share for printing
+    const printContent = generatePrintableRecipe(recipe);
+    const printWindow = window.open('', '_blank');
     
-    if (isMobileDevice) {
-      // For mobile devices, create a shareable version for printing
-      const printableContent = generateMobilePrintContent(recipe);
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${recipe.title} - Recipe</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                margin: 15px; 
+                line-height: 1.5;
+                color: #333;
+                font-size: 14px;
+              }
+              .recipe-header { 
+                border-bottom: 2px solid #333; 
+                padding-bottom: 8px; 
+                margin-bottom: 15px; 
+              }
+              .recipe-title { 
+                font-size: 20px; 
+                font-weight: bold; 
+                margin: 0; 
+              }
+              .recipe-info { 
+                margin: 8px 0; 
+                font-size: 12px;
+                color: #666;
+              }
+              .section { 
+                margin: 15px 0; 
+              }
+              .section-title { 
+                font-size: 16px; 
+                font-weight: bold; 
+                margin-bottom: 8px; 
+                color: #444;
+              }
+              .ingredients, .instructions { 
+                margin-left: 15px; 
+                padding-left: 0;
+              }
+              .ingredients li, .instructions li { 
+                margin: 3px 0; 
+                font-size: 13px;
+              }
+              @media print {
+                body { margin: 5px; font-size: 12px; }
+                .recipe-title { font-size: 18px; }
+                .section-title { font-size: 14px; }
+              }
+            </style>
+          </head>
+          <body>
+            ${printContent}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
       
-      // Try to use native share API first (works well on mobile)
-      if (navigator.share) {
-        navigator.share({
-          title: `${recipe.title} - Recipe`,
-          text: printableContent,
-        }).then(() => {
-          toast({
-            title: "Recipe Shared",
-            description: "You can now print from the shared app or save as PDF.",
-          });
-        }).catch((error) => {
-          console.log('Share failed, falling back to copy:', error);
-          copyToClipboard(printableContent);
-        });
-      } else {
-        // Fallback: copy to clipboard and open print dialog
-        copyToClipboard(printableContent);
-        setTimeout(() => {
-          window.print();
-        }, 100);
-      }
+      toast({
+        title: "Recipe Print Ready",
+        description: "Print dialog opened for the recipe.",
+      });
     } else {
-      // Desktop printing (original implementation)
-      const printContent = generatePrintableRecipe(recipe);
-      const printWindow = window.open('', '_blank');
-      
-      if (printWindow) {
-        printWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>${recipe.title} - Recipe</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body { 
-                  font-family: Arial, sans-serif; 
-                  margin: 15px; 
-                  line-height: 1.5;
-                  color: #333;
-                  font-size: 14px;
-                }
-                .recipe-header { 
-                  border-bottom: 2px solid #333; 
-                  padding-bottom: 8px; 
-                  margin-bottom: 15px; 
-                }
-                .recipe-title { 
-                  font-size: 20px; 
-                  font-weight: bold; 
-                  margin: 0; 
-                }
-                .recipe-info { 
-                  margin: 8px 0; 
-                  font-size: 12px;
-                  color: #666;
-                }
-                .section { 
-                  margin: 15px 0; 
-                }
-                .section-title { 
-                  font-size: 16px; 
-                  font-weight: bold; 
-                  margin-bottom: 8px; 
-                  color: #444;
-                }
-                .ingredients, .instructions { 
-                  margin-left: 15px; 
-                  padding-left: 0;
-                }
-                .ingredients li, .instructions li { 
-                  margin: 3px 0; 
-                  font-size: 13px;
-                }
-                @media print {
-                  body { margin: 5px; font-size: 12px; }
-                  .recipe-title { font-size: 18px; }
-                  .section-title { font-size: 14px; }
-                }
-              </style>
-            </head>
-            <body>
-              ${printContent}
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-      }
+      toast({
+        title: "Print Failed",
+        description: "Unable to open print dialog. Please try again.",
+        variant: "destructive",
+      });
     }
     setIsSheetOpen(false);
   };
@@ -299,17 +285,6 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
               <span className="text-sm font-medium">Share to Apps</span>
             </Button>
 
-            <Button
-              variant="outline"
-              className="flex flex-col items-center gap-2 h-20 touch-manipulation active:scale-95 transition-transform"
-              onClick={() => {
-                setIsShareOpen(true);
-                setIsSheetOpen(false);
-              }}
-            >
-              <Share className="w-6 h-6 text-green-600" />
-              <span className="text-sm font-medium">Social Media</span>
-            </Button>
 
             <Button
               variant="outline"
