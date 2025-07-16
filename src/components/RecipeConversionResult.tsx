@@ -53,7 +53,12 @@ const RecipeConversionResult = ({ convertedRecipe, onBack, onSave }: RecipeConve
   };
 
   const handleGoToMyRecipes = () => {
-    navigate('/my-recipes');
+    // Show toast instead of navigating to preserve chat history
+    toast({
+      title: "Navigate to My Recipes",
+      description: "Click 'My Recipes' in the navigation menu to view your saved recipes.",
+      duration: 4000,
+    });
   };
 
   // Extract recipe title for sharing
@@ -106,10 +111,11 @@ const RecipeConversionResult = ({ convertedRecipe, onBack, onSave }: RecipeConve
         
         <Button
           onClick={handleGoToMyRecipes}
-          className="bg-blue-600 text-white hover:bg-blue-700 flex-1 min-w-[140px]"
+          variant="outline"
+          className="flex-1 min-w-[140px]"
         >
           <BookOpen className="w-4 h-4 mr-2" />
-          Go to my recipes
+          View in My Recipes
         </Button>
       </div>
     </div>

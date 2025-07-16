@@ -426,7 +426,7 @@ const ChatInterface = () => {
   };
 
   const resetChat = () => {
-    console.log('🔄 ChatInterface: Resetting chat - clearing mode and messages');
+    console.log('🔄 EXPLICIT USER RESET: User clicked Reset Chat button - this is the ONLY valid reason to clear chat');
     setChatMode('general');
     setServingSize(null); // Reset serving size when resetting chat
     setIsAwaitingServingSize(false);

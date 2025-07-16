@@ -59,7 +59,7 @@ export const usePersistentChat = () => {
             return index === firstModeIndex;
           });
           
-          console.log('🔄 Loaded messages from storage:', parsedMessages.length, 'filtered to:', filteredMessages.length);
+          console.log('🔄 CHAT RESTORE: Loading messages from storage:', parsedMessages.length, 'filtered to:', filteredMessages.length);
           console.log('💾 PERMANENT CHAT: All messages will persist forever - no auto-deletion');
           
           // Log image data for debugging
@@ -71,21 +71,30 @@ export const usePersistentChat = () => {
           
           // ALWAYS load stored messages - they should persist forever
           if (filteredMessages.length > 0) {
+            console.log('🔒 FORCE RESTORING CHAT MESSAGES - NO EXCEPTIONS');
             setMessages(filteredMessages);
             console.log('✅ PERMANENT CHAT: Restored', filteredMessages.length, 'messages from storage');
+          } else {
+            console.log('⚠️ No stored messages found, keeping default welcome message');
           }
         } catch (error) {
           console.error('❌ Failed to parse stored chat messages:', error);
         }
+      } else {
+        console.log('📭 No stored chat messages found in localStorage for key:', storageKey);
       }
     };
 
-    // Load messages immediately
+    // CRITICAL: Load messages immediately and FORCEFULLY
+    console.log('🚀 INITIALIZING CHAT PERSISTENCE - LOADING NOW');
     loadMessages();
     
-    // Also load messages when user state changes
+    // Also load messages when user state changes - but with protection against double loading
     if (user) {
-      setTimeout(loadMessages, 100); // Small delay to ensure user is fully loaded
+      console.log('👤 User state changed, re-loading chat messages after short delay');
+      setTimeout(() => {
+        loadMessages();
+      }, 100); // Small delay to ensure user is fully loaded
     }
   }, [user]);
 
@@ -162,6 +171,8 @@ export const usePersistentChat = () => {
   };
 
   const clearChatHistory = () => {
+    console.log('🚨 CRITICAL WARNING: clearChatHistory called - this should ONLY happen on explicit user "Reset Chat" action');
+    
     const welcomeMessage = {
       id: '1',
       text: "Hi! I'm GlutenConvert, your AI recipe assistant. I can help you create gluten-free recipes, convert existing recipes, scan ingredients for safety, or answer any gluten-free cooking questions. What would you like to do today?",
@@ -169,16 +180,19 @@ export const usePersistentChat = () => {
       timestamp: new Date(),
     };
     
-    console.log('🗑️ Clearing chat history');
+    console.log('🗑️ EXPLICIT USER ACTION: Clearing chat history');
     
     // Clear both user-specific and general storage
     if (user) {
       const userStorageKey = `${CHAT_STORAGE_KEY}_${user.id}`;
       localStorage.removeItem(userStorageKey);
+      console.log('🗑️ Cleared user-specific storage:', userStorageKey);
     }
     localStorage.removeItem(CHAT_STORAGE_KEY);
+    console.log('🗑️ Cleared general storage:', CHAT_STORAGE_KEY);
     
     setMessages([welcomeMessage]);
+    console.log('✅ Chat reset complete - only welcome message remains');
   };
 
   return {
