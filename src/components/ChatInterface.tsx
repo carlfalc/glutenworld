@@ -127,10 +127,27 @@ const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Initial scroll position check
+  // Initial scroll position check and auto-scroll to last message when app opens
   useEffect(() => {
     checkScrollPosition();
+    // Auto-scroll to the last conversation message when the app loads
+    if (messages.length > 1) {
+      console.log('📱 APP OPENED: Auto-scrolling to last conversation message');
+      setTimeout(() => {
+        scrollToBottom(true); // Force scroll to bottom on app load
+      }, 500); // Small delay to ensure DOM is ready
+    }
   }, []);
+
+  // Auto-scroll to bottom when messages are first loaded from storage
+  useEffect(() => {
+    if (messages.length > 1) {
+      console.log('💾 MESSAGES LOADED: Auto-scrolling to last message');
+      setTimeout(() => {
+        scrollToBottom(true);
+      }, 100);
+    }
+  }, [messages.length]);
 
   // Add mode indicator message when mode changes
   useEffect(() => {
@@ -420,13 +437,17 @@ const ChatInterface = () => {
   };
 
   const handleBackFromRecipe = () => {
+    console.log('🔙 RETURNING FROM RECIPE VIEW - CHAT HISTORY PRESERVED');
     setConversionResult(null);
     setActiveConvertedRecipeId(null);
+    // Note: Chat messages are NEVER cleared when returning from recipe view
   };
 
   const handleRecipeSaved = () => {
+    console.log('💾 RECIPE SAVED - CHAT HISTORY PRESERVED');
     setConversionResult(null);
     setActiveConvertedRecipeId(null);
+    // Note: Chat messages are NEVER cleared when saving recipes
   };
 
   if (conversionResult) {

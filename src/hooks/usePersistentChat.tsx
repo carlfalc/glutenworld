@@ -60,6 +60,7 @@ export const usePersistentChat = () => {
           });
           
           console.log('🔄 Loaded messages from storage:', parsedMessages.length, 'filtered to:', filteredMessages.length);
+          console.log('💾 PERMANENT CHAT: All messages will persist forever - no auto-deletion');
           
           // Log image data for debugging
           filteredMessages.forEach(msg => {
@@ -68,12 +69,13 @@ export const usePersistentChat = () => {
             }
           });
           
-          // Only update if we have more than just the welcome message
-          if (filteredMessages.length > 1) {
+          // ALWAYS load stored messages - they should persist forever
+          if (filteredMessages.length > 0) {
             setMessages(filteredMessages);
+            console.log('✅ PERMANENT CHAT: Restored', filteredMessages.length, 'messages from storage');
           }
         } catch (error) {
-          console.error('Failed to parse stored chat messages:', error);
+          console.error('❌ Failed to parse stored chat messages:', error);
         }
       }
     };
@@ -87,9 +89,10 @@ export const usePersistentChat = () => {
     }
   }, [user]);
 
-  // Save messages to localStorage whenever messages change
+  // Save messages to localStorage whenever messages change - PERMANENT STORAGE
   useEffect(() => {
-    if (messages.length > 1) { // Don't save if only welcome message
+    // ALWAYS save all messages - they should persist forever
+    if (messages.length > 0) {
       let storageKey = CHAT_STORAGE_KEY;
       
       // Use user-specific storage if user is logged in, otherwise use general storage
@@ -112,25 +115,26 @@ export const usePersistentChat = () => {
         return index === firstModeIndex;
       });
       
-      // Log storage operation
+      // Log storage operation with permanent storage emphasis
       const imagesCount = messagesToSave.filter(msg => msg.image).length;
-      console.log(`💾 Saving ${messagesToSave.length} messages to storage (${imagesCount} with images) with key: ${storageKey}`);
+      const recipesCount = messagesToSave.filter(msg => msg.text.includes('Recipe') || msg.convertedRecipe).length;
+      console.log(`💾 PERMANENT STORAGE: Saving ${messagesToSave.length} messages (${imagesCount} with images, ${recipesCount} recipes) with key: ${storageKey}`);
       
       try {
         localStorage.setItem(storageKey, JSON.stringify(messagesToSave));
-        console.log('✅ Messages saved successfully to storage');
+        console.log('✅ PERMANENT CHAT: All messages saved successfully - will persist forever');
       } catch (error) {
         console.error('❌ Failed to save messages to storage:', error);
-        // If storage is full, try to save without images
+        // If storage is full, try to save without images but KEEP ALL TEXT AND RECIPES
         const messagesWithoutImages = messagesToSave.map(msg => ({
           ...msg,
           image: undefined
         }));
         try {
           localStorage.setItem(storageKey, JSON.stringify(messagesWithoutImages));
-          console.log('✅ Messages saved without images due to storage constraints');
+          console.log('✅ PERMANENT CHAT: Messages saved without images but all text/recipes preserved');
         } catch (fallbackError) {
-          console.error('❌ Failed to save messages even without images:', fallbackError);
+          console.error('❌ CRITICAL: Failed to save messages even without images:', fallbackError);
         }
       }
     }
