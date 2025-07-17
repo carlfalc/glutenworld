@@ -37,12 +37,11 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       description: "Perfect for regular home cooks",
       features: [
         "Unlimited recipe conversions",
-        "Premium community features",
-        "Priority AI support",
         "Save favorite recipes",
         "Meal planning tools",
         "Scan Ingredient Labels",
-        "Premium AI Gluten Free Chat Interface"
+        "Premium AI Gluten Free Chat Interface",
+        "Save & Share Recipe Creations"
       ],
       popular: true,
       icon: <Crown className="w-5 h-5 text-gluten-primary" />
