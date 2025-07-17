@@ -65,7 +65,12 @@ const Landing = () => {
             <Sparkles className="w-6 h-6 text-gluten-secondary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Gluten World</h1>
+            <h1 
+              className="text-2xl font-bold text-foreground hover:text-gluten-primary cursor-pointer transition-colors duration-200"
+              onClick={() => setShowFeatureDetails(true)}
+            >
+              Gluten World
+            </h1>
           </div>
         </div>
         
