@@ -23,7 +23,8 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       features: [
         "Convert up to 5 recipes",
         "Community chat access",
-        "AI recipe assistant"
+        "AI recipe assistant",
+        "Scan Ingredient Labels"
       ],
       popular: false,
       icon: <Zap className="w-5 h-5 text-blue-500" />
@@ -39,7 +40,8 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
         "Premium community features",
         "Priority AI support",
         "Save favorite recipes",
-        "Meal planning tools"
+        "Meal planning tools",
+        "Scan Ingredient Labels"
       ],
       popular: true,
       icon: <Crown className="w-5 h-5 text-gluten-primary" />
