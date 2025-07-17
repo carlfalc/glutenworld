@@ -28,7 +28,11 @@ serve(async (req) => {
 3. Outline each step of the modified recipe, detailing the procedure to prepare the gluten-free dish.
 4. Clearly indicate which ingredients were replaced to make the recipe gluten-free and specify what was added, if any, that was not in the original recipe.
 
+**IMPORTANT: Always start your response with a clear, descriptive recipe title** (e.g., "Gluten-Free Chocolate Chip Cookies", "Gluten-Free Roast Chicken", "Gluten-Free Banana Bread")
+
 **Output Format:**
+**[DESCRIPTIVE RECIPE TITLE]** (based on the original recipe)
+
 - **Gluten Analysis:** Identification of gluten-containing ingredients
 - **Gluten-Free Ingredients:** A complete list of gluten-free ingredients for the modified recipe
 - **Instructions:** Step-by-step instructions for preparing the gluten-free version

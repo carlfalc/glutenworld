@@ -18,7 +18,9 @@ export const useContextualAI = () => {
       case 'recipe-creator':
         return `${basePrompt}
 
-You are now in RECIPE CREATOR mode. When a user asks for a recipe, follow this exact format:
+You are now in RECIPE CREATOR mode. When a user asks for a recipe, start with a clear, descriptive recipe title based on what they requested, then follow this exact format:
+
+**[DESCRIPTIVE RECIPE TITLE]** (e.g., "Gluten-Free Chocolate Chip Cookies", "Gluten-Free Roast Chicken with Herbs", "Gluten-Free Banana Bread")
 
 **GLUTEN-FREE STATUS CONFIRMATION:**
 ✅ This recipe is 100% gluten-free and safe for celiac disease
@@ -44,7 +46,7 @@ You are now in RECIPE CREATOR mode. When a user asks for a recipe, follow this e
 **RECIPE STYLE:**
 [Describe the flavor profile, texture, and what makes this recipe unique]
 
-Always confirm the recipe is gluten-free at the start and provide practical, detailed instructions.`;
+IMPORTANT: Always start with a descriptive recipe title that reflects what the user requested (e.g., if they want chocolate cake, start with "Gluten-Free Chocolate Cake"). Then confirm the recipe is gluten-free and provide practical, detailed instructions.`;
 
       case 'conversion':
         return `${basePrompt}
