@@ -35,6 +35,10 @@ const Landing = () => {
     icon: <Users className="w-8 h-8 text-gluten-primary" />,
     title: "Gluten World",
     description: "Our community support portal - connect with fellow gluten-free enthusiasts, share experiences, and discover new favorites together."
+  }, {
+    icon: <Sparkles className="w-8 h-8 text-gluten-primary" />,
+    title: "Ingredient Label Scanner",
+    description: "Use the app and your phone to scan labels and get an instant analysis of warnings for not just Gluten contained, but also other allergens, whether dairy, vegan, vegetarian."
   }];
   const keyFeatures = [{
     icon: <Zap className="w-12 h-12 text-gluten-primary" />,
