@@ -42,7 +42,8 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
         "Premium AI Gluten Free Chat Interface",
         "Save & Share Recipe Creations",
         "Convert any recipe to be Free of Gluten!",
-        "Get Recipe Nutritional Information, Warnings"
+        "Get Recipe Nutritional Information, Warnings",
+        "Ingredient label scanner also reports on Allergens!"
       ],
       popular: true,
       icon: <Crown className="w-5 h-5 text-gluten-primary" />
