@@ -21,9 +21,38 @@ const RecipeConversionResult = ({ convertedRecipe, onBack, onSave }: RecipeConve
 
   const handleSave = async () => {
     try {
-      // Extract title from the converted recipe (first line or first sentence)
-      const lines = convertedRecipe.split('\n').filter(line => line.trim());
-      const title = lines[0]?.replace(/^\d+\.\s*/, '').replace(/^#*\s*/, '') || 'Converted Gluten-Free Recipe';
+      // Extract title from the converted recipe content
+      let title = 'Gluten-Free Recipe';
+      
+      // Try to find recipe title in various formats
+      const titlePatterns = [
+        /(?:recipe|title):\s*(.+)/i,
+        /^#\s*(.+)/m,
+        /\*\*(.+)\*\*/,
+        /^(.+)(?=ingredients|preparation|steps)/im
+      ];
+      
+      for (const pattern of titlePatterns) {
+        const match = convertedRecipe.match(pattern);
+        if (match && match[1]) {
+          title = match[1].trim().replace(/\*\*/g, '');
+          // Ensure it's a reasonable title (not too long or system text)
+          if (title.length < 60 && !title.toLowerCase().includes('gluten-free status') && !title.toLowerCase().includes('confirmation')) {
+            break;
+          }
+        }
+      }
+      
+      // If no good title found, try to guess from context
+      if (title === 'Gluten-Free Recipe') {
+        if (convertedRecipe.toLowerCase().includes('cookie')) title = 'Gluten-Free Cookies';
+        else if (convertedRecipe.toLowerCase().includes('biscuit')) title = 'Gluten-Free Biscuits';
+        else if (convertedRecipe.toLowerCase().includes('bread')) title = 'Gluten-Free Bread';
+        else if (convertedRecipe.toLowerCase().includes('cake')) title = 'Gluten-Free Cake';
+        else if (convertedRecipe.toLowerCase().includes('pasta')) title = 'Gluten-Free Pasta';
+        else if (convertedRecipe.toLowerCase().includes('pizza')) title = 'Gluten-Free Pizza';
+        else title = 'Converted Gluten-Free Recipe';
+      }
 
       await createRecipeMutation.mutateAsync({
         title,
@@ -61,9 +90,41 @@ const RecipeConversionResult = ({ convertedRecipe, onBack, onSave }: RecipeConve
     });
   };
 
-  // Extract recipe title for sharing
-  const lines = convertedRecipe.split('\n').filter(line => line.trim());
-  const recipeTitle = lines[0]?.replace(/^\d+\.\s*/, '').replace(/^#*\s*/, '') || 'Converted Gluten-Free Recipe';
+  // Extract recipe title for sharing (use same logic as save)
+  const getRecipeTitle = () => {
+    let title = 'Gluten-Free Recipe';
+    
+    const titlePatterns = [
+      /(?:recipe|title):\s*(.+)/i,
+      /^#\s*(.+)/m,
+      /\*\*(.+)\*\*/,
+      /^(.+)(?=ingredients|preparation|steps)/im
+    ];
+    
+    for (const pattern of titlePatterns) {
+      const match = convertedRecipe.match(pattern);
+      if (match && match[1]) {
+        title = match[1].trim().replace(/\*\*/g, '');
+        if (title.length < 60 && !title.toLowerCase().includes('gluten-free status') && !title.toLowerCase().includes('confirmation')) {
+          break;
+        }
+      }
+    }
+    
+    if (title === 'Gluten-Free Recipe') {
+      if (convertedRecipe.toLowerCase().includes('cookie')) title = 'Gluten-Free Cookies';
+      else if (convertedRecipe.toLowerCase().includes('biscuit')) title = 'Gluten-Free Biscuits';
+      else if (convertedRecipe.toLowerCase().includes('bread')) title = 'Gluten-Free Bread';
+      else if (convertedRecipe.toLowerCase().includes('cake')) title = 'Gluten-Free Cake';
+      else if (convertedRecipe.toLowerCase().includes('pasta')) title = 'Gluten-Free Pasta';
+      else if (convertedRecipe.toLowerCase().includes('pizza')) title = 'Gluten-Free Pizza';
+      else title = 'Converted Gluten-Free Recipe';
+    }
+    
+    return title;
+  };
+  
+  const recipeTitle = getRecipeTitle();
 
   return (
     <div className="space-y-4">
