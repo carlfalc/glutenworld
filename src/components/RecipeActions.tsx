@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useCreateRecipe, useRecipes, useDeleteRecipe } from '@/hooks/useRecipes';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import ShareRecipe from './ShareRecipe';
 import { cn } from '@/lib/utils';
 
@@ -39,7 +40,8 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   
   const createRecipeMutation = useCreateRecipe();
   const deleteRecipeMutation = useDeleteRecipe();
-  const { data: userRecipes } = useRecipes();
+  const { data: userRecipes, isLoading: recipesLoading } = useRecipes();
+  const { user, loading: authLoading } = useAuth();
   
   // Check if recipe exists in My Recipes - use more specific matching
   const isFav = userRecipes?.some(r => 
@@ -52,6 +54,9 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
     recipeTitle: recipe.title,
     recipesCount: userRecipes?.length || 0,
     isFav,
+    isAuthenticated: !!user,
+    authLoading,
+    recipesLoading,
     userRecipes: userRecipes?.map(r => ({ id: r.id, title: r.title }))
   });
 
