@@ -78,7 +78,7 @@ const Landing = () => {
               </Button>
               <Button onClick={handleGetStarted} className="bg-gluten-primary hover:bg-gluten-primary/90 flex flex-col h-auto py-2 px-4">
                 <span className="text-white font-medium">Sign up</span>
-                <span className="text-blue-200 text-xs">Free 5 day Trial</span>
+                <span className="text-blue-600 text-xs font-medium">FREE 5 DAY TRIAL</span>
               </Button>
             </>}
         </div>
