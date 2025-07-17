@@ -21,8 +21,7 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       duration: "5 days",
       description: "Try all features risk-free",
       features: [
-        "Convert up to 5 recipes",
-        "Community chat access",
+        "Convert Recipes",
         "AI recipe assistant",
         "Scan Ingredient Labels"
       ],
