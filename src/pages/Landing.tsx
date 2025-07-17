@@ -153,21 +153,28 @@ const Landing = () => {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Everything you need to master gluten-free cooking and connect with a supportive community, just type, take pictures or talk to our AI! Its that simple</p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, index) => <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50">
-              <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-gluten-primary/10 rounded-full w-fit">
-                  {feature.icon}
-                </div>
-                <CardTitle className="text-xl">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>)}
-        </div>
+         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {features.map((feature, index) => <Card key={index} className={`text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50 ${index === 3 ? 'ring-2 ring-blue-500 border-blue-500/50' : ''} relative`}>
+               {index === 3 && (
+                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                   <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
+                     Our Most Popular Feature
+                   </div>
+                 </div>
+               )}
+               <CardHeader>
+                 <div className="mx-auto mb-4 p-3 bg-gluten-primary/10 rounded-full w-fit">
+                   {feature.icon}
+                 </div>
+                 <CardTitle className="text-xl">{feature.title}</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <CardDescription className="text-base">
+                   {feature.description}
+                 </CardDescription>
+               </CardContent>
+             </Card>)}
+         </div>
       </section>
 
       {/* AI Recipe Generator Section */}
