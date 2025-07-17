@@ -43,25 +43,25 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   const { data: userRecipes, isLoading: recipesLoading } = useRecipes();
   const { user, loading: authLoading } = useAuth();
   
-  // Check if recipe exists in My Recipes - for newly generated recipes, check by ID first, then content
+  // Check if recipe exists in My Recipes - for newly generated chat recipes, they should NOT be considered saved initially
   const isFav = userRecipes?.some(r => {
-    // If the recipe has an ID that matches a user recipe, it's already saved
-    if (recipe.id && r.id === recipe.id) return true;
+    // For generated recipes without a database ID, they are NOT saved yet
+    if (!recipe.id || recipe.id.startsWith('msg-')) return false;
     
-    // For generated recipes without ID, check by title and content
-    return r.title === recipe.title && 
-           r.converted_recipe === recipe.converted_recipe &&
-           r.converted_recipe // Only match if there's actual content to compare
+    // Only match if the recipe has a real database ID that exists in user recipes
+    return r.id === recipe.id;
   }) || false;
 
   // Debug logging
   console.log('🔍 Recipe matching debug:', {
     recipeTitle: recipe.title,
+    recipeId: recipe.id,
     recipesCount: userRecipes?.length || 0,
     isFav,
     isAuthenticated: !!user,
     authLoading,
     recipesLoading,
+    isGeneratedRecipe: !recipe.id || recipe.id.startsWith('msg-'),
     userRecipes: userRecipes?.map(r => ({ id: r.id, title: r.title }))
   });
 

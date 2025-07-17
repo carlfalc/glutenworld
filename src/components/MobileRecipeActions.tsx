@@ -42,8 +42,14 @@ const MobileRecipeActions = ({ recipe, className }: MobileRecipeActionsProps) =>
   const deleteRecipeMutation = useDeleteRecipe();
   const { data: userRecipes } = useRecipes();
   
-  // Check if recipe exists in My Recipes
-  const isFav = userRecipes?.some(r => r.title === recipe.title) || false;
+  // Check if recipe exists in My Recipes - for newly generated chat recipes, they should NOT be considered saved initially
+  const isFav = userRecipes?.some(r => {
+    // For generated recipes without a database ID, they are NOT saved yet
+    if (!recipe.id || recipe.id.startsWith('msg-')) return false;
+    
+    // Only match if the recipe has a real database ID that exists in user recipes
+    return r.id === recipe.id;
+  }) || false;
 
   const handleFavoriteToggle = async () => {
     if (isFav) {
