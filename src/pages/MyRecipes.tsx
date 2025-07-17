@@ -146,9 +146,19 @@ const MyRecipes = () => {
                            <span className="text-xs text-muted-foreground">
                              Created {new Date(recipe.created_at).toLocaleDateString()}
                           </span>
-                          <Button size="sm" variant="outline">
-                            View Recipe
-                          </Button>
+                           <Button 
+                             size="sm" 
+                             variant="outline"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               // Navigate to recipe details or open modal
+                               console.log('View recipe:', recipe);
+                               // For now, show the recipe content in a toast/alert
+                               alert(`Recipe: ${recipe.title}\n\n${recipe.converted_recipe || recipe.original_recipe || 'No recipe content available'}`);
+                             }}
+                           >
+                             View Recipe
+                           </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -199,9 +209,17 @@ const MyRecipes = () => {
                         <span className="text-xs text-muted-foreground">
                           By {recipe.author}
                         </span>
-                        <Button size="sm" variant="outline">
-                          View Recipe
-                        </Button>
+                         <Button 
+                           size="sm" 
+                           variant="outline"
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             console.log('View favorite recipe:', recipe);
+                             alert(`Recipe: ${recipe.title}\n\n${recipe.description}`);
+                           }}
+                         >
+                           View Recipe
+                         </Button>
                       </div>
                     </div>
                   </CardContent>

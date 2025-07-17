@@ -41,13 +41,19 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   const deleteRecipeMutation = useDeleteRecipe();
   const { data: userRecipes } = useRecipes();
   
-  // Check if recipe exists in My Recipes
-  const isFav = userRecipes?.some(r => r.title === recipe.title) || false;
+  // Check if recipe exists in My Recipes - use more specific matching
+  const isFav = userRecipes?.some(r => 
+    r.title === recipe.title && 
+    (r.converted_recipe === recipe.converted_recipe || r.original_recipe === recipe.original_recipe)
+  ) || false;
 
   const handleFavoriteToggle = async () => {
     if (isFav) {
       // Remove from My Recipes
-      const existingRecipe = userRecipes?.find(r => r.title === recipe.title);
+      const existingRecipe = userRecipes?.find(r => 
+        r.title === recipe.title && 
+        (r.converted_recipe === recipe.converted_recipe || r.original_recipe === recipe.original_recipe)
+      );
       if (existingRecipe) {
         deleteRecipeMutation.mutate(existingRecipe.id, {
           onSuccess: () => {
@@ -59,9 +65,9 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         });
       }
     } else {
-      // Save recipe to My Recipes
+      // Save recipe to My Recipes - ensure we have required fields
       const recipeData = {
-        title: recipe.title,
+        title: recipe.title || 'Untitled Recipe',
         original_recipe: recipe.original_recipe || '',
         converted_recipe: recipe.converted_recipe || '',
         ingredients: recipe.ingredients || null,
@@ -76,6 +82,8 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         difficulty_level: 'Medium' as const,
         is_public: false
       };
+
+      console.log('🍳 Saving recipe data:', recipeData);
 
       createRecipeMutation.mutate(recipeData, {
         onSuccess: () => {
