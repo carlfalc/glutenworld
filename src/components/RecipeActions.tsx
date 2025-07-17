@@ -47,6 +47,14 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
     (r.converted_recipe === recipe.converted_recipe || r.original_recipe === recipe.original_recipe)
   ) || false;
 
+  // Debug logging
+  console.log('🔍 Recipe matching debug:', {
+    recipeTitle: recipe.title,
+    recipesCount: userRecipes?.length || 0,
+    isFav,
+    userRecipes: userRecipes?.map(r => ({ id: r.id, title: r.title }))
+  });
+
   const handleFavoriteToggle = async () => {
     if (isFav) {
       // Remove from My Recipes
@@ -282,7 +290,7 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
         disabled={createRecipeMutation.isPending || deleteRecipeMutation.isPending}
       >
         <Heart className={cn("w-4 h-4", isFav ? "fill-current" : "")} />
-        {size !== 'sm' && (isFav ? "Saved" : "Save")}
+        {size !== 'sm' && (isFav ? "Remove from My Recipes" : "Save to My Recipes")}
       </Button>
 
       {/* Share to Apps Button */}
