@@ -55,7 +55,8 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       duration: "12 months",
       description: "Best value for committed users",
       features: [
-        "All the features in the Quarterly subscription but for our best price offer"
+        "All the features in the Quarterly subscription but for our best price offer",
+        "Annual Subscribers unlock our own specially generated recipes bonus"
       ],
       popular: false,
       icon: <Crown className="w-5 h-5 text-amber-500" />
