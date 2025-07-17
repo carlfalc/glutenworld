@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff, X, ChevronDown } from 'lucide-react';
+import { Send, Mic, MicOff, X, ChevronDown, Menu, BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ChatMessage from './ChatMessage';

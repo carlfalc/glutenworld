@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { Camera, X, Heart, Scan, Skull } from 'lucide-react';
+import { Camera, X, Heart, Scan, Skull, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChatContext } from '@/contexts/ChatContext';
 import FavoritesModal from '@/components/FavoritesModal';
+import { useNavigate } from 'react-router-dom';
 
 interface MobileActionBarProps {
   onCameraClick: () => void;
@@ -13,6 +14,7 @@ interface MobileActionBarProps {
 const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionBarProps) => {
   const { setChatMode, setIsAwaitingServingSize } = useChatContext();
   const [showFavorites, setShowFavorites] = useState(false);
+  const navigate = useNavigate();
 
   const handleRecipeCreator = () => {
     console.log('🟢 MobileActionBar: Recipe Creator button clicked');
@@ -50,9 +52,9 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
       color: "bg-green-600 hover:bg-green-700"
     },
     {
-      icon: <Heart className="w-5 h-5" />,
-      label: "My Favorites",
-      onClick: () => setShowFavorites(true),
+      icon: <BookOpen className="w-5 h-5" />,
+      label: "My Recipes",
+      onClick: () => navigate('/my-recipes'),
       color: "bg-blue-600 hover:bg-blue-700"
     }
   ];
@@ -74,6 +76,17 @@ const MobileActionBar = ({ onCameraClick, onIngredientScanClick }: MobileActionB
           ))}
         </div>
 
+        {/* Middle row: View Favorites button */}
+        <div className="px-4 pb-2">
+          <Button
+            onClick={() => setShowFavorites(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 h-12 w-full text-sm font-medium"
+          >
+            <Heart className="w-5 h-5" />
+            View Favorites
+          </Button>
+        </div>
+        
         {/* Bottom row: Full width Check Ingredient button */}
         <div className="px-4 pb-4">
           <Button

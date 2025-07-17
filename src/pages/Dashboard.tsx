@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Info } from 'lucide-react';
+import { Menu, Info, BookOpen, Heart } from 'lucide-react';
 import Header from '@/components/Header';
 import ChatInterface from '@/components/ChatInterface';
 import RecipeHotlist from '@/components/RecipeHotlist';
@@ -109,7 +109,27 @@ const Dashboard = () => {
               </button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:w-80 bg-card/95 backdrop-blur-md border-border/50 overflow-y-auto">
-              <div className="p-4">
+              <div className="p-4 space-y-6">
+                {/* My Recipes link at the top */}
+                <div className="border-b border-border/50 pb-4 space-y-2">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                    onClick={() => navigate('/my-recipes')}
+                  >
+                    <BookOpen className="w-5 h-5 mr-2 text-gluten-primary" />
+                    My Recipes
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                    onClick={() => navigate('/dashboard')}
+                  >
+                    <Heart className="w-5 h-5 mr-2 text-red-500" />
+                    My Favorites
+                  </Button>
+                </div>
                 <SidebarContent />
               </div>
             </SheetContent>

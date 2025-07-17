@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,8 @@ import { useRecipeSearch } from '@/hooks/useRecipeSearch';
 import { useAIGeneratorAccess } from '@/hooks/useAIGeneratorAccess';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Coffee, Apple, Utensils, Moon, Search, X, ChefHat, Loader } from 'lucide-react';
+import { Coffee, Apple, Utensils, Moon, Search, X, ChefHat, Loader, BookOpen, Menu, Heart } from 'lucide-react';
+import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 
 const categories = [
   { id: 'all', label: 'All Recipes', icon: ChefHat, color: 'text-primary' },
@@ -26,6 +27,7 @@ const RecipeMenu = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [hasPopulated, setHasPopulated] = useState(false);
+  const navigate = useNavigate();
   
   const { searchRecipes, populateDatabase, searchResult, loading } = useRecipeSearch();
   const { checkAccess } = useAIGeneratorAccess();
@@ -108,6 +110,82 @@ const RecipeMenu = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      
+      {/* Mobile Menu Button - Fixed Position */}
+      <div className="fixed top-24 right-4 z-50 md:hidden">
+        <Drawer>
+          <DrawerTrigger asChild>
+            <button className="bg-gluten-primary/90 hover:bg-gluten-primary text-white p-2 rounded-full shadow-lg backdrop-blur-sm border border-white/20">
+              <Menu className="w-5 h-5" />
+            </button>
+          </DrawerTrigger>
+          <DrawerContent className="h-[85vh]">
+            <div className="p-4 space-y-6">
+              {/* My Recipes link at the top */}
+              <div className="border-b border-border/50 pb-4 space-y-2">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                  onClick={() => navigate('/my-recipes')}
+                >
+                  <BookOpen className="w-5 h-5 mr-2 text-gluten-primary" />
+                  My Recipes
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  <Heart className="w-5 h-5 mr-2 text-red-500" />
+                  My Favorites
+                </Button>
+              </div>
+              
+              {/* Subscription Status */}
+              <div className="border-b border-border/50 pb-4">
+                <h3 className="font-medium mb-2 flex items-center">
+                  <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full mr-2">free</span>
+                  <span>Subscription Status</span>
+                </h3>
+                <Button variant="outline" size="sm" className="w-full mt-2">
+                  Premium Features
+                </Button>
+                <Button variant="default" size="sm" className="w-full mt-2 bg-gluten-primary hover:bg-gluten-primary/90">
+                  Manage Subscription
+                </Button>
+              </div>
+              
+              {/* AI Generated Recipes */}
+              <div>
+                <h3 className="font-medium mb-2">AI Generated Recipes</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Browse unique, detailed gluten-free recipes powered by AI
+                </p>
+                <div className="space-y-2">
+                  {categories.map((category) => (
+                    <Button
+                      key={category.id}
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        setActiveCategory(category.id);
+                        const drawerClose = document.querySelector('[data-vaul-drawer-close]');
+                        if (drawerClose) {
+                          (drawerClose as HTMLElement).click();
+                        }
+                      }}
+                    >
+                      <category.icon className={`w-4 h-4 mr-2 ${category.color}`} />
+                      {category.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
       
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
