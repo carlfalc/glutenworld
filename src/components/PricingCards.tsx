@@ -18,7 +18,7 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       id: 'trial' as const,
       name: "Free Trial",
       price: "Free",
-      duration: "5 days",
+      duration: "5 days Free access to all Quarterly and Annual Subscriber features LIMITED TIME",
       description: "Try all features risk-free",
       features: [
         "Convert Recipes",
