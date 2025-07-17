@@ -76,8 +76,9 @@ const Landing = () => {
               <Button variant="ghost" onClick={handleSignIn} className="text-foreground hover:text-gluten-primary">
                 Sign In
               </Button>
-              <Button onClick={handleGetStarted} className="bg-gluten-primary hover:bg-gluten-primary/90">
-                Launch
+              <Button onClick={handleGetStarted} className="bg-gluten-primary hover:bg-gluten-primary/90 flex flex-col h-auto py-2 px-4">
+                <span className="text-white font-medium">Sign up</span>
+                <span className="text-blue-200 text-xs">Free 5 day Trial</span>
               </Button>
             </>}
         </div>
