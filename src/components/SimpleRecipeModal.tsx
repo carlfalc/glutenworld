@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock, Users, ChefHat } from 'lucide-react';
 import { DatabaseRecipe } from '@/hooks/useRecipeSearch';
 
@@ -13,120 +14,178 @@ const SimpleRecipeModal = ({ recipe, isOpen, onClose }: SimpleRecipeModalProps) 
   if (!recipe) return null;
 
   const totalTime = recipe.cook_time ? (recipe.prep_time || 0) + recipe.cook_time : (recipe.prep_time || 0);
+  
+  // Get the full recipe content
+  const fullRecipeText = recipe.converted_recipe || recipe.original_recipe || "";
+  
+  // Helper function to format the recipe text for display
+  const formatRecipeContent = (text: string) => {
+    if (!text) return "A delicious gluten-free recipe.";
+    
+    // Split the text into paragraphs and format them
+    const paragraphs = text.split('\n').filter(line => line.trim());
+    
+    return paragraphs.map((paragraph, index) => {
+      const trimmed = paragraph.trim();
+      if (!trimmed) return null;
+      
+      // Handle different types of content
+      if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
+        // This is a header
+        return (
+          <h4 key={index} className="text-lg font-semibold mt-4 mb-2 text-primary">
+            {trimmed.replace(/\*\*/g, '')}
+          </h4>
+        );
+      } else if (trimmed.startsWith('✅') || trimmed.startsWith('🥄') || trimmed.startsWith('🔥') || trimmed.startsWith('📊')) {
+        // This is a special formatted line
+        return (
+          <div key={index} className="flex items-start gap-2 mb-2 p-2 bg-muted/20 rounded">
+            <span className="text-lg">{trimmed.charAt(0)}</span>
+            <span className="flex-1">{trimmed.substring(1).trim()}</span>
+          </div>
+        );
+      } else if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
+        // This is a list item
+        return (
+          <div key={index} className="flex items-start gap-2 mb-1 ml-4">
+            <span className="text-primary font-bold">•</span>
+            <span className="flex-1">{trimmed.substring(1).trim()}</span>
+          </div>
+        );
+      } else if (/^\d+\./.test(trimmed)) {
+        // This is a numbered step
+        const stepMatch = trimmed.match(/^(\d+)\.\s*(.+)/);
+        if (stepMatch) {
+          return (
+            <div key={index} className="flex gap-3 p-3 mb-2 bg-muted/20 rounded">
+              <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                {stepMatch[1]}
+              </div>
+              <p className="flex-1">{stepMatch[2]}</p>
+            </div>
+          );
+        }
+      }
+      
+      // Regular paragraph
+      return (
+        <p key={index} className="mb-3 text-muted-foreground leading-relaxed">
+          {trimmed}
+        </p>
+      );
+    }).filter(Boolean);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-2xl font-bold">{recipe.title}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          {/* Recipe Info */}
-          <div className="grid grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              <div>
-                <div className="font-medium">{totalTime} min</div>
-                <div className="text-sm text-muted-foreground">Total Time</div>
+        <ScrollArea className="flex-1 pr-4">
+          <div className="space-y-6 pb-6">
+            {/* Recipe Info */}
+            <div className="grid grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                <div>
+                  <div className="font-medium">{totalTime} min</div>
+                  <div className="text-sm text-muted-foreground">Total Time</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <div>
+                  <div className="font-medium">{recipe.servings || 1}</div>
+                  <div className="text-sm text-muted-foreground">Servings</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <ChefHat className="h-5 w-5 text-primary" />
+                <div>
+                  <div className="font-medium">{recipe.difficulty_level || 'Medium'}</div>
+                  <div className="text-sm text-muted-foreground">Difficulty</div>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              <div>
-                <div className="font-medium">{recipe.servings || 1}</div>
-                <div className="text-sm text-muted-foreground">Servings</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <ChefHat className="h-5 w-5 text-primary" />
-              <div>
-                <div className="font-medium">{recipe.difficulty_level || 'Medium'}</div>
-                <div className="text-sm text-muted-foreground">Difficulty</div>
-              </div>
-            </div>
-          </div>
 
-          {/* Description */}
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Description</h3>
-            <p className="text-muted-foreground">
-              {recipe.converted_recipe || recipe.original_recipe || "A delicious gluten-free recipe."}
-            </p>
-          </div>
-
-          {/* Ingredients */}
-          {recipe.ingredients && (
+            {/* Full Recipe Content */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Ingredients</h3>
+              <h3 className="text-lg font-semibold mb-3">Complete Recipe</h3>
               <div className="space-y-2">
-                {Array.isArray(recipe.ingredients) ? (
-                  recipe.ingredients.map((ingredient: any, index: number) => (
+                {formatRecipeContent(fullRecipeText)}
+              </div>
+            </div>
+
+            {/* Ingredients - Only show if structured data exists */}
+            {recipe.ingredients && Array.isArray(recipe.ingredients) && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Ingredients (Structured)</h3>
+                <div className="space-y-2">
+                  {recipe.ingredients.map((ingredient: any, index: number) => (
                     <div key={index} className="flex items-center gap-2 p-2 bg-muted/20 rounded">
                       <span className="font-medium">{ingredient.amount} {ingredient.unit}</span>
                       <span>{ingredient.name}</span>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-2 bg-muted/20 rounded">
-                    {JSON.stringify(recipe.ingredients)}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Instructions */}
-          {recipe.instructions && recipe.instructions.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Instructions</h3>
-              <div className="space-y-3">
-                {recipe.instructions.map((instruction: string, index: number) => (
-                  <div key={index} className="flex gap-3 p-3 bg-muted/20 rounded">
-                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
-                      {index + 1}
-                    </div>
-                    <p className="flex-1">{instruction}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Nutrition */}
-          {recipe.calories_per_serving && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Nutrition (per serving)</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="p-3 bg-muted/20 rounded text-center">
-                  <div className="font-bold text-lg">{recipe.calories_per_serving}</div>
-                  <div className="text-sm text-muted-foreground">Calories</div>
+                  ))}
                 </div>
-                {recipe.protein_g && (
-                  <div className="p-3 bg-muted/20 rounded text-center">
-                    <div className="font-bold text-lg">{recipe.protein_g}g</div>
-                    <div className="text-sm text-muted-foreground">Protein</div>
-                  </div>
-                )}
-                {recipe.carbs_g && (
-                  <div className="p-3 bg-muted/20 rounded text-center">
-                    <div className="font-bold text-lg">{recipe.carbs_g}g</div>
-                    <div className="text-sm text-muted-foreground">Carbs</div>
-                  </div>
-                )}
-                {recipe.fat_g && (
-                  <div className="p-3 bg-muted/20 rounded text-center">
-                    <div className="font-bold text-lg">{recipe.fat_g}g</div>
-                    <div className="text-sm text-muted-foreground">Fat</div>
-                  </div>
-                )}
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="flex justify-end">
-            <Button onClick={onClose}>Close</Button>
+            {/* Instructions - Only show if structured data exists */}
+            {recipe.instructions && recipe.instructions.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Instructions (Structured)</h3>
+                <div className="space-y-3">
+                  {recipe.instructions.map((instruction: string, index: number) => (
+                    <div key={index} className="flex gap-3 p-3 bg-muted/20 rounded">
+                      <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                        {index + 1}
+                      </div>
+                      <p className="flex-1">{instruction}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Nutrition */}
+            {recipe.calories_per_serving && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Nutrition (per serving)</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="p-3 bg-muted/20 rounded text-center">
+                    <div className="font-bold text-lg">{recipe.calories_per_serving}</div>
+                    <div className="text-sm text-muted-foreground">Calories</div>
+                  </div>
+                  {recipe.protein_g && (
+                    <div className="p-3 bg-muted/20 rounded text-center">
+                      <div className="font-bold text-lg">{recipe.protein_g}g</div>
+                      <div className="text-sm text-muted-foreground">Protein</div>
+                    </div>
+                  )}
+                  {recipe.carbs_g && (
+                    <div className="p-3 bg-muted/20 rounded text-center">
+                      <div className="font-bold text-lg">{recipe.carbs_g}g</div>
+                      <div className="text-sm text-muted-foreground">Carbs</div>
+                    </div>
+                  )}
+                  {recipe.fat_g && (
+                    <div className="p-3 bg-muted/20 rounded text-center">
+                      <div className="font-bold text-lg">{recipe.fat_g}g</div>
+                      <div className="text-sm text-muted-foreground">Fat</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+        </ScrollArea>
+        
+        <div className="flex justify-end pt-4 border-t flex-shrink-0">
+          <Button onClick={onClose}>Close</Button>
         </div>
       </DialogContent>
     </Dialog>
