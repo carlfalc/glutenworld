@@ -47,6 +47,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   Authorization: `Bearer ${session.access_token}`,
                 },
               });
+              
+              // Check if user was trying to purchase a plan before signing in
+              const selectedPlan = localStorage.getItem('selectedPlan');
+              if (selectedPlan) {
+                console.log('Found stored plan after sign in:', selectedPlan);
+                localStorage.removeItem('selectedPlan');
+                
+                // Proceed with checkout for the stored plan
+                try {
+                  const { data, error } = await supabase.functions.invoke('create-checkout', {
+                    body: { plan: selectedPlan },
+                    headers: {
+                      Authorization: `Bearer ${session.access_token}`,
+                    },
+                  });
+                  
+                  if (error) {
+                    console.error('Error creating checkout after sign in:', error);
+                  } else if (data?.url) {
+                    // Open Stripe checkout in a new tab
+                    window.open(data.url, '_blank');
+                  }
+                } catch (error) {
+                  console.error('Failed to create checkout after sign in:', error);
+                }
+              }
             } catch (error) {
               console.error('Failed to check subscription on sign in:', error);
             }

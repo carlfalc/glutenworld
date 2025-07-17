@@ -27,23 +27,54 @@ export const useSubscription = () => {
       return;
     }
 
-    // Set default free access immediately for testing
-    console.log('Setting default free access for testing');
-    setSubscriptionData({
-      subscribed: true,
-      subscription_tier: 'free',
-      subscription_end: null,
-      loading: false,
-    });
+    try {
+      setSubscriptionData(prev => ({ ...prev, loading: true }));
+      
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error checking subscription:', error);
+        setSubscriptionData({
+          subscribed: false,
+          subscription_tier: null,
+          subscription_end: null,
+          loading: false,
+        });
+        return;
+      }
+
+      setSubscriptionData({
+        subscribed: data?.subscribed || false,
+        subscription_tier: data?.subscription_tier || null,
+        subscription_end: data?.subscription_end || null,
+        loading: false,
+      });
+    } catch (error) {
+      console.error('Failed to check subscription:', error);
+      setSubscriptionData({
+        subscribed: false,
+        subscription_tier: null,
+        subscription_end: null,
+        loading: false,
+      });
+    }
   };
 
   const createCheckout = async (plan: 'trial' | 'quarterly' | 'annual') => {
     if (!user || !session) {
+      // Store the selected plan to continue after authentication
+      localStorage.setItem('selectedPlan', plan);
       toast({
         title: "Authentication Required",
         description: "Please sign in to subscribe.",
         variant: "destructive",
       });
+      // Redirect to auth page
+      window.location.href = '/auth?tab=signup';
       return;
     }
 
