@@ -40,20 +40,23 @@ const Auth = () => {
 
   const saveUserAddress = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('user_addresses')
-        .insert({
-          user_id: userId,
-          street_address: streetAddress,
-          city,
-          state_province: '',
-          postal_code: postalCode,
-          country,
-        });
+      // Only save if we have meaningful data (at least country)
+      if (country) {
+        const { error } = await supabase
+          .from('user_addresses')
+          .insert({
+            user_id: userId,
+            street_address: streetAddress || '',
+            city: city || '',
+            state_province: '',
+            postal_code: postalCode || '',
+            country,
+          });
 
-      if (error) {
-        console.error('Error saving user address:', error);
-        // Don't throw error here as we don't want to block signup for address issues
+        if (error) {
+          console.error('Error saving user address:', error);
+          // Don't throw error here as we don't want to block signup for address issues
+        }
       }
     } catch (error) {
       console.error('Error saving user address:', error);
@@ -104,16 +107,16 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate address fields (removed stateProvince from validation)
-    if (!streetAddress || !city || !postalCode) {
-      toast({
-        title: "Address required",
-        description: "Please fill in all address fields to continue.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
+    // Country is optional, no validation needed for address fields
+    // if (!streetAddress || !city || !postalCode) {
+    //   toast({
+    //     title: "Address required",
+    //     description: "Please fill in all address fields to continue.",
+    //     variant: "destructive",
+    //   });
+    //   setLoading(false);
+    //   return;
+    // }
 
     const { error } = await signUp(email, password, fullName);
     
@@ -344,7 +347,7 @@ const Auth = () => {
                     </div>
                     
                     <div className="border-t pt-4">
-                      <h4 className="font-medium text-foreground mb-3">Address Information</h4>
+                      <h4 className="font-medium text-foreground mb-3">Country Selection</h4>
                       <AddressForm
                         streetAddress={streetAddress}
                         setStreetAddress={setStreetAddress}
