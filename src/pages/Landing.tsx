@@ -173,7 +173,7 @@ const Landing = () => {
             AI Recipe Generator
           </h3>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Generate 400 unique, detailed gluten-free recipes using our advanced AI technology.
+            Our own generated recipes split into Breakfast, Snacks, Lunch and Dinner. Unlocked for Annual Subscribers
           </p>
         </div>
         
