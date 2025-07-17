@@ -43,11 +43,16 @@ const RecipeActions = ({ recipe, className, size = 'default' }: RecipeActionsPro
   const { data: userRecipes, isLoading: recipesLoading } = useRecipes();
   const { user, loading: authLoading } = useAuth();
   
-  // Check if recipe exists in My Recipes - use more specific matching
-  const isFav = userRecipes?.some(r => 
-    r.title === recipe.title && 
-    (r.converted_recipe === recipe.converted_recipe || r.original_recipe === recipe.original_recipe)
-  ) || false;
+  // Check if recipe exists in My Recipes - for newly generated recipes, check by ID first, then content
+  const isFav = userRecipes?.some(r => {
+    // If the recipe has an ID that matches a user recipe, it's already saved
+    if (recipe.id && r.id === recipe.id) return true;
+    
+    // For generated recipes without ID, check by title and content
+    return r.title === recipe.title && 
+           r.converted_recipe === recipe.converted_recipe &&
+           r.converted_recipe // Only match if there's actual content to compare
+  }) || false;
 
   // Debug logging
   console.log('🔍 Recipe matching debug:', {
