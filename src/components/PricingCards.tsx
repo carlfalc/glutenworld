@@ -41,7 +41,8 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
         "Priority AI support",
         "Save favorite recipes",
         "Meal planning tools",
-        "Scan Ingredient Labels"
+        "Scan Ingredient Labels",
+        "Premium AI Gluten Free Chat Interface"
       ],
       popular: true,
       icon: <Crown className="w-5 h-5 text-gluten-primary" />
