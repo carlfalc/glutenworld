@@ -172,22 +172,39 @@ const Auth = () => {
     {
       name: "Free Trial",
       price: "Free",
-      duration: "5 days",
-      features: ["Convert up to 5 recipes", "Access basic recipe library", "Community chat access", "AI recipe assistant"],
+      duration: "5 days Free access to all Quarterly and Annual Subscriber features LIMITED TIME",
+      features: [
+        "Convert Recipes",
+        "AI recipe assistant", 
+        "Scan Ingredient Labels"
+      ],
       popular: false
     },
     {
       name: "Quarterly",
       price: "$12.99",
       duration: "3 months",
-      features: ["Unlimited recipe conversions", "Full recipe library access", "Premium community features", "Priority AI support"],
+      features: [
+        "Unlimited recipe conversions",
+        "Save favorite recipes",
+        "Meal planning tools",
+        "Scan Ingredient Labels",
+        "Premium AI Gluten Free Chat Interface",
+        "Save & Share Recipe Creations",
+        "Convert any recipe to be Free of Gluten!",
+        "Get Recipe Nutritional Information, Warnings",
+        "Ingredient label scanner also reports on Allergens!"
+      ],
       popular: true
     },
     {
       name: "Annual",
       price: "$29.99",
       duration: "12 months",
-      features: ["Everything in Quarterly", "Advanced nutrition tracking", "Custom recipe collections", "Early access to new features"],
+      features: [
+        "All the features in the Quarterly subscription but for our best price offer",
+        "Annual Subscribers unlock our own specially generated recipes bonus"
+      ],
       popular: false
     }
   ];
