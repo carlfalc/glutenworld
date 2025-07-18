@@ -47,35 +47,79 @@ export type Database = {
         }
         Relationships: []
       }
+      community_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       community_posts: {
         Row: {
+          category_id: string | null
           comments_count: number | null
           content: string
           created_at: string
           id: string
+          image_url: string | null
           likes_count: number | null
+          title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          category_id?: string | null
           comments_count?: number | null
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           likes_count?: number | null
+          title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          category_id?: string | null
           comments_count?: number | null
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           likes_count?: number | null
+          title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "community_posts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "community_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_comments: {
         Row: {
@@ -141,26 +185,41 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          community_joined_at: string | null
           created_at: string
+          dietary_preferences: string[] | null
           email: string
           full_name: string | null
           id: string
+          is_community_member: boolean | null
+          location: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          community_joined_at?: string | null
           created_at?: string
+          dietary_preferences?: string[] | null
           email: string
           full_name?: string | null
           id: string
+          is_community_member?: boolean | null
+          location?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          community_joined_at?: string | null
           created_at?: string
+          dietary_preferences?: string[] | null
           email?: string
           full_name?: string | null
           id?: string
+          is_community_member?: boolean | null
+          location?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -535,6 +594,42 @@ export type Database = {
           },
         ]
       }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_recipes: {
         Row: {
           average_rating: number | null
@@ -627,7 +722,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_community_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

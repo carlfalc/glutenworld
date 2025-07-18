@@ -24,7 +24,10 @@ const CommunityShop = () => {
   const handleCreatePost = async () => {
     if (newPostContent.trim() && user) {
       try {
-        await createPostMutation.mutateAsync(newPostContent.trim());
+        await createPostMutation.mutateAsync({
+          title: 'Community Post',
+          content: newPostContent.trim()
+        });
         setNewPostContent('');
         setShowNewPostForm(false);
       } catch (error) {
