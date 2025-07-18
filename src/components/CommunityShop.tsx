@@ -8,6 +8,7 @@ import { useNewSignups } from '@/hooks/useNewSignups';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import GlutenFreeStoreLocator from './GlutenFreeStoreLocator';
 
 const CommunityShop = () => {
   const { user } = useAuth();
@@ -53,8 +54,9 @@ const CommunityShop = () => {
   return (
     <div className="p-4">
       <Tabs defaultValue="community" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4 h-8">
+        <TabsList className="grid w-full grid-cols-3 mb-4 h-8">
           <TabsTrigger value="community" className="text-xs px-2">Gluten World</TabsTrigger>
+          <TabsTrigger value="store-locator" className="text-xs px-2">Store Locator</TabsTrigger>
           <TabsTrigger value="shop" className="text-xs px-2">Shop</TabsTrigger>
         </TabsList>
         
@@ -141,6 +143,10 @@ const CommunityShop = () => {
               ))
             )}
           </div>
+        </TabsContent>
+        
+        <TabsContent value="store-locator" className="space-y-3 mt-0">
+          <GlutenFreeStoreLocator />
         </TabsContent>
         
         <TabsContent value="shop" className="space-y-3 mt-0">
