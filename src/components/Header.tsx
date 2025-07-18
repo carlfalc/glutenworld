@@ -89,6 +89,14 @@ const Header = () => {
                     <NavigationMenuItem>
                       <NavigationMenuLink
                         className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
+                        onClick={() => navigate('/fav-places')}
+                      >
+                        Fav Places
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem>
+                      <NavigationMenuLink
+                        className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
                         onClick={() => navigate('/store-locator')}
                       >
                         <MapPin className="w-4 h-4" />
@@ -155,6 +163,13 @@ const Header = () => {
                         onClick={() => navigate('/my-recipes')}
                       >
                         My Recipes
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start text-lg"
+                        onClick={() => navigate('/fav-places')}
+                      >
+                        Fav Places
                       </Button>
                       <Button 
                         variant="ghost" 

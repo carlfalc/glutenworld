@@ -16,6 +16,7 @@ import MyRecipes from "./pages/MyRecipes";
 import RecipeMenu from "./pages/RecipeMenu";
 import Subscription from "./pages/Subscription";
 import StoreLocator from "./pages/StoreLocator";
+import FavPlaces from "./pages/FavPlaces";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -39,6 +40,7 @@ const App = () => {
                 <Route path="/my-recipes" element={<MyRecipes />} />
                 <Route path="/recipe-menu" element={<RecipeMenu />} />
                 <Route path="/store-locator" element={<StoreLocator />} />
+                <Route path="/fav-places" element={<FavPlaces />} />
                 <Route path="/subscription" element={<Subscription />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
