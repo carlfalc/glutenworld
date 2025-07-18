@@ -2,20 +2,32 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
-// Currency and pricing configuration
-const PRICING_CONFIG = {
-  'US': { currency: 'usd', quarterly: 1299, annual: 2999 }, // $12.99, $29.99
-  'CA': { currency: 'cad', quarterly: 1699, annual: 3999 }, // $16.99 CAD, $39.99 CAD
-  'GB': { currency: 'gbp', quarterly: 999, annual: 2399 },  // £9.99, £23.99
-  'AU': { currency: 'aud', quarterly: 1799, annual: 4299 }, // $17.99 AUD, $42.99 AUD
-  'DE': { currency: 'eur', quarterly: 1199, annual: 2799 }, // €11.99, €27.99
-  'FR': { currency: 'eur', quarterly: 1199, annual: 2799 }, // €11.99, €27.99
-  'ES': { currency: 'eur', quarterly: 1199, annual: 2799 }, // €11.99, €27.99
-  'IT': { currency: 'eur', quarterly: 1199, annual: 2799 }, // €11.99, €27.99
-  'NL': { currency: 'eur', quarterly: 1199, annual: 2799 }, // €11.99, €27.99
-  // Default fallback to USD
-  'DEFAULT': { currency: 'usd', quarterly: 1299, annual: 2999 }
+// Base USD pricing (will be converted to local currency)
+const BASE_PRICING_USD = {
+  quarterly: 1299, // $12.99
+  annual: 2999     // $29.99
 };
+
+// Currency mapping by country
+const COUNTRY_CURRENCY_MAP = {
+  'US': 'usd', 'CA': 'cad', 'GB': 'gbp', 'AU': 'aud',
+  'DE': 'eur', 'FR': 'eur', 'ES': 'eur', 'IT': 'eur', 'NL': 'eur',
+  'AT': 'eur', 'BE': 'eur', 'FI': 'eur', 'IE': 'eur', 'PT': 'eur'
+};
+
+// Get current exchange rates from USD
+async function getExchangeRate(toCurrency: string): Promise<number> {
+  if (toCurrency === 'usd') return 1;
+  
+  try {
+    const response = await fetch(`https://api.exchangerate-api.com/v4/latest/USD`);
+    const data = await response.json();
+    return data.rates[toCurrency.toUpperCase()] || 1;
+  } catch (error) {
+    console.log('Exchange rate fetch failed:', error);
+    return 1; // Fallback to 1:1 rate
+  }
+}
 
 // Detect country from IP using CF-IPCountry header or IP geolocation
 async function detectCountryFromIP(request: Request): Promise<string> {
@@ -85,10 +97,18 @@ serve(async (req) => {
     if (!plan) throw new Error("Plan is required");
     logStep("Plan selected", { plan });
 
-    // Detect user's country and get localized pricing
+    // Detect user's country and currency
     const countryCode = await detectCountryFromIP(req);
-    const pricing = PRICING_CONFIG[countryCode] || PRICING_CONFIG['DEFAULT'];
-    logStep("Geo-location detected", { countryCode, currency: pricing.currency });
+    const currency = COUNTRY_CURRENCY_MAP[countryCode] || 'usd';
+    logStep("Geo-location detected", { countryCode, currency });
+
+    // Get exchange rate and convert USD prices to local currency
+    const exchangeRate = await getExchangeRate(currency);
+    const localPricing = {
+      quarterly: Math.round(BASE_PRICING_USD.quarterly * exchangeRate),
+      annual: Math.round(BASE_PRICING_USD.annual * exchangeRate)
+    };
+    logStep("Currency conversion", { exchangeRate, localPricing });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
@@ -102,31 +122,31 @@ serve(async (req) => {
       logStep("Creating new customer");
     }
 
-    // Define pricing based on plan and user's location
+    // Define pricing based on plan and converted currency
     let priceData;
     const currencySymbols = { usd: '$', eur: '€', gbp: '£', cad: 'C$', aud: 'A$' };
-    const symbol = currencySymbols[pricing.currency as keyof typeof currencySymbols] || '$';
+    const symbol = currencySymbols[currency as keyof typeof currencySymbols] || '$';
     
     switch (plan) {
       case 'quarterly':
         priceData = {
-          currency: pricing.currency,
-          product_data: { name: `Quarterly Plan - Gluten World (${symbol}${(pricing.quarterly / 100).toFixed(2)})` },
-          unit_amount: pricing.quarterly,
+          currency: currency,
+          product_data: { name: `Quarterly Plan - Gluten World (${symbol}${(localPricing.quarterly / 100).toFixed(2)})` },
+          unit_amount: localPricing.quarterly,
           recurring: { interval: "month", interval_count: 3 },
         };
         break;
       case 'annual':
         priceData = {
-          currency: pricing.currency,
-          product_data: { name: `Annual Plan - Gluten World (${symbol}${(pricing.annual / 100).toFixed(2)})` },
-          unit_amount: pricing.annual,
+          currency: currency,
+          product_data: { name: `Annual Plan - Gluten World (${symbol}${(localPricing.annual / 100).toFixed(2)})` },
+          unit_amount: localPricing.annual,
           recurring: { interval: "year" },
         };
         break;
       case 'trial':
         priceData = {
-          currency: pricing.currency,
+          currency: currency,
           product_data: { name: "Free Trial - Gluten World" },
           unit_amount: 0, // Free
           recurring: { interval: "day", interval_count: 5 },
@@ -138,9 +158,10 @@ serve(async (req) => {
     
     logStep("Pricing configured", { 
       plan, 
-      currency: pricing.currency, 
+      currency,
       amount: priceData.unit_amount,
-      country: countryCode 
+      country: countryCode,
+      usdAmount: plan === 'quarterly' ? BASE_PRICING_USD.quarterly : BASE_PRICING_USD.annual
     });
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
