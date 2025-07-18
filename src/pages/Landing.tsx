@@ -103,11 +103,6 @@ const Landing = () => {
             <span className="text-white font-medium">Sign up</span>
             <span className="text-white text-xs font-medium">FREE 5 DAY TRIAL</span>
           </Button>
-          {user && (
-            <Button onClick={() => navigate('/dashboard')} className="bg-gluten-secondary hover:bg-gluten-secondary/90">
-              Go to Dashboard
-            </Button>
-          )}
         </div>
       </header>
 
