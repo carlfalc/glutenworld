@@ -15,13 +15,13 @@ const GlutenWorld = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   
   const { data: communityStats } = useCommunityStats();
   const { data: categories = [] } = useCommunityCategories();
-  const { data: posts = [] } = useCommunityPosts(selectedCategory || undefined);
+  const { data: posts = [] } = useCommunityPosts(selectedCategory === 'all' ? undefined : selectedCategory);
   const likePost = useLikePost();
 
   const handleLikePost = async (postId: string) => {
@@ -130,7 +130,7 @@ const GlutenWorld = () => {
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         <div className="flex items-center gap-2">
