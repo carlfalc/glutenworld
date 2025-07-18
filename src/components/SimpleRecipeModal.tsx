@@ -43,36 +43,36 @@ const SimpleRecipeModal = ({ recipe, isOpen, onClose }: SimpleRecipeModalProps) 
       if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
         // This is a header
         return (
-          <h4 key={index} className="text-lg font-semibold mt-4 mb-2 text-primary">
+          <h4 key={index} className="text-lg font-semibold mt-6 mb-3 text-primary">
             {trimmed.replace(/\*\*/g, '')}
           </h4>
         );
-      } else if (trimmed.startsWith('✅') || trimmed.startsWith('🥄') || trimmed.startsWith('🔥') || trimmed.startsWith('📊')) {
+      } else if (trimmed.startsWith('✅') || trimmed.startsWith('🥄') || trimmed.startsWith('🔥') || trimmed.startsWith('📊') || trimmed.startsWith('🍽️') || trimmed.startsWith('⏱️')) {
         // This is a special formatted line
         return (
-          <div key={index} className="flex items-start gap-2 mb-2 p-2 bg-muted/20 rounded">
-            <span className="text-lg">{trimmed.charAt(0)}</span>
+          <div key={index} className="flex items-start gap-2 mb-2 p-3 bg-muted/30 rounded-lg">
+            <span className="text-lg flex-shrink-0">{trimmed.charAt(0)}</span>
             <span className="flex-1">{trimmed.substring(1).trim()}</span>
           </div>
         );
       } else if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-        // This is a list item
+        // This is a list item (ingredients)
         return (
-          <div key={index} className="flex items-start gap-2 mb-1 ml-4">
-            <span className="text-primary font-bold">•</span>
+          <div key={index} className="flex items-start gap-2 mb-2 ml-2 p-2 bg-muted/20 rounded">
+            <span className="text-primary font-bold flex-shrink-0">•</span>
             <span className="flex-1">{trimmed.substring(1).trim()}</span>
           </div>
         );
       } else if (/^\d+\./.test(trimmed)) {
-        // This is a numbered step
+        // This is a numbered step (cooking instructions)
         const stepMatch = trimmed.match(/^(\d+)\.\s*(.+)/);
         if (stepMatch) {
           return (
-            <div key={index} className="flex gap-3 p-3 mb-2 bg-muted/20 rounded">
-              <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+            <div key={index} className="flex gap-3 p-4 mb-3 bg-primary/10 border-l-4 border-primary rounded-r-lg">
+              <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
                 {stepMatch[1]}
               </div>
-              <p className="flex-1">{stepMatch[2]}</p>
+              <p className="flex-1 text-foreground leading-relaxed">{stepMatch[2]}</p>
             </div>
           );
         }
