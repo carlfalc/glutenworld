@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import FavoriteButton from '@/components/FavoriteButton';
+import SimpleRecipeModal from '@/components/SimpleRecipeModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,8 @@ const MyRecipes = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: favoriteEntries = [] } = useFavorites('recipe');
   const { data: myRecipes = [], isLoading } = useRecipes();
   const { data: favoritedRecipes = [] } = useFavoritedRecipes();
@@ -140,19 +143,17 @@ const MyRecipes = () => {
                            <span className="text-xs text-muted-foreground">
                              Created {new Date(recipe.created_at).toLocaleDateString()}
                           </span>
-                           <Button 
-                             size="sm" 
-                             variant="outline"
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               // Navigate to recipe details or open modal
-                               console.log('View recipe:', recipe);
-                               // For now, show the recipe content in a toast/alert
-                               alert(`Recipe: ${recipe.title}\n\n${recipe.converted_recipe || recipe.original_recipe || 'No recipe content available'}`);
-                             }}
-                           >
-                             View Recipe
-                           </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedRecipe(recipe);
+                                setIsModalOpen(true);
+                              }}
+                            >
+                              View Recipe
+                            </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -216,17 +217,17 @@ const MyRecipes = () => {
                           <span className="text-xs text-muted-foreground">
                             Added {new Date(recipe.created_at).toLocaleDateString()}
                           </span>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log('View favorite recipe:', recipe);
-                              alert(`Recipe: ${recipe.title}\n\n${recipe.converted_recipe || recipe.original_recipe || 'No recipe content available'}`);
-                            }}
-                          >
-                            View Recipe
-                          </Button>
+                           <Button 
+                             size="sm" 
+                             variant="outline"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               setSelectedRecipe(recipe);
+                               setIsModalOpen(true);
+                             }}
+                           >
+                             View Recipe
+                           </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -291,17 +292,17 @@ const MyRecipes = () => {
                             <span className="text-xs text-muted-foreground">
                               Saved {new Date(recipe.created_at).toLocaleDateString()}
                             </span>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                console.log('View recipe:', recipe);
-                                alert(`Recipe: ${recipe.title}\n\n${recipe.converted_recipe || recipe.original_recipe || 'No recipe content available'}`);
-                              }}
-                            >
-                              View Recipe
-                            </Button>
+                             <Button 
+                               size="sm" 
+                               variant="outline"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 setSelectedRecipe(recipe);
+                                 setIsModalOpen(true);
+                               }}
+                             >
+                               View Recipe
+                             </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -319,6 +320,15 @@ const MyRecipes = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <SimpleRecipeModal
+        recipe={selectedRecipe}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedRecipe(null);
+        }}
+      />
     </div>
   );
 };
