@@ -18,6 +18,16 @@ const SimpleRecipeModal = ({ recipe, isOpen, onClose }: SimpleRecipeModalProps) 
   // Get the full recipe content
   const fullRecipeText = recipe.converted_recipe || recipe.original_recipe || "";
   
+  // Debug logging to see what's in the recipe
+  console.log("Recipe data:", {
+    title: recipe.title,
+    converted_recipe: recipe.converted_recipe,
+    original_recipe: recipe.original_recipe,
+    fullRecipeText: fullRecipeText,
+    instructions: recipe.instructions,
+    ingredients: recipe.ingredients
+  });
+  
   // Helper function to format the recipe text for display
   const formatRecipeContent = (text: string) => {
     if (!text) return "A delicious gluten-free recipe.";
