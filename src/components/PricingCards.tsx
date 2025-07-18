@@ -22,8 +22,9 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       description: "Try all features risk-free",
       features: [
         "Convert Recipes",
-        "AI recipe assistant",
-        "Scan Ingredient Labels"
+        "AI recipe assistant", 
+        "Scan Ingredient Labels",
+        "GF Restaurant, Cafe, Bakery, Store Finder"
       ],
       popular: false,
       icon: <Zap className="w-5 h-5 text-blue-500" />
@@ -36,14 +37,16 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       description: "Perfect for regular home cooks",
       features: [
         "Unlimited recipe conversions",
-        "Save favorite recipes",
+        "Save favorite recipes", 
         "Meal planning tools",
         "Scan Ingredient Labels",
         "Premium AI Gluten Free Chat Interface",
         "Save & Share Recipe Creations",
         "Convert any recipe to be Free of Gluten!",
-        "Get Recipe Nutritional Information, Warnings",
-        "Ingredient label scanner also reports on Allergens!"
+        "Get Recipe Nutritional Information, Warnings", 
+        "Ingredient label scanner also reports on Allergens!",
+        "GF Restaurant, Cafe, Bakery, Store Finder",
+        "Save favorite restaurants & stores"
       ],
       popular: true,
       icon: <Crown className="w-5 h-5 text-gluten-primary" />
@@ -56,7 +59,9 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       description: "Best value for committed users",
       features: [
         "All the features in the Quarterly subscription but for our best price offer",
-        "Annual Subscribers unlock our own specially generated recipes bonus"
+        "Annual Subscribers unlock our own specially generated recipes bonus",
+        "Premium GF Restaurant, Cafe, Bakery, Store Finder with unlimited searches",
+        "Save unlimited favorite restaurants & stores"
       ],
       popular: false,
       icon: <Crown className="w-5 h-5 text-amber-500" />
