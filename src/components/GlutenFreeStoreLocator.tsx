@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, MapPin, Star, ExternalLink, Search, Navigation, Globe } from 'lucide-react';
+import { Loader2, MapPin, Star, ExternalLink, Search, Navigation, Globe, Heart } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -69,6 +69,36 @@ const GlutenFreeStoreLocator = () => {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const { toast } = useToast();
+
+  // Load saved default country on component mount
+  useEffect(() => {
+    const savedCountry = localStorage.getItem('gluten-world-default-country');
+    if (savedCountry) {
+      setSelectedCountry(savedCountry);
+    }
+  }, []);
+
+  // Save country as default when user selects it
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country);
+    if (country) {
+      localStorage.setItem('gluten-world-default-country', country);
+      toast({
+        title: "Default Country Set",
+        description: `${country} has been saved as your default country`,
+      });
+    }
+  };
+
+  // Clear default country
+  const clearDefaultCountry = () => {
+    localStorage.removeItem('gluten-world-default-country');
+    setSelectedCountry('');
+    toast({
+      title: "Default Country Cleared",
+      description: "You'll need to select a country for each search",
+    });
+  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -227,10 +257,22 @@ const GlutenFreeStoreLocator = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Country</label>
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Country</label>
+                {selectedCountry && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearDefaultCountry}
+                    className="text-xs text-muted-foreground hover:text-destructive"
+                  >
+                    Clear Default
+                  </Button>
+                )}
+              </div>
+              <Select value={selectedCountry} onValueChange={handleCountryChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select country" />
+                  <SelectValue placeholder="Select country (will be saved as default)" />
                 </SelectTrigger>
                 <SelectContent>
                   {countries.map((country) => (
@@ -240,6 +282,12 @@ const GlutenFreeStoreLocator = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {selectedCountry && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Heart className="w-3 h-3 text-red-500" />
+                  <span>Default country: {selectedCountry}</span>
+                </div>
+              )}
             </div>
           </div>
           
