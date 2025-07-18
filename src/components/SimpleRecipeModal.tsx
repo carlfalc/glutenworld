@@ -79,12 +79,14 @@ const SimpleRecipeModal = ({ recipe, isOpen, onClose }: SimpleRecipeModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="text-2xl font-bold">{recipe.title}</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl h-[calc(90vh-2rem)] flex flex-col p-0">
+        <div className="flex-shrink-0 p-6 pb-0">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">{recipe.title}</DialogTitle>
+          </DialogHeader>
+        </div>
         
-        <div className="flex-1 overflow-y-auto pr-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
           <div className="space-y-6 pb-6">
             {/* Recipe Info */}
             <div className="grid grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
@@ -184,8 +186,10 @@ const SimpleRecipeModal = ({ recipe, isOpen, onClose }: SimpleRecipeModalProps) 
           </div>
         </div>
         
-        <div className="flex justify-end pt-4 border-t flex-shrink-0">
-          <Button onClick={onClose}>Close</Button>
+        <div className="flex-shrink-0 p-6 pt-4 border-t">
+          <div className="flex justify-end">
+            <Button onClick={onClose}>Close</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
