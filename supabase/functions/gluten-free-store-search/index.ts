@@ -12,6 +12,8 @@ interface SearchRequest {
   latitude?: number;
   longitude?: number;
   radius?: number;
+  limit?: number;
+  offset?: number;
 }
 
 // Function to categorize places based on their types
@@ -57,7 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { query, location, latitude, longitude, radius = 50000 }: SearchRequest = await req.json();
+    const { query, location, latitude, longitude, radius = 50000, limit = 20, offset = 0 }: SearchRequest = await req.json();
 
     console.log('Search request:', { query, location, latitude, longitude, radius });
 
@@ -141,17 +143,19 @@ const handler = async (req: Request): Promise<Response> => {
       index === self.findIndex(p => p.place_id === place.place_id)
     );
 
-    // Sort by rating and limit results
+    // Sort by rating and filter results
     const sortedResults = uniqueResults
       .filter(place => place.rating && place.rating >= 3.5) // Only show well-rated places
-      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      .slice(0, 20);
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
     console.log(`Found ${sortedResults.length} unique places`);
 
+    // Apply pagination
+    const paginatedResults = sortedResults.slice(offset, offset + limit);
+
     // Get additional details including website for each place
     const detailedResults = await Promise.all(
-      sortedResults.slice(0, 12).map(async (place) => {
+      paginatedResults.map(async (place) => {
         try {
           const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,website,formatted_address,rating,price_level,types,geometry,opening_hours,photos&key=${GOOGLE_PLACES_API_KEY}`;
           const detailsResponse = await fetch(detailsUrl);
@@ -206,7 +210,9 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({
       results: formattedResults,
       searchTerms: searchTerms,
-      total: formattedResults.length
+      total: formattedResults.length,
+      totalAvailable: sortedResults.length,
+      hasMore: offset + limit < sortedResults.length
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

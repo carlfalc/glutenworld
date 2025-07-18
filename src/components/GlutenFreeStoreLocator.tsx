@@ -35,6 +35,8 @@ interface SearchResult {
   results: Store[];
   searchTerms: string[];
   total: number;
+  totalAvailable: number;
+  hasMore: boolean;
 }
 
 const countries = [
@@ -66,8 +68,13 @@ const GlutenFreeStoreLocator = () => {
   const [city, setCity] = useState('');
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalAvailable, setTotalAvailable] = useState(0);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [lastSearchParams, setLastSearchParams] = useState<any>(null);
   const { toast } = useToast();
 
   // Load saved default country on component mount
@@ -100,7 +107,7 @@ const GlutenFreeStoreLocator = () => {
     });
   };
 
-  const handleSearch = async () => {
+  const handleSearch = async (loadMore = false) => {
     if (!searchQuery.trim()) {
       toast({
         title: "Search Required",
@@ -110,26 +117,51 @@ const GlutenFreeStoreLocator = () => {
       return;
     }
 
-    setLoading(true);
+    const isNewSearch = !loadMore;
+    const offset = isNewSearch ? 0 : currentOffset + 20;
+
+    if (isNewSearch) {
+      setLoading(true);
+      setStores([]);
+      setCurrentOffset(0);
+    } else {
+      setLoadingMore(true);
+    }
+
     try {
       const location = city && selectedCountry ? `${city}, ${selectedCountry}` : selectedCountry;
+      const searchParams = {
+        query: searchQuery,
+        location: location,
+        limit: 20,
+        offset: offset
+      };
       
       const { data, error } = await supabase.functions.invoke('gluten-free-store-search', {
-        body: {
-          query: searchQuery,
-          location: location
-        }
+        body: searchParams
       });
 
       if (error) throw error;
 
       const result: SearchResult = data;
-      setStores(result.results || []);
+      
+      if (isNewSearch) {
+        setStores(result.results || []);
+        setLastSearchParams(searchParams);
+      } else {
+        setStores(prev => [...prev, ...(result.results || [])]);
+      }
+      
       setSearchTerms(result.searchTerms || []);
+      setHasMore(result.hasMore || false);
+      setTotalAvailable(result.totalAvailable || 0);
+      setCurrentOffset(offset);
       
       toast({
-        title: "Search Complete",
-        description: `Found ${result.total} gluten-free businesses`,
+        title: isNewSearch ? "Search Complete" : "More Results Loaded",
+        description: isNewSearch 
+          ? `Found ${result.totalAvailable} gluten-free businesses (showing first ${result.total})`
+          : `Loaded ${result.total} more results`,
       });
     } catch (error) {
       console.error('Search error:', error);
@@ -140,6 +172,7 @@ const GlutenFreeStoreLocator = () => {
       });
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -168,14 +201,17 @@ const GlutenFreeStoreLocator = () => {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
+          const searchParams = {
+            query: searchQuery,
+            latitude,
+            longitude,
+            radius: 25000, // 25km radius
+            limit: 20,
+            offset: 0
+          };
           
           const { data, error } = await supabase.functions.invoke('gluten-free-store-search', {
-            body: {
-              query: searchQuery,
-              latitude,
-              longitude,
-              radius: 25000 // 25km radius
-            }
+            body: searchParams
           });
 
           if (error) throw error;
@@ -183,10 +219,14 @@ const GlutenFreeStoreLocator = () => {
           const result: SearchResult = data;
           setStores(result.results || []);
           setSearchTerms(result.searchTerms || []);
+          setHasMore(result.hasMore || false);
+          setTotalAvailable(result.totalAvailable || 0);
+          setCurrentOffset(0);
+          setLastSearchParams(searchParams);
           
           toast({
             title: "Search Complete",
-            description: `Found ${result.total} gluten-free businesses near you`,
+            description: `Found ${result.totalAvailable} gluten-free businesses near you (showing first ${result.total})`,
           });
         } catch (error) {
           console.error('Near me search error:', error);
@@ -253,7 +293,7 @@ const GlutenFreeStoreLocator = () => {
                 placeholder="e.g., gluten-free bakery, celiac restaurant, health food store"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(false)}
               />
             </div>
             <div className="space-y-2">
@@ -297,13 +337,13 @@ const GlutenFreeStoreLocator = () => {
               placeholder="Enter city name"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch(false)}
             />
           </div>
 
           <div className="flex gap-3">
             <Button 
-              onClick={handleSearch} 
+              onClick={() => handleSearch(false)} 
               disabled={loading}
               className="flex-1 store-locator-button bg-brand-blue hover:bg-brand-blue-dark text-white"
             >
@@ -338,9 +378,11 @@ const GlutenFreeStoreLocator = () => {
 
       {stores.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">
-            Found <span className="text-brand-blue">{stores.length}</span> Gluten-Free Businesses
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">
+              Found <span className="text-brand-blue">{stores.length}</span> of <span className="text-brand-blue">{totalAvailable}</span> Gluten-Free Businesses
+            </h3>
+          </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {stores.map((store) => (
               <Dialog key={store.id}>
@@ -450,6 +492,24 @@ const GlutenFreeStoreLocator = () => {
               </Dialog>
             ))}
           </div>
+          
+          {hasMore && (
+            <div className="flex justify-center pt-4">
+              <Button 
+                onClick={() => handleSearch(true)} 
+                disabled={loadingMore}
+                variant="outline"
+                className="store-locator-button-outline border-brand-blue text-brand-blue hover:bg-brand-blue/10"
+              >
+                {loadingMore ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="mr-2 h-4 w-4" />
+                )}
+                Load More Results ({totalAvailable - stores.length} remaining)
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
