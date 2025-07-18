@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock, Info } from 'lucide-react';
+import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock, Info, MapPin, Globe, ExternalLink } from 'lucide-react';
 import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import PricingCards from '@/components/PricingCards';
 import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
@@ -32,6 +32,10 @@ const Landing = () => {
     title: "Extensive Recipe Library",
     description: "Our library of tested gluten-free recipes for baking, meals, breakfasts, snacks, and smoothies."
   }, {
+    icon: <MapPin className="w-8 h-8 text-blue-600" />,
+    title: "Global Store Locator",
+    description: "Find gluten-free restaurants, bakeries, and food stores worldwide with directions, websites, menus, and verified reviews - your complete dining companion."
+  }, {
     icon: <Users className="w-8 h-8 text-gluten-primary" />,
     title: "Gluten World",
     description: "Our community support portal - connect with fellow gluten-free enthusiasts, share experiences, and discover new favorites together."
@@ -45,6 +49,11 @@ const Landing = () => {
     title: "Instant AI Conversion",
     description: "Convert any recipe to gluten-free in seconds with our advanced AI technology",
     highlight: "Save hours of research"
+  }, {
+    icon: <MapPin className="w-12 h-12 text-blue-600" />,
+    title: "Worldwide Store Finder",
+    description: "Discover gluten-free restaurants, bakeries & stores globally with AI-powered search, directions, websites & menus",
+    highlight: "195 countries covered"
   }, {
     icon: <Shield className="w-12 h-12 text-gluten-primary" />,
     title: "Safe & Tested",
@@ -124,7 +133,7 @@ const Landing = () => {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {keyFeatures.map((feature, index) => <Card key={index} className="text-center hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-gluten-primary/5 to-gluten-secondary/5 border-gluten-primary/20 relative">
               <CardHeader className="pb-4">
                 <div className="mx-auto mb-4 p-4 bg-gluten-primary/10 rounded-full w-fit">
@@ -135,6 +144,10 @@ const Landing = () => {
                   {index === 0 && <Button onClick={() => setShowFeatureDetails(true)} className="ml-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 flex items-center gap-1" size="sm">
                       <Info className="w-3 h-3" />
                       See More
+                    </Button>}
+                  {index === 1 && <Button onClick={() => navigate('/store-locator')} className="ml-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 flex items-center gap-1" size="sm">
+                      <ExternalLink className="w-3 h-3" />
+                      Try Now
                     </Button>}
                 </div>
                 <div className="inline-block bg-gluten-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium mb-3">
@@ -159,12 +172,12 @@ const Landing = () => {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Everything you need to master gluten-free cooking and connect with a supportive community, just type, take pictures or talk to our AI! Its that simple</p>
         </div>
         
-         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-           {features.map((feature, index) => <Card key={index} className={`text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50 ${index === 3 ? 'ring-2 ring-blue-500 border-blue-500/50' : ''} relative`}>
-               {index === 3 && (
+         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
+           {features.map((feature, index) => <Card key={index} className={`text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50 ${index === 2 ? 'ring-2 ring-blue-500 border-blue-500/50' : index === 4 ? 'ring-2 ring-blue-500 border-blue-500/50' : ''} relative`}>
+               {(index === 2 || index === 4) && (
                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                    <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
-                     Our Most Popular Feature
+                     {index === 2 ? 'Premium Feature' : 'Our Most Popular Feature'}
                    </div>
                  </div>
                )}
