@@ -1,5 +1,5 @@
 
-import { ChefHat, Sparkles, User, LogOut, Settings, Crown, AlignJustify, Brain } from 'lucide-react';
+import { ChefHat, Sparkles, User, LogOut, Settings, Crown, AlignJustify, Brain, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -80,10 +80,19 @@ const Header = () => {
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                       <NavigationMenuLink
-                        className={cn(navigationMenuTriggerStyle(), "cursor-pointer")}
+                        className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
                         onClick={() => navigate('/my-recipes')}
                       >
                         My Recipes
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem>
+                      <NavigationMenuLink
+                        className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
+                        onClick={() => navigate('/store-locator')}
+                      >
+                        <MapPin className="w-4 h-4" />
+                        Store Locator
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
@@ -146,6 +155,14 @@ const Header = () => {
                         onClick={() => navigate('/my-recipes')}
                       >
                         My Recipes
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start text-lg flex items-center gap-2"
+                        onClick={() => navigate('/store-locator')}
+                      >
+                        <MapPin className="w-4 h-4" />
+                        Store Locator
                       </Button>
                       <Button 
                         variant="ghost" 
