@@ -125,4 +125,43 @@
       font-size: 16px; /* Prevents zoom on iOS */
     }
   }
+
+  /* Store Locator Custom Blue Theme */
+  .store-locator-theme {
+    /* Override button colors for store locator */
+    --primary: 59 130 246; /* brand-blue #3B82F6 in HSL */
+    --primary-foreground: 255 255 255; /* white text */
+  }
+
+  .store-locator-theme .store-locator-button {
+    background: hsl(59 130 246);
+    color: white;
+    border: 1px solid hsl(59 130 246);
+  }
+
+  .store-locator-theme .store-locator-button:hover {
+    background: hsl(30 64 239); /* brand-blue-dark #1E40AF in HSL */
+    border-color: hsl(30 64 239);
+  }
+
+  .store-locator-theme .store-locator-button-outline {
+    background: transparent;
+    color: hsl(59 130 246);
+    border: 1px solid hsl(59 130 246);
+  }
+
+  .store-locator-theme .store-locator-button-outline:hover {
+    background: hsl(59 130 246 / 0.1);
+    color: hsl(30 64 239);
+    border-color: hsl(30 64 239);
+  }
+
+  .store-locator-theme .store-locator-accent {
+    color: hsl(59 130 246);
+  }
+
+  .store-locator-theme .store-locator-card-hover:hover {
+    box-shadow: 0 10px 25px -5px hsl(59 130 246 / 0.2), 0 8px 10px -6px hsl(59 130 246 / 0.1);
+    border-color: hsl(59 130 246 / 0.3);
+  }
 }

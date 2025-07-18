@@ -238,11 +238,11 @@ const GlutenFreeStoreLocator = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border-brand-blue/20 bg-gradient-to-r from-brand-blue-light/10 to-white/50 dark:to-card/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Find Gluten-Free Stores
+            <Search className="h-5 w-5 text-brand-blue" />
+            <span className="text-brand-blue">Find Gluten-Free Stores</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -305,7 +305,7 @@ const GlutenFreeStoreLocator = () => {
             <Button 
               onClick={handleSearch} 
               disabled={loading}
-              className="flex-1"
+              className="flex-1 store-locator-button bg-brand-blue hover:bg-brand-blue-dark text-white"
             >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
               Search Location
@@ -314,7 +314,7 @@ const GlutenFreeStoreLocator = () => {
               onClick={handleNearMeSearch} 
               disabled={loading}
               variant="outline"
-              className="flex-1"
+              className="flex-1 store-locator-button-outline border-brand-blue text-brand-blue hover:bg-brand-blue/10"
             >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
               Search Near Me
@@ -323,10 +323,10 @@ const GlutenFreeStoreLocator = () => {
 
           {searchTerms.length > 0 && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">AI-Enhanced Search Terms:</label>
+              <label className="text-sm font-medium store-locator-accent">AI-Enhanced Search Terms:</label>
               <div className="flex flex-wrap gap-2">
                 {searchTerms.map((term, index) => (
-                  <Badge key={index} variant="secondary">
+                  <Badge key={index} variant="secondary" className="bg-brand-blue/10 text-brand-blue border-brand-blue/30">
                     {term}
                   </Badge>
                 ))}
@@ -338,12 +338,14 @@ const GlutenFreeStoreLocator = () => {
 
       {stores.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Found {stores.length} Gluten-Free Businesses</h3>
+          <h3 className="text-lg font-semibold">
+            Found <span className="text-brand-blue">{stores.length}</span> Gluten-Free Businesses
+          </h3>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {stores.map((store) => (
               <Dialog key={store.id}>
                 <DialogTrigger asChild>
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                  <Card className="cursor-pointer store-locator-card-hover transition-all duration-300 hover:shadow-lg border-brand-blue/10">
                     <CardContent className="p-4">
                       <div className="space-y-2">
                         <div className="flex items-start justify-between gap-2">
@@ -428,7 +430,7 @@ const GlutenFreeStoreLocator = () => {
                       {store.website && (
                         <Button 
                           variant="outline"
-                          className="w-full" 
+                          className="w-full store-locator-button-outline border-brand-blue text-brand-blue hover:bg-brand-blue/10" 
                           onClick={() => window.open(store.website, '_blank')}
                         >
                           <Globe className="mr-2 h-4 w-4" />
@@ -436,7 +438,7 @@ const GlutenFreeStoreLocator = () => {
                         </Button>
                       )}
                       <Button 
-                        className="w-full" 
+                        className="w-full store-locator-button bg-brand-blue hover:bg-brand-blue-dark text-white" 
                         onClick={() => window.open(store.googleMapsUrl, '_blank')}
                       >
                         <ExternalLink className="mr-2 h-4 w-4" />
