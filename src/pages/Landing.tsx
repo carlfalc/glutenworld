@@ -21,6 +21,8 @@ const Landing = () => {
     if (user) {
       navigate('/dashboard');
     } else {
+      // Store trial plan for immediate checkout after signup
+      localStorage.setItem('selectedPlan', 'trial');
       navigate('/auth?tab=signup');
     }
   };

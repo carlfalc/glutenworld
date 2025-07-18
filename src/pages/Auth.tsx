@@ -34,6 +34,11 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
+      // Check if user was redirected here for a specific plan
+      const selectedPlan = localStorage.getItem('selectedPlan');
+      if (selectedPlan) {
+        console.log('User authenticated with stored plan, will be handled by AuthContext');
+      }
       navigate('/dashboard');
     }
   }, [user, navigate]);

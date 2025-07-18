@@ -68,12 +68,13 @@ export const useSubscription = () => {
     if (!user || !session) {
       // Store the selected plan to continue after authentication
       localStorage.setItem('selectedPlan', plan);
+      console.log('User not authenticated, storing plan and redirecting:', plan);
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to subscribe.",
-        variant: "destructive",
+        title: "Sign Up Required",
+        description: `Please sign up to start your ${plan === 'trial' ? 'free trial' : plan + ' subscription'}.`,
+        variant: "default",
       });
-      // Redirect to auth page
+      // Redirect to auth page with signup tab
       window.location.href = '/auth?tab=signup';
       return;
     }

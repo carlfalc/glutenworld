@@ -107,7 +107,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    // Check if user was redirected here for checkout
+    const selectedPlan = localStorage.getItem('selectedPlan');
+    const redirectUrl = selectedPlan 
+      ? `${window.location.origin}/dashboard` 
+      : `${window.location.origin}/dashboard`;
     
     const { error } = await supabase.auth.signUp({
       email,
