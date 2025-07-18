@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, MapPin, Star, ExternalLink, Search, Navigation, Globe, Heart } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTrialRestriction } from '@/hooks/useTrialRestriction';
 
 interface Store {
   id: string;
@@ -76,6 +78,8 @@ const GlutenFreeStoreLocator = () => {
   const [currentOffset, setCurrentOffset] = useState(0);
   const [lastSearchParams, setLastSearchParams] = useState<any>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { markStoreLocatorUsed } = useTrialRestriction();
 
   // Load saved default country on component mount
   useEffect(() => {
@@ -157,6 +161,11 @@ const GlutenFreeStoreLocator = () => {
       setTotalAvailable(result.totalAvailable || 0);
       setCurrentOffset(offset);
       
+      // Mark trial usage for non-authenticated users on first successful search
+      if (isNewSearch && !user) {
+        markStoreLocatorUsed();
+      }
+      
       toast({
         title: isNewSearch ? "Search Complete" : "More Results Loaded",
         description: isNewSearch 
@@ -223,6 +232,11 @@ const GlutenFreeStoreLocator = () => {
           setTotalAvailable(result.totalAvailable || 0);
           setCurrentOffset(0);
           setLastSearchParams(searchParams);
+          
+          // Mark trial usage for non-authenticated users on successful search
+          if (!user) {
+            markStoreLocatorUsed();
+          }
           
           toast({
             title: "Search Complete",

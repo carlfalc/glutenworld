@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTrialRestriction } from '@/hooks/useTrialRestriction';
+import { TrialRestrictionModal } from '@/components/TrialRestrictionModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock, Info, MapPin, Globe, ExternalLink } from 'lucide-react';
@@ -13,6 +15,8 @@ const Landing = () => {
     user
   } = useAuth();
   const [showFeatureDetails, setShowFeatureDetails] = useState(false);
+  const [showTrialRestriction, setShowTrialRestriction] = useState(false);
+  const { canUseStoreLocator, hasUsedTrial } = useTrialRestriction();
   const handleGetStarted = () => {
     if (user) {
       navigate('/dashboard');
@@ -22,6 +26,14 @@ const Landing = () => {
   };
   const handleSignIn = () => {
     navigate('/auth?tab=signin');
+  };
+
+  const handleStoreLocatorTry = () => {
+    if (canUseStoreLocator()) {
+      navigate('/store-locator');
+    } else {
+      setShowTrialRestriction(true);
+    }
   };
   const features = [{
     icon: <ChefHat className="w-8 h-8 text-gluten-primary" />,
@@ -145,9 +157,9 @@ const Landing = () => {
                       <Info className="w-3 h-3" />
                       See More
                     </Button>}
-                  {index === 1 && <Button onClick={() => navigate('/store-locator')} className="ml-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 flex items-center gap-1" size="sm">
+                  {index === 1 && <Button onClick={handleStoreLocatorTry} className="ml-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 flex items-center gap-1" size="sm">
                       <ExternalLink className="w-3 h-3" />
-                      Try Now
+                      {user ? "Try Now" : hasUsedTrial() ? "Sign Up" : "Try Now"}
                     </Button>}
                 </div>
                 <div className="inline-block bg-gluten-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium mb-3">
@@ -236,6 +248,11 @@ const Landing = () => {
       </footer>
 
       <FeatureDetailsPopup open={showFeatureDetails} onOpenChange={setShowFeatureDetails} isFromLanding={true} onStartScanning={handleGetStarted} />
+      <TrialRestrictionModal 
+        open={showTrialRestriction} 
+        onOpenChange={setShowTrialRestriction} 
+        featureName="Global Store Locator" 
+      />
     </div>;
 };
 export default Landing;
