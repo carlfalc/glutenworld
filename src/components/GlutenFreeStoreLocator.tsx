@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, MapPin, Star, ExternalLink, Search, Navigation } from 'lucide-react';
+import { Loader2, MapPin, Star, ExternalLink, Search, Navigation, Globe } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,6 +16,8 @@ interface Store {
   rating: number;
   priceLevel?: number;
   types: string[];
+  category: string;
+  website?: string;
   photoReference?: string;
   geometry: {
     location: {
@@ -175,6 +177,17 @@ const GlutenFreeStoreLocator = () => {
     );
   };
 
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'Restaurant': return 'bg-red-100 text-red-800 border-red-200';
+      case 'Cafe': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'Bakery': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Health Food Store': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Pharmacy': return 'bg-blue-100 text-blue-800 border-blue-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -267,7 +280,15 @@ const GlutenFreeStoreLocator = () => {
                   <Card className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
                       <div className="space-y-2">
-                        <h4 className="font-semibold line-clamp-2">{store.name}</h4>
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-semibold line-clamp-2 flex-1">{store.name}</h4>
+                          <Badge 
+                            className={`text-xs font-medium shrink-0 ${getCategoryColor(store.category)}`}
+                            variant="outline"
+                          >
+                            {store.category}
+                          </Badge>
+                        </div>
                         <div className="flex items-center gap-2">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                           <span className="text-sm">{store.rating?.toFixed(1)}</span>
@@ -296,7 +317,15 @@ const GlutenFreeStoreLocator = () => {
 
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="line-clamp-2">{store.name}</DialogTitle>
+                    <div className="flex items-start justify-between gap-2">
+                      <DialogTitle className="line-clamp-2 flex-1">{store.name}</DialogTitle>
+                      <Badge 
+                        className={`text-xs font-medium shrink-0 ${getCategoryColor(store.category)}`}
+                        variant="outline"
+                      >
+                        {store.category}
+                      </Badge>
+                    </div>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -329,13 +358,25 @@ const GlutenFreeStoreLocator = () => {
                       </Badge>
                     )}
 
-                    <Button 
-                      className="w-full" 
-                      onClick={() => window.open(store.googleMapsUrl, '_blank')}
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      View on Google Maps
-                    </Button>
+                    <div className="grid gap-2">
+                      {store.website && (
+                        <Button 
+                          variant="outline"
+                          className="w-full" 
+                          onClick={() => window.open(store.website, '_blank')}
+                        >
+                          <Globe className="mr-2 h-4 w-4" />
+                          Visit Website
+                        </Button>
+                      )}
+                      <Button 
+                        className="w-full" 
+                        onClick={() => window.open(store.googleMapsUrl, '_blank')}
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        View on Google Maps
+                      </Button>
+                    </div>
                   </div>
                 </DialogContent>
               </Dialog>

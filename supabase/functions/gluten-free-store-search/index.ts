@@ -14,6 +14,32 @@ interface SearchRequest {
   radius?: number;
 }
 
+// Function to categorize places based on their types
+const categorizePlace = (types: string[]): string => {
+  if (!types) return 'Other';
+  
+  const typeSet = new Set(types.map(t => t.toLowerCase()));
+  
+  if (typeSet.has('cafe') || typeSet.has('coffee_shop')) {
+    return 'Cafe';
+  }
+  if (typeSet.has('restaurant') || typeSet.has('meal_takeaway') || typeSet.has('meal_delivery')) {
+    return 'Restaurant';
+  }
+  if (typeSet.has('bakery')) {
+    return 'Bakery';
+  }
+  if (typeSet.has('grocery_or_supermarket') || typeSet.has('supermarket') || 
+      typeSet.has('health') || typeSet.has('store') || typeSet.has('food')) {
+    return 'Health Food Store';
+  }
+  if (typeSet.has('pharmacy')) {
+    return 'Pharmacy';
+  }
+  
+  return 'Other';
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -123,19 +149,59 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Found ${sortedResults.length} unique places`);
 
-    // Format results for frontend
-    const formattedResults = sortedResults.map(place => ({
-      id: place.place_id,
-      name: place.name,
-      address: place.formatted_address || place.vicinity,
-      rating: place.rating,
-      priceLevel: place.price_level,
-      types: place.types,
-      photoReference: place.photos?.[0]?.photo_reference,
-      geometry: place.geometry,
-      openingHours: place.opening_hours,
-      googleMapsUrl: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`
-    }));
+    // Get additional details including website for each place
+    const detailedResults = await Promise.all(
+      sortedResults.slice(0, 12).map(async (place) => {
+        try {
+          const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,website,formatted_address,rating,price_level,types,geometry,opening_hours,photos&key=${GOOGLE_PLACES_API_KEY}`;
+          const detailsResponse = await fetch(detailsUrl);
+          const detailsData = await detailsResponse.json();
+          
+          if (detailsData.status === 'OK' && detailsData.result) {
+            const details = detailsData.result;
+            
+            // Categorize the business
+            const category = categorizePlace(details.types || place.types);
+            
+            return {
+              id: place.place_id,
+              name: details.name || place.name,
+              address: details.formatted_address || place.formatted_address || place.vicinity,
+              rating: details.rating || place.rating,
+              priceLevel: details.price_level || place.price_level,
+              types: details.types || place.types,
+              category: category,
+              website: details.website,
+              photoReference: details.photos?.[0]?.photo_reference || place.photos?.[0]?.photo_reference,
+              geometry: details.geometry || place.geometry,
+              openingHours: details.opening_hours || place.opening_hours,
+              googleMapsUrl: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`
+            };
+          }
+        } catch (error) {
+          console.error(`Error fetching details for ${place.name}:`, error);
+        }
+        
+        // Fallback without website
+        return {
+          id: place.place_id,
+          name: place.name,
+          address: place.formatted_address || place.vicinity,
+          rating: place.rating,
+          priceLevel: place.price_level,
+          types: place.types,
+          category: categorizePlace(place.types),
+          website: null,
+          photoReference: place.photos?.[0]?.photo_reference,
+          geometry: place.geometry,
+          openingHours: place.opening_hours,
+          googleMapsUrl: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`
+        };
+      })
+    );
+
+    // Filter out any null results
+    const formattedResults = detailedResults.filter(Boolean);
 
     return new Response(JSON.stringify({
       results: formattedResults,
