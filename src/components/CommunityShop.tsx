@@ -150,11 +150,19 @@ const CommunityShop = () => {
         </TabsContent>
         
         <TabsContent value="shop" className="space-y-3 mt-0">
-          <div className="pb-2">
+          <div className="pb-2 flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
               <Store className="w-4 h-4 text-gluten-primary" />
               Featured Products
             </h3>
+            <Button
+              onClick={() => navigate('/add-product')}
+              size="sm"
+              className="h-7 text-xs bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Add Product
+            </Button>
           </div>
           
           <div className="max-h-64 sm:max-h-80 overflow-y-auto space-y-3">
@@ -170,15 +178,28 @@ const CommunityShop = () => {
                 >
                   <CardContent className="p-3">
                     <div className="flex gap-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                        <Store className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {item.image_url ? (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Store className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+                        )}
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-medium text-foreground group-hover:text-gluten-primary transition-colors truncate">
                           {item.name}
                         </h3>
-                        <p className="text-xs text-muted-foreground truncate">by Seller</p>
+                        <p className="text-xs text-muted-foreground truncate">{item.category}</p>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {item.description.split('\n\nContact:')[0]}
+                          </p>
+                        )}
                         
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-1">
