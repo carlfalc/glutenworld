@@ -92,9 +92,6 @@ const ReviewsSection = () => {
             <StarRating rating={averageRating} size="lg" />
             <span className="text-2xl font-bold text-foreground">{averageRating.toFixed(1)}</span>
           </div>
-          <div className="text-lg text-muted-foreground">
-            Based on {totalReviews}+ verified reviews
-          </div>
         </div>
       </div>
 
