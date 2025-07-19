@@ -98,6 +98,7 @@ const Landing = () => {
             >
               Gluten World
             </h1>
+            <p className="text-sm text-muted-foreground">Transform your recipes, transform your life.</p>
           </div>
         </div>
         
