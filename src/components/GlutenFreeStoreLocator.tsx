@@ -9,7 +9,7 @@ import { Loader2, MapPin, Star, ExternalLink, Search, Navigation, Globe, Heart }
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTrialRestriction } from '@/hooks/useTrialRestriction';
+import { useTrialManagement } from '@/hooks/useTrialManagement';
 
 interface Store {
   id: string;
@@ -79,7 +79,7 @@ const GlutenFreeStoreLocator = () => {
   const [lastSearchParams, setLastSearchParams] = useState<any>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-  const { markStoreLocatorUsed } = useTrialRestriction();
+  const { canAccessFeatures, getFeatureStatus } = useTrialManagement();
 
   // Load saved default country on component mount
   useEffect(() => {
@@ -161,10 +161,7 @@ const GlutenFreeStoreLocator = () => {
       setTotalAvailable(result.totalAvailable || 0);
       setCurrentOffset(offset);
       
-      // Mark trial usage for non-authenticated users on first successful search
-      if (isNewSearch && !user) {
-        markStoreLocatorUsed();
-      }
+      // Trial access is now handled by the new trial management system
       
       toast({
         title: isNewSearch ? "Search Complete" : "More Results Loaded",
@@ -233,10 +230,7 @@ const GlutenFreeStoreLocator = () => {
           setCurrentOffset(0);
           setLastSearchParams(searchParams);
           
-          // Mark trial usage for non-authenticated users on successful search
-          if (!user) {
-            markStoreLocatorUsed();
-          }
+          // Trial access is now handled by the new trial management system
           
           toast({
             title: "Search Complete",

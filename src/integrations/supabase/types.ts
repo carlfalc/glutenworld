@@ -458,33 +458,45 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          features_locked: boolean
           id: string
           stripe_customer_id: string | null
           subscribed: boolean
           subscription_end: string | null
           subscription_tier: string | null
+          trial_end_date: string | null
+          trial_start_date: string | null
+          trial_used: boolean
           updated_at: string
           user_id: string | null
         }
         Insert: {
           created_at?: string
           email: string
+          features_locked?: boolean
           id?: string
           stripe_customer_id?: string | null
           subscribed?: boolean
           subscription_end?: string | null
           subscription_tier?: string | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          trial_used?: boolean
           updated_at?: string
           user_id?: string | null
         }
         Update: {
           created_at?: string
           email?: string
+          features_locked?: boolean
           id?: string
           stripe_customer_id?: string | null
           subscribed?: boolean
           subscription_end?: string | null
           subscription_tier?: string | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          trial_used?: boolean
           updated_at?: string
           user_id?: string | null
         }
@@ -722,9 +734,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_and_update_trial_status: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_community_stats: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      start_user_trial: {
+        Args: { user_email: string; user_id_param: string }
+        Returns: undefined
       }
     }
     Enums: {

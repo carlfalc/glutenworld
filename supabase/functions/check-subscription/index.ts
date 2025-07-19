@@ -100,13 +100,19 @@ serve(async (req) => {
       logStep("No active subscription found");
     }
 
+    // Check if subscription has expired and lock features
+    const now = new Date();
+    const subscriptionExpired = subscriptionEnd && new Date(subscriptionEnd) < now;
+    const shouldLockFeatures = !hasActiveSub || subscriptionExpired;
+
     await supabaseClient.from("subscribers").upsert({
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
-      subscribed: hasActiveSub,
+      subscribed: hasActiveSub && !subscriptionExpired,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEnd,
+      features_locked: shouldLockFeatures,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 

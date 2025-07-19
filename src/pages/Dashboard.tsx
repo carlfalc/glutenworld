@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, Info, BookOpen, Heart } from 'lucide-react';
 import Header from '@/components/Header';
@@ -13,6 +13,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
+import { useTrialManagement } from '@/hooks/useTrialManagement';
+import { TrialExpiredModal } from '@/components/TrialExpiredModal';
 import {
   Sheet,
   SheetContent,
@@ -23,6 +25,8 @@ const Dashboard = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { trialData, canAccessFeatures, startTrial, refreshTrialData } = useTrialManagement();
+  const [showTrialExpiredModal, setShowTrialExpiredModal] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,6 +37,44 @@ const Dashboard = () => {
       });
     }
   }, [user, loading]);
+
+  // Handle trial logic when user logs in
+  useEffect(() => {
+    if (user && !trialData.trial_used && !trialData.subscribed) {
+      // Auto-start trial for new users
+      setTimeout(() => {
+        startTrial();
+      }, 1000);
+    } else if (user && trialData.trial_expired && !trialData.subscribed) {
+      // Show trial expired modal if trial has ended and user isn't subscribed
+      setTimeout(() => {
+        setShowTrialExpiredModal(true);
+      }, 1500);
+    }
+  }, [user, trialData.trial_used, trialData.trial_expired, trialData.subscribed]);
+
+  // Handle URL params (success/canceled from Stripe checkout)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      toast({
+        title: "Payment Successful!",
+        description: "Your subscription is now active. Welcome to Gluten World Premium!",
+        variant: "default",
+      });
+      refreshTrialData();
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('canceled') === 'true') {
+      toast({
+        title: "Payment Canceled",
+        description: "No charges were made. You can try again anytime.",
+        variant: "destructive",
+      });
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [refreshTrialData]);
 
   if (loading) {
     return (
@@ -136,6 +178,12 @@ const Dashboard = () => {
           </Sheet>
         </div>
       </div>
+
+      {/* Trial Expired Modal */}
+      <TrialExpiredModal 
+        open={showTrialExpiredModal}
+        onOpenChange={setShowTrialExpiredModal}
+      />
     </div>
   );
 };
