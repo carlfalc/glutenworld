@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useTrialManagement } from '@/hooks/useTrialManagement';
 
 interface SubscriptionData {
   subscribed: boolean;
@@ -18,7 +17,6 @@ interface SubscriptionData {
 export const useSubscription = () => {
   const { user, session } = useAuth();
   const { toast } = useToast();
-  const { refreshTrialData } = useTrialManagement();
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({
     subscribed: false,
     subscription_tier: null,
@@ -114,9 +112,9 @@ export const useSubscription = () => {
         // Open Stripe checkout in a new tab
         window.open(data.url, '_blank');
         
-        // Refresh trial data after successful checkout setup
+        // Refresh subscription data after successful checkout setup
         setTimeout(() => {
-          refreshTrialData();
+          checkSubscription();
         }, 1000);
       }
     } catch (error) {
