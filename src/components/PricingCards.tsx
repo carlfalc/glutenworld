@@ -114,7 +114,7 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
             </div>
             <CardTitle className="text-2xl">{plan.name}</CardTitle>
             {plan.id === 'annual' && (
-              <div className="text-red-500 font-bold text-lg tracking-wide">
+              <div className="text-blue-600 font-bold text-lg tracking-wide">
                 Most Popular Choice
               </div>
             )}
