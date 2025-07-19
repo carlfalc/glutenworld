@@ -16,17 +16,20 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
   const plans = [
     ...(showTrialOption ? [{
       id: 'trial' as const,
-      name: "Free Trial",
+      name: "5-Day Trial",
       price: "Free",
-      duration: "5 days Free access to all Quarterly and Annual Subscriber features LIMITED TIME",
-      description: "Try all features risk-free",
+      duration: "Then $12.99 quarterly (auto-renews)",
+      description: "Credit card required • Cancel anytime",
       features: [
-        "Convert Recipes",
+        "5 days FREE access to all features",
+        "Convert unlimited recipes",
         "AI recipe assistant", 
-        "Scan Ingredient Labels",
-        "GF Restaurant, Cafe, Bakery, Store Finder"
+        "Scan ingredient labels",
+        "GF restaurant & store finder",
+        "Auto-converts to quarterly plan after trial",
+        "Cancel before trial ends to avoid charges"
       ],
-      popular: false,
+      popular: true,
       icon: <Zap className="w-5 h-5 text-blue-500" />
     }] : []),
     {

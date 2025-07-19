@@ -1,203 +1,135 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 
 interface TrialData {
+  isInTrial: boolean;
+  trialDaysLeft: number;
+  trialExpired: boolean;
+  featuresLocked: boolean;
+  loading: boolean;
+  // Backward compatibility properties
   trial_used: boolean;
-  trial_start_date: string | null;
-  trial_end_date: string | null;
-  features_locked: boolean;
+  trial_expired: boolean;
   subscribed: boolean;
   subscription_tier: string | null;
-  subscription_end: string | null;
-  days_remaining: number;
-  trial_expired: boolean;
 }
 
 export const useTrialManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { 
+    subscribed, 
+    subscription_tier, 
+    trial_expires_at, 
+    is_trialing, 
+    subscription_status,
+    loading: subscriptionLoading,
+    checkSubscription 
+  } = useSubscription();
+
   const [trialData, setTrialData] = useState<TrialData>({
+    isInTrial: false,
+    trialDaysLeft: 0,
+    trialExpired: false,
+    featuresLocked: false,
+    loading: true,
     trial_used: false,
-    trial_start_date: null,
-    trial_end_date: null,
-    features_locked: false,
+    trial_expired: false,
     subscribed: false,
     subscription_tier: null,
-    subscription_end: null,
-    days_remaining: 0,
-    trial_expired: false
   });
-  const [loading, setLoading] = useState(true);
 
-  const calculateDaysRemaining = (endDate: string | null): number => {
-    if (!endDate) return 0;
-    const end = new Date(endDate);
+  const calculateDaysRemaining = (expiresAt: string | null): number => {
+    if (!expiresAt) return 0;
+    const expiry = new Date(expiresAt);
     const now = new Date();
-    const diffTime = end.getTime() - now.getTime();
+    const diffTime = expiry.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return Math.max(0, diffDays);
   };
 
-  const fetchTrialData = async () => {
-    if (!user?.email) {
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    if (!subscriptionLoading) {
+      const daysLeft = trial_expires_at ? calculateDaysRemaining(trial_expires_at) : 0;
+      const trialExpired = is_trialing && daysLeft === 0;
+      const hasActiveAccess = subscribed || (is_trialing && daysLeft > 0);
 
-    try {
-      // Check and update trial status first
-      const { error: checkError } = await supabase.rpc('check_and_update_trial_status');
-      if (checkError) {
-        console.error('Error checking trial status:', checkError);
-      }
-
-      // Fetch current trial data
-      const { data, error } = await supabase
-        .from('subscribers')
-        .select('*')
-        .eq('email', user.email)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching trial data:', error);
-        return;
-      }
-
-      if (data) {
-        const daysRemaining = data.trial_end_date ? calculateDaysRemaining(data.trial_end_date) : 0;
-        const trialExpired = data.trial_used && daysRemaining === 0 && !data.subscribed;
-
-        setTrialData({
-          trial_used: data.trial_used || false,
-          trial_start_date: data.trial_start_date,
-          trial_end_date: data.trial_end_date,
-          features_locked: data.features_locked || false,
-          subscribed: data.subscribed || false,
-          subscription_tier: data.subscription_tier,
-          subscription_end: data.subscription_end,
-          days_remaining: daysRemaining,
-          trial_expired: trialExpired
-        });
-      }
-    } catch (error) {
-      console.error('Error in fetchTrialData:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const startTrial = async () => {
-    if (!user?.email || !user?.id) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to start your trial.",
-        variant: "destructive",
+      setTrialData({
+        isInTrial: is_trialing || false,
+        trialDaysLeft: daysLeft,
+        trialExpired: trialExpired,
+        featuresLocked: !hasActiveAccess,
+        loading: false,
+        trial_used: is_trialing || false,
+        trial_expired: trialExpired,
+        subscribed: subscribed || false,
+        subscription_tier: subscription_tier,
       });
-      return false;
     }
-
-    try {
-      const { error } = await supabase.rpc('start_user_trial', {
-        user_email: user.email,
-        user_id_param: user.id
-      });
-
-      if (error) {
-        console.error('Error starting trial:', error);
-        toast({
-          title: "Trial Start Failed",
-          description: "Unable to start your trial. Please try again.",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      await fetchTrialData();
-      toast({
-        title: "Trial Started!",
-        description: "Your 5-day free trial has begun. Enjoy all premium features!",
-        variant: "default",
-      });
-      return true;
-    } catch (error) {
-      console.error('Error starting trial:', error);
-      return false;
-    }
-  };
+  }, [subscribed, subscription_tier, trial_expires_at, is_trialing, subscription_status, subscriptionLoading]);
 
   const canAccessFeatures = (): boolean => {
-    // If user is subscribed, they can access features
-    if (trialData.subscribed) return true;
+    // User has active subscription
+    if (subscribed) return true;
     
-    // If trial is active (used and not expired), they can access features
-    if (trialData.trial_used && trialData.days_remaining > 0) return true;
-    
-    // If no trial used yet, they can access features
-    if (!trialData.trial_used) return true;
+    // User is in trial and trial hasn't expired
+    if (is_trialing && trialData.trialDaysLeft > 0) return true;
     
     // Otherwise, features are locked
     return false;
   };
 
   const getFeatureStatus = () => {
-    if (trialData.subscribed) {
+    if (subscribed) {
       return {
         status: 'subscribed',
-        message: `Active ${trialData.subscription_tier} subscription`,
+        message: `Active ${subscription_tier} subscription`,
         canAccess: true
       };
     }
     
-    if (trialData.trial_used && trialData.days_remaining > 0) {
+    if (is_trialing && trialData.trialDaysLeft > 0) {
       return {
         status: 'trial_active',
-        message: `${trialData.days_remaining} days left in trial`,
+        message: `${trialData.trialDaysLeft} days left in trial`,
         canAccess: true
       };
     }
     
-    if (trialData.trial_expired) {
+    if (trialData.trialExpired) {
       return {
         status: 'trial_expired',
-        message: 'Trial expired - Subscribe to continue',
+        message: 'Trial expired - Your subscription is now active',
         canAccess: false
       };
     }
     
     return {
-      status: 'no_trial',
-      message: 'Start your 5-day free trial',
-      canAccess: true
+      status: 'no_access',
+      message: 'Subscribe to access premium features',
+      canAccess: false
     };
   };
 
-  useEffect(() => {
-    if (user) {
-      fetchTrialData();
-    } else {
-      setTrialData({
-        trial_used: false,
-        trial_start_date: null,
-        trial_end_date: null,
-        features_locked: false,
-        subscribed: false,
-        subscription_tier: null,
-        subscription_end: null,
-        days_remaining: 0,
-        trial_expired: false
-      });
-      setLoading(false);
-    }
-  }, [user]);
+  // Since trials are now handled through Stripe checkout, we don't need a separate startTrial function
+  // Users start trials by going through the checkout process with the 'trial' plan
+  const startTrial = async () => {
+    toast({
+      title: "Start Trial",
+      description: "Please use the 'Start 5-Day Trial' button to begin your trial with auto-billing.",
+      variant: "default",
+    });
+    return false;
+  };
 
   return {
     trialData,
-    loading,
-    startTrial,
+    loading: trialData.loading || subscriptionLoading,
+    startTrial, // Keep for backward compatibility but redirect to checkout
     canAccessFeatures,
     getFeatureStatus,
-    refreshTrialData: fetchTrialData
+    refreshTrialData: checkSubscription // Use subscription check to refresh data
   };
 };

@@ -461,10 +461,13 @@ export type Database = {
           features_locked: boolean
           id: string
           stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           subscribed: boolean
           subscription_end: string | null
+          subscription_status: string | null
           subscription_tier: string | null
           trial_end_date: string | null
+          trial_expires_at: string | null
           trial_start_date: string | null
           trial_used: boolean
           updated_at: string
@@ -476,10 +479,13 @@ export type Database = {
           features_locked?: boolean
           id?: string
           stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscribed?: boolean
           subscription_end?: string | null
+          subscription_status?: string | null
           subscription_tier?: string | null
           trial_end_date?: string | null
+          trial_expires_at?: string | null
           trial_start_date?: string | null
           trial_used?: boolean
           updated_at?: string
@@ -491,10 +497,13 @@ export type Database = {
           features_locked?: boolean
           id?: string
           stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscribed?: boolean
           subscription_end?: string | null
+          subscription_status?: string | null
           subscription_tier?: string | null
           trial_end_date?: string | null
+          trial_expires_at?: string | null
           trial_start_date?: string | null
           trial_used?: boolean
           updated_at?: string

@@ -124,6 +124,7 @@ serve(async (req) => {
 
     // Define pricing based on plan and converted currency
     let priceData;
+    let subscriptionData: any = {};
     const currencySymbols = { usd: '$', eur: '€', gbp: '£', cad: 'C$', aud: 'A$' };
     const symbol = currencySymbols[currency as keyof typeof currencySymbols] || '$';
     
@@ -145,11 +146,20 @@ serve(async (req) => {
         };
         break;
       case 'trial':
+        // For trial, create a quarterly subscription with 5-day trial
         priceData = {
           currency: currency,
-          product_data: { name: "Free Trial - Gluten World" },
-          unit_amount: 0, // Free
-          recurring: { interval: "day", interval_count: 5 },
+          product_data: { name: `Quarterly Plan - Gluten World (${symbol}${(localPricing.quarterly / 100).toFixed(2)}) - 5 Day Trial` },
+          unit_amount: localPricing.quarterly,
+          recurring: { interval: "month", interval_count: 3 },
+        };
+        subscriptionData = {
+          trial_period_days: 5,
+          trial_settings: {
+            end_behavior: {
+              missing_payment_method: 'cancel',
+            },
+          },
         };
         break;
       default:
@@ -165,7 +175,7 @@ serve(async (req) => {
     });
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
-    const session = await stripe.checkout.sessions.create({
+    const sessionCreateParams: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
@@ -181,7 +191,16 @@ serve(async (req) => {
         user_id: user.id,
         plan: plan,
       },
-    });
+      payment_method_types: ['card'],
+      billing_address_collection: 'required',
+    };
+
+    // Add trial settings for trial plan
+    if (plan === 'trial') {
+      sessionCreateParams.subscription_data = subscriptionData;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionCreateParams);
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 

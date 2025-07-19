@@ -69,58 +69,97 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
+    // Check for active, trialing, or recently created subscriptions
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      status: "all",
+      limit: 10,
     });
-    const hasActiveSub = subscriptions.data.length > 0;
+    
+    let activeSubscription = null;
     let subscriptionTier = null;
     let subscriptionEnd = null;
+    let subscriptionStatus = 'inactive';
+    let trialExpiresAt = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-      
-      // Determine subscription tier from price
-      const priceId = subscription.items.data[0].price.id;
-      const price = await stripe.prices.retrieve(priceId);
-      const amount = price.unit_amount || 0;
-      
-      if (amount <= 1299) {
-        subscriptionTier = "Free Trial";
-      } else if (amount <= 2999) {
-        subscriptionTier = "Quarterly";
-      } else {
-        subscriptionTier = "Annual";
+    // Find the most relevant subscription (active, trialing, or past_due)
+    for (const sub of subscriptions.data) {
+      if (['active', 'trialing', 'past_due'].includes(sub.status)) {
+        activeSubscription = sub;
+        break;
       }
-      logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
-    } else {
-      logStep("No active subscription found");
     }
 
-    // Check if subscription has expired and lock features
-    const now = new Date();
-    const subscriptionExpired = subscriptionEnd && new Date(subscriptionEnd) < now;
-    const shouldLockFeatures = !hasActiveSub || subscriptionExpired;
+    if (activeSubscription) {
+      subscriptionStatus = activeSubscription.status;
+      subscriptionEnd = new Date(activeSubscription.current_period_end * 1000).toISOString();
+      
+      // Check if subscription is in trial
+      if (activeSubscription.status === 'trialing' && activeSubscription.trial_end) {
+        trialExpiresAt = new Date(activeSubscription.trial_end * 1000).toISOString();
+        subscriptionTier = "Trial";
+        logStep("Trial subscription found", { 
+          subscriptionId: activeSubscription.id, 
+          trialEnd: trialExpiresAt,
+          status: activeSubscription.status 
+        });
+      } else {
+        // Determine subscription tier from price
+        const priceId = activeSubscription.items.data[0].price.id;
+        const price = await stripe.prices.retrieve(priceId);
+        const amount = price.unit_amount || 0;
+        
+        if (amount <= 1299) {
+          subscriptionTier = "Quarterly";
+        } else {
+          subscriptionTier = "Annual";
+        }
+        logStep("Active subscription found", { 
+          subscriptionId: activeSubscription.id, 
+          endDate: subscriptionEnd,
+          status: activeSubscription.status,
+          tier: subscriptionTier 
+        });
+      }
+    } else {
+      logStep("No active or trialing subscription found");
+    }
+
+    // Determine if user has access (active subscription or trial)
+    const hasActiveAccess = activeSubscription && ['active', 'trialing'].includes(activeSubscription.status);
+    const isTrialing = activeSubscription?.status === 'trialing';
+    
+    // Features are locked if no active subscription or trial
+    const shouldLockFeatures = !hasActiveAccess;
 
     await supabaseClient.from("subscribers").upsert({
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
-      subscribed: hasActiveSub && !subscriptionExpired,
+      stripe_subscription_id: activeSubscription?.id || null,
+      subscribed: hasActiveAccess && !isTrialing,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEnd,
+      subscription_status: subscriptionStatus,
+      trial_expires_at: trialExpiresAt,
       features_locked: shouldLockFeatures,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
+    logStep("Updated database with subscription info", { 
+      subscribed: hasActiveAccess, 
+      subscriptionTier, 
+      subscriptionStatus,
+      isTrialing 
+    });
+
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
+      subscribed: hasActiveAccess && !isTrialing,
       subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      subscription_status: subscriptionStatus,
+      trial_expires_at: trialExpiresAt,
+      is_trialing: isTrialing
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
