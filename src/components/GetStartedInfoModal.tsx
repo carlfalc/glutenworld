@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ChefHat, Sparkles, BookOpen, Users, Heart, ArrowRight } from 'lucide-react';
@@ -9,6 +10,13 @@ interface GetStartedInfoModalProps {
 }
 
 export const GetStartedInfoModal = ({ isOpen, onClose }: GetStartedInfoModalProps) => {
+  const navigate = useNavigate();
+
+  const handleStartTrial = () => {
+    localStorage.setItem('selectedPlan', 'trial');
+    navigate('/auth?tab=signup');
+    onClose();
+  };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -84,7 +92,7 @@ export const GetStartedInfoModal = ({ isOpen, onClose }: GetStartedInfoModalProp
           <div className="flex gap-3 pt-4">
             <Button 
               className="flex-1" 
-              onClick={onClose}
+              onClick={handleStartTrial}
             >
               Start Free Trial
               <ArrowRight className="ml-2 w-4 h-4" />
