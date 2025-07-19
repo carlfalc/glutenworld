@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { ChefHat, Sparkles, User, LogOut, Settings, Crown, AlignJustify, Brain, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,12 +30,14 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { MyAccountModal } from '@/components/MyAccountModal';
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const { subscribed } = useSubscription();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [showMyAccount, setShowMyAccount] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -207,9 +210,10 @@ const Header = () => {
                         <Button 
                           variant="ghost" 
                           className="justify-start text-lg w-full"
+                          onClick={() => setShowMyAccount(true)}
                         >
                           <User className="w-4 h-4 mr-2" />
-                          Profile
+                          My Account
                         </Button>
                         <Button 
                           variant="ghost" 
@@ -244,13 +248,13 @@ const Header = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem onClick={() => setShowMyAccount(true)}>
+                      <User className="w-4 h-4 mr-2" />
+                      My Account
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/subscription')}>
                       <Crown className="w-4 h-4 mr-2" />
                       Subscription
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <User className="w-4 h-4 mr-2" />
-                      Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <Settings className="w-4 h-4 mr-2" />
@@ -275,6 +279,11 @@ const Header = () => {
           )}
         </div>
       </div>
+      
+      <MyAccountModal 
+        open={showMyAccount} 
+        onOpenChange={setShowMyAccount} 
+      />
     </header>
   );
 };
