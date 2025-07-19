@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import SubscriptionStatus from '@/components/SubscriptionStatus';
+import EmailPreferences from '@/components/EmailPreferences';
 import PricingCards from '@/components/PricingCards';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -55,7 +56,7 @@ const Subscription = () => {
             Subscription Management
           </h1>
           <p className="text-xl text-muted-foreground">
-            Manage your Gluten World subscription and billing
+            Manage your Gluten World subscription and preferences
           </p>
         </div>
 
@@ -108,6 +109,9 @@ const Subscription = () => {
               </Card>
             </div>
           </div>
+
+          {/* Email Preferences */}
+          <EmailPreferences />
 
           {/* Pricing Options */}
           {!subscribed && (

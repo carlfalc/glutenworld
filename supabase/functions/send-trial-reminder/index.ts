@@ -15,74 +15,76 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface WelcomeEmailRequest {
+interface TrialReminderRequest {
   email: string;
-  fullName: string;
-  signInUrl: string;
+  fullName?: string;
+  trialEndDate: string;
   userId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email, fullName, signInUrl, userId }: WelcomeEmailRequest = await req.json();
+    const { email, fullName, trialEndDate, userId }: TrialReminderRequest = await req.json();
 
     // Check email preferences
     let shouldSend = true;
     if (userId) {
       const { data: preferences } = await supabaseClient
         .from('email_preferences')
-        .select('trial_start')
+        .select('trial_reminder')
         .eq('user_id', userId)
         .maybeSingle();
 
-      shouldSend = !preferences || preferences.trial_start !== false;
+      shouldSend = !preferences || preferences.trial_reminder !== false;
     }
 
     if (!shouldSend) {
-      console.log("Welcome email sending skipped due to user preferences");
+      console.log("Trial reminder email sending skipped due to user preferences");
       return new Response(JSON.stringify({ skipped: true }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
+    const trialEnd = new Date(trialEndDate);
+    const timeLeft = Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
     const emailResponse = await resend.emails.send({
       from: "Gluten World <onboarding@resend.dev>",
       to: [email],
-      subject: "Welcome to Gluten World! 🌟",
+      subject: `Your Free Trial Ends in ${timeLeft} Day${timeLeft !== 1 ? 's' : ''}! 🕐`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #8B5CF6; font-size: 28px; margin: 0;">Welcome to Gluten World! 🌟</h1>
-            <p style="color: #6B7280; font-size: 16px; margin: 10px 0;">Your AI-Powered Recipe Conversion Journey Begins</p>
+            <h1 style="color: #8B5CF6; font-size: 28px; margin: 0;">Don't Miss Out!</h1>
+            <p style="color: #6B7280; font-size: 16px; margin: 10px 0;">Your Gluten World Trial is Ending Soon</p>
           </div>
 
-          <div style="background: linear-gradient(135deg, #F3E8FF 0%, #EDE9FE 100%); padding: 25px; border-radius: 12px; margin-bottom: 25px;">
-            <h2 style="color: #7C3AED; margin: 0 0 15px 0;">Hi ${fullName || 'there'}! 👋</h2>
+          <div style="background: linear-gradient(135deg, #FEF3E2 0%, #FEF9C3 100%); padding: 25px; border-radius: 12px; margin-bottom: 25px;">
+            <h2 style="color: #D97706; margin: 0 0 15px 0;">Hi ${fullName || 'there'}! ⏰</h2>
             <p style="color: #374151; line-height: 1.6; margin: 0;">
-              We're thrilled to have you join our amazing community of gluten-free food enthusiasts! 
-              You're now part of a supportive network where delicious, safe recipes are just a conversation away.
+              Your free trial of Gluten World Premium ends in just ${timeLeft} day${timeLeft !== 1 ? 's' : ''}! 
+              Don't lose access to all the amazing features you've been enjoying.
             </p>
           </div>
 
           <div style="margin-bottom: 25px;">
-            <h3 style="color: #1F2937; margin: 0 0 15px 0;">What's waiting for you:</h3>
+            <h3 style="color: #1F2937; margin: 0 0 15px 0;">What you'll miss without Premium:</h3>
             <ul style="color: #374151; line-height: 1.8; padding-left: 20px;">
-              <li><strong>AI Recipe Assistant:</strong> Convert any recipe to gluten-free in seconds</li>
-              <li><strong>Community Support:</strong> Connect with fellow gluten-free enthusiasts</li>
-              <li><strong>Recipe Library:</strong> Access thousands of tested gluten-free recipes</li>
-              <li><strong>Smart Substitutions:</strong> Get intelligent ingredient recommendations</li>
-              <li><strong>7-Day Free Trial:</strong> Explore all features at no cost</li>
+              <li>Unlimited AI recipe conversions</li>
+              <li>Access to our premium recipe library</li>
+              <li>Priority customer support</li>
+              <li>Advanced meal planning tools</li>
+              <li>Unlimited saved favorites</li>
             </ul>
           </div>
 
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${signInUrl}" 
+            <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'supabase.co')}/subscription" 
                style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); 
                       color: white; 
                       padding: 14px 28px; 
@@ -92,29 +94,25 @@ const handler = async (req: Request): Promise<Response> => {
                       font-size: 16px;
                       display: inline-block;
                       box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
-              Start Your Gluten-Free Journey →
+              Continue with Premium →
             </a>
           </div>
 
           <div style="background: #F9FAFB; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-            <h4 style="color: #1F2937; margin: 0 0 10px 0;">💡 Pro Tip:</h4>
+            <h4 style="color: #1F2937; margin: 0 0 10px 0;">💝 Special Offer:</h4>
             <p style="color: #6B7280; margin: 0; line-height: 1.5;">
-              Start by asking our AI to convert your favorite family recipe! Simply describe the dish, 
-              and we'll provide a complete gluten-free version with ingredient substitutions and cooking tips.
+              Subscribe now and get your first month at a special discount! 
+              Plus, you can cancel anytime if you're not completely satisfied.
             </p>
           </div>
 
           <div style="border-top: 1px solid #E5E7EB; padding-top: 20px; text-align: center;">
             <p style="color: #9CA3AF; font-size: 14px; margin: 0;">
-              Questions? Just reply to this email - we're here to help! 💜
+              Questions about your subscription? Just reply to this email!
             </p>
             <p style="color: #9CA3AF; font-size: 14px; margin: 10px 0 0 0;">
-              Happy cooking,<br>
+              Thanks for being part of Gluten World,<br>
               The Gluten World Team
-            </p>
-            <p style="color: #9CA3AF; font-size: 12px; margin: 20px 0 0 0;">
-              <a href="#" style="color: #9CA3AF; text-decoration: underline;">Unsubscribe</a> | 
-              <a href="#" style="color: #9CA3AF; text-decoration: underline;">Email Preferences</a>
             </p>
           </div>
         </div>
@@ -126,15 +124,15 @@ const handler = async (req: Request): Promise<Response> => {
       await supabaseClient.from("email_logs").insert({
         user_id: userId,
         email: email,
-        email_type: 'welcome',
-        subject: 'Welcome to Gluten World! 🌟',
+        email_type: 'trial_reminder',
+        subject: `Your Free Trial Ends in ${timeLeft} Day${timeLeft !== 1 ? 's' : ''}! 🕐`,
         sent_at: new Date().toISOString(),
         resend_id: emailResponse.data?.id,
         status: 'sent'
       });
     }
 
-    console.log("Welcome email sent successfully:", emailResponse);
+    console.log("Trial reminder email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,
@@ -144,7 +142,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error in send-welcome-email function:", error);
+    console.error("Error in send-trial-reminder function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

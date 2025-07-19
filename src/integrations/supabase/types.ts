@@ -121,6 +121,78 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          email: string
+          email_type: string
+          id: string
+          resend_id: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          email: string
+          email_type: string
+          id?: string
+          resend_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          email?: string
+          email_type?: string
+          id?: string
+          resend_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      email_preferences: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          payment_success: boolean | null
+          subscription_cancelled: boolean | null
+          subscription_updated: boolean | null
+          trial_reminder: boolean | null
+          trial_start: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          payment_success?: boolean | null
+          subscription_cancelled?: boolean | null
+          subscription_updated?: boolean | null
+          trial_reminder?: boolean | null
+          trial_start?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          payment_success?: boolean | null
+          subscription_cancelled?: boolean | null
+          subscription_updated?: boolean | null
+          trial_reminder?: boolean | null
+          trial_start?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           content: string
