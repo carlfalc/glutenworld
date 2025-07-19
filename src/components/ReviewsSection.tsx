@@ -157,7 +157,7 @@ const ReviewsSection = () => {
             <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-bold">⭐</span>
             </div>
-            <span>4.9/5 Average Rating</span>
+            <span>5.0/5 Average Rating</span>
           </div>
         </div>
       </div>
