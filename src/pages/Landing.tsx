@@ -10,6 +10,10 @@ import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import PricingCards from '@/components/PricingCards';
 import ReviewsSection from '@/components/ReviewsSection';
 import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
+import { AboutUsModal } from '@/components/AboutUsModal';
+import { SupportModal } from '@/components/SupportModal';
+import { FAQModal } from '@/components/FAQModal';
+import { PolicyLegalModal } from '@/components/PolicyLegalModal';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -18,6 +22,10 @@ const Landing = () => {
   } = useAuth();
   const [showFeatureDetails, setShowFeatureDetails] = useState(false);
   const [showTrialRestriction, setShowTrialRestriction] = useState(false);
+  const [showAboutUs, setShowAboutUs] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
+  const [showFAQ, setShowFAQ] = useState(false);
+  const [showPolicyLegal, setShowPolicyLegal] = useState(false);
   const { canUseStoreLocator, hasUsedTrial } = useTrialRestriction();
   const handleGetStarted = () => {
     if (user) {
@@ -247,9 +255,152 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-12 border-t border-border/50">
-        <div className="text-center text-muted-foreground">
-          <p>&copy; 2024 Gluten World. Transform your recipes, transform your life.</p>
+      <footer className="container mx-auto px-4 py-16 border-t border-border/50 bg-muted/30">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          {/* About Section */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold text-primary">About Gluten World</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              A global community helping people with gluten intolerance, celiac disease, and food allergies live confidently with AI-powered tools and support.
+            </p>
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-primary hover:text-primary/80"
+              onClick={() => setShowAboutUs(true)}
+            >
+              Learn More About Us →
+            </Button>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold text-primary">Quick Links</h4>
+            <div className="space-y-2">
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={handleGetStarted}
+              >
+                Get Started
+              </Button>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => setShowFAQ(true)}
+              >
+                FAQ
+              </Button>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={handleStoreLocatorTry}
+              >
+                Store Locator
+              </Button>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => navigate('/subscription')}
+              >
+                Pricing
+              </Button>
+            </div>
+          </div>
+
+          {/* Support */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold text-primary">Support</h4>
+            <div className="space-y-2">
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => setShowSupport(true)}
+              >
+                Contact Support
+              </Button>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => window.location.href = 'mailto:glutenworldhelp@gmail.com'}
+              >
+                glutenworldhelp@gmail.com
+              </Button>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => setShowFAQ(true)}
+              >
+                Help Center
+              </Button>
+            </div>
+          </div>
+
+          {/* Legal */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold text-primary">Legal & Policies</h4>
+            <div className="space-y-2">
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => setShowPolicyLegal(true)}
+              >
+                Terms of Service
+              </Button>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => setShowPolicyLegal(true)}
+              >
+                Privacy Policy
+              </Button>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => setShowPolicyLegal(true)}
+              >
+                Refund Policy
+              </Button>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-muted-foreground hover:text-primary block"
+                onClick={() => setShowPolicyLegal(true)}
+              >
+                Liability Disclaimer
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="border-t border-border/50 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-center md:text-left text-muted-foreground">
+              <p>&copy; 2024 Gluten World. Transform your recipes, transform your life.</p>
+            </div>
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowAboutUs(true)}
+              >
+                About Us
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowSupport(true)}
+              >
+                Support
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowFAQ(true)}
+              >
+                FAQ
+              </Button>
+            </div>
+          </div>
         </div>
       </footer>
 
@@ -259,6 +410,10 @@ const Landing = () => {
         onOpenChange={setShowTrialRestriction} 
         featureName="Global Store Locator" 
       />
+      <AboutUsModal open={showAboutUs} onOpenChange={setShowAboutUs} />
+      <SupportModal open={showSupport} onOpenChange={setShowSupport} />
+      <FAQModal open={showFAQ} onOpenChange={setShowFAQ} />
+      <PolicyLegalModal open={showPolicyLegal} onOpenChange={setShowPolicyLegal} />
     </div>;
 };
 
