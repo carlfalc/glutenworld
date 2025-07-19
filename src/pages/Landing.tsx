@@ -14,6 +14,8 @@ import { AboutUsModal } from '@/components/AboutUsModal';
 import { SupportModal } from '@/components/SupportModal';
 import { FAQModal } from '@/components/FAQModal';
 import { PolicyLegalModal } from '@/components/PolicyLegalModal';
+import { GetStartedInfoModal } from '@/components/GetStartedInfoModal';
+import { StoreLocatorInfoModal } from '@/components/StoreLocatorInfoModal';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -26,6 +28,8 @@ const Landing = () => {
   const [showSupport, setShowSupport] = useState(false);
   const [showFAQ, setShowFAQ] = useState(false);
   const [showPolicyLegal, setShowPolicyLegal] = useState(false);
+  const [showGetStartedInfo, setShowGetStartedInfo] = useState(false);
+  const [showStoreLocatorInfo, setShowStoreLocatorInfo] = useState(false);
   const { canUseStoreLocator, hasUsedTrial } = useTrialRestriction();
   const handleGetStarted = () => {
     if (user) {
@@ -279,7 +283,7 @@ const Landing = () => {
               <Button 
                 variant="link" 
                 className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={handleGetStarted}
+                onClick={() => setShowGetStartedInfo(true)}
               >
                 Get Started
               </Button>
@@ -293,7 +297,7 @@ const Landing = () => {
               <Button 
                 variant="link" 
                 className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={handleStoreLocatorTry}
+                onClick={() => setShowStoreLocatorInfo(true)}
               >
                 Store Locator
               </Button>
@@ -414,6 +418,14 @@ const Landing = () => {
       <SupportModal open={showSupport} onOpenChange={setShowSupport} />
       <FAQModal open={showFAQ} onOpenChange={setShowFAQ} />
       <PolicyLegalModal open={showPolicyLegal} onOpenChange={setShowPolicyLegal} />
+      <GetStartedInfoModal 
+        isOpen={showGetStartedInfo} 
+        onClose={() => setShowGetStartedInfo(false)} 
+      />
+      <StoreLocatorInfoModal 
+        isOpen={showStoreLocatorInfo} 
+        onClose={() => setShowStoreLocatorInfo(false)} 
+      />
     </div>;
 };
 
