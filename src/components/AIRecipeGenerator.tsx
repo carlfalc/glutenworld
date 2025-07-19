@@ -88,36 +88,16 @@ export const AIRecipeGenerator = () => {
           Each recipe includes: detailed ingredients, step-by-step instructions, nutritional info, and cooking times.
         </div>
 
-        {/* Access Status Display */}
-        {hasAccess ? (
-          <div className="space-y-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
-            <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold">Premium Access Activated!</span>
-            </div>
-            <p className="text-sm text-green-700 dark:text-green-300">
-              ✨ You now have access to our curated collection of AI-generated gluten-free recipes! Browse them using the category tabs above.
-            </p>
-          </div>
-        ) : null}
-
-        <Button 
-          onClick={handleClick}
-          className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-medium"
-          disabled={loading}
-        >
-          {hasAccess ? (
-            <>
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Access Granted - Browse Recipes Above
-            </>
-          ) : (
-            <>
-              <Lock className="w-4 h-4 mr-2" />
-              Unlock Premium Recipes for $4.99/year
-            </>
-          )}
-        </Button>
+        {!hasAccess && (
+          <Button 
+            onClick={handleClick}
+            className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-medium"
+            disabled={loading}
+          >
+            <Lock className="w-4 h-4 mr-2" />
+            Unlock Premium Recipes for $4.99/year
+          </Button>
+        )}
 
         {/* Temporary fix button - remove this after testing */}
         {!hasAccess && (
