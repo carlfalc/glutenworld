@@ -400,6 +400,7 @@ export type Database = {
           calories_per_serving: number | null
           carbs_g: number | null
           cholesterol_mg: number | null
+          conversion_count: number | null
           converted_recipe: string | null
           cook_time: number | null
           created_at: string
@@ -413,6 +414,7 @@ export type Database = {
           ingredients: Json | null
           instructions: string[] | null
           is_public: boolean | null
+          last_converted_at: string | null
           likes_count: number | null
           original_recipe: string | null
           prep_time: number | null
@@ -430,6 +432,7 @@ export type Database = {
           calories_per_serving?: number | null
           carbs_g?: number | null
           cholesterol_mg?: number | null
+          conversion_count?: number | null
           converted_recipe?: string | null
           cook_time?: number | null
           created_at?: string
@@ -443,6 +446,7 @@ export type Database = {
           ingredients?: Json | null
           instructions?: string[] | null
           is_public?: boolean | null
+          last_converted_at?: string | null
           likes_count?: number | null
           original_recipe?: string | null
           prep_time?: number | null
@@ -460,6 +464,7 @@ export type Database = {
           calories_per_serving?: number | null
           carbs_g?: number | null
           cholesterol_mg?: number | null
+          conversion_count?: number | null
           converted_recipe?: string | null
           cook_time?: number | null
           created_at?: string
@@ -473,6 +478,7 @@ export type Database = {
           ingredients?: Json | null
           instructions?: string[] | null
           is_public?: boolean | null
+          last_converted_at?: string | null
           likes_count?: number | null
           original_recipe?: string | null
           prep_time?: number | null
@@ -729,6 +735,7 @@ export type Database = {
           calories_per_serving: number | null
           carbs_g: number | null
           cholesterol_mg: number | null
+          conversion_count: number | null
           converted_recipe: string | null
           cook_time: number | null
           created_at: string
@@ -741,6 +748,7 @@ export type Database = {
           ingredients: Json | null
           instructions: string[] | null
           is_public: boolean | null
+          last_converted_at: string | null
           original_recipe: string | null
           prep_time: number | null
           protein_g: number | null
@@ -757,6 +765,7 @@ export type Database = {
           calories_per_serving?: number | null
           carbs_g?: number | null
           cholesterol_mg?: number | null
+          conversion_count?: number | null
           converted_recipe?: string | null
           cook_time?: number | null
           created_at?: string
@@ -769,6 +778,7 @@ export type Database = {
           ingredients?: Json | null
           instructions?: string[] | null
           is_public?: boolean | null
+          last_converted_at?: string | null
           original_recipe?: string | null
           prep_time?: number | null
           protein_g?: number | null
@@ -785,6 +795,7 @@ export type Database = {
           calories_per_serving?: number | null
           carbs_g?: number | null
           cholesterol_mg?: number | null
+          conversion_count?: number | null
           converted_recipe?: string | null
           cook_time?: number | null
           created_at?: string
@@ -797,6 +808,7 @@ export type Database = {
           ingredients?: Json | null
           instructions?: string[] | null
           is_public?: boolean | null
+          last_converted_at?: string | null
           original_recipe?: string | null
           prep_time?: number | null
           protein_g?: number | null
@@ -822,6 +834,40 @@ export type Database = {
       get_community_stats: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_most_converted_recipes: {
+        Args: { limit_count?: number }
+        Returns: {
+          id: string
+          title: string
+          original_recipe: string
+          converted_recipe: string
+          ingredients: Json
+          instructions: string[]
+          prep_time: number
+          cook_time: number
+          servings: number
+          difficulty_level: string
+          cuisine_type: string
+          calories_per_serving: number
+          protein_g: number
+          carbs_g: number
+          fat_g: number
+          fiber_g: number
+          sugar_g: number
+          sodium_mg: number
+          cholesterol_mg: number
+          image_url: string
+          average_rating: number
+          rating_count: number
+          conversion_count: number
+          last_converted_at: string
+          created_at: string
+        }[]
+      }
+      increment_recipe_conversion_count: {
+        Args: { recipe_id: string; table_name?: string }
+        Returns: undefined
       }
       start_user_trial: {
         Args: { user_email: string; user_id_param: string }

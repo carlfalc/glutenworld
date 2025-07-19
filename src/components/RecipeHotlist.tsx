@@ -1,10 +1,10 @@
 
 import { TrendingUp, Clock, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { usePublicRecipes } from '@/hooks/useRecipes';
+import { useMostConvertedRecipes } from '@/hooks/useRecipes';
 
 const RecipeHotlist = () => {
-  const { data: hotRecipes = [], isLoading } = usePublicRecipes();
+  const { data: hotRecipes = [], isLoading } = useMostConvertedRecipes();
 
   return (
     <div className="p-4">
@@ -39,8 +39,8 @@ const RecipeHotlist = () => {
                 
                 <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground flex-wrap">
                   <div className="flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    <span>Popular</span>
+                    <TrendingUp className="w-3 h-3" />
+                    <span>{recipe.conversion_count} conversions</span>
                   </div>
                   {recipe.cook_time && (
                     <div className="flex items-center gap-1">

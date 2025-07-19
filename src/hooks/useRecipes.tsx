@@ -30,6 +30,8 @@ export interface Recipe {
   image_url?: string;
   average_rating?: number;
   rating_count?: number;
+  conversion_count?: number;
+  last_converted_at?: string;
 }
 
 export const useRecipes = () => {
@@ -139,5 +141,18 @@ export const useDeleteRecipe = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
     },
+  });
+};
+
+// Hook to get most converted recipes (hotlist)
+export const useMostConvertedRecipes = () => {
+  return useQuery({
+    queryKey: ['most-converted-recipes'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_most_converted_recipes', { limit_count: 10 });
+      if (error) throw error;
+      return data as Recipe[];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
