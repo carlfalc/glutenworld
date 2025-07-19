@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock, Info, MapPin, Globe, ExternalLink } from 'lucide-react';
 import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import PricingCards from '@/components/PricingCards';
+import ReviewsSection from '@/components/ReviewsSection';
 import { AIRecipeGenerator } from '@/components/AIRecipeGenerator';
+
 const Landing = () => {
   const navigate = useNavigate();
   const {
@@ -37,6 +39,7 @@ const Landing = () => {
       setShowTrialRestriction(true);
     }
   };
+
   const features = [{
     icon: <ChefHat className="w-8 h-8 text-gluten-primary" />,
     title: "Recipe Conversion",
@@ -79,6 +82,7 @@ const Landing = () => {
     description: "Get started in minutes with our intuitive interface and step-by-step guidance",
     highlight: "No learning curve"
   }];
+
    return <div className="min-h-screen bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
       {/* Header */}
       <header className="container mx-auto px-4 py-6 flex items-center justify-between">
@@ -206,6 +210,9 @@ const Landing = () => {
          </div>
       </section>
 
+      {/* Reviews Section */}
+      <ReviewsSection />
+
       {/* AI Recipe Generator Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
@@ -253,4 +260,5 @@ const Landing = () => {
       />
     </div>;
 };
+
 export default Landing;
