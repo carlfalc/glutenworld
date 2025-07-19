@@ -139,7 +139,7 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
                 <div className="space-y-4 text-muted-foreground">
                   <h4 className="font-semibold text-foreground mb-3">Free Trial Period</h4>
                   <p>
-                    New users receive a 7-day free trial of premium features. No credit card is required to start the trial. You can cancel anytime during the trial period with no charges applied to your account.
+                    New users receive a 5-day free trial of premium features. No credit card is required to start the trial. You can cancel anytime during the trial period with no charges applied to your account.
                   </p>
 
                   <h4 className="font-semibold text-foreground mt-6 mb-3">Subscription Refunds</h4>

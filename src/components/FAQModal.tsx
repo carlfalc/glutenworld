@@ -119,7 +119,7 @@ export const FAQModal = ({ open, onOpenChange }: FAQModalProps) => {
                 Is there a free trial available?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
-                Yes! New users get a 7-day free trial of premium features. No credit card required to start. During the trial, you have full access to all premium features. You can cancel anytime before the trial ends with no charges.
+                Yes! New users get a 5-day free trial of premium features. No credit card required to start. During the trial, you have full access to all premium features. You can cancel anytime before the trial ends with no charges.
               </AccordionContent>
             </AccordionItem>
 
