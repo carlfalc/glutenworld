@@ -72,6 +72,14 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
   ];
 
   const handleSubscribe = (planId: 'trial' | 'quarterly' | 'annual') => {
+    console.log('PricingCards: Subscribing to plan:', planId);
+    
+    // Store the plan selection with enhanced logging
+    localStorage.setItem('selectedPlan', planId);
+    sessionStorage.setItem('selectedPlan', planId);
+    console.log('PricingCards: Stored plan in localStorage and sessionStorage');
+    
+    // Create checkout session
     createCheckout(planId);
   };
 

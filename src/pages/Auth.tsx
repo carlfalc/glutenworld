@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { ChefHat, Sparkles, Check } from 'lucide-react';
+import { ChefHat, Sparkles, Check, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import AddressForm from '@/components/AddressForm';
 import ForgotPasswordModal from '@/components/ForgotPasswordModal';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -31,21 +33,43 @@ const Auth = () => {
   
   // Get the default tab from URL parameters
   const defaultTab = searchParams.get('tab') || 'signin';
+  const errorParam = searchParams.get('error');
+  
+  // Check for stored plan on component mount
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check for stored plan in multiple locations
+    const storedPlan = localStorage.getItem('selectedPlan') || 
+                      sessionStorage.getItem('selectedPlan') ||
+                      searchParams.get('plan');
+    
+    if (storedPlan) {
+      setSelectedPlan(storedPlan);
+      console.log('Auth page detected stored plan:', storedPlan);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (user) {
-      // Check if user was redirected here for a specific plan
-      const selectedPlan = localStorage.getItem('selectedPlan');
-      if (selectedPlan) {
-        console.log('User authenticated with stored plan, will be handled by AuthContext');
-      }
+      console.log('User authenticated, navigating to dashboard');
       navigate('/dashboard');
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    // Handle error parameter
+    if (errorParam === 'checkout_failed') {
+      toast({
+        title: "Checkout Error",
+        description: "There was an issue processing your subscription. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [errorParam, toast]);
+
   const saveUserAddress = async (userId: string) => {
     try {
-      // Only save if we have meaningful data (at least country)
       if (country) {
         const { error } = await supabase
           .from('user_addresses')
@@ -60,7 +84,6 @@ const Auth = () => {
 
         if (error) {
           console.error('Error saving user address:', error);
-          // Don't throw error here as we don't want to block signup for address issues
         }
       }
     } catch (error) {
@@ -82,7 +105,6 @@ const Auth = () => {
       });
     } catch (error) {
       console.error('Error sending welcome email:', error);
-      // Don't show error to user as email is not critical for signup
     }
   };
 
@@ -90,9 +112,11 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    console.log('Handling sign in for:', email);
     const { error } = await signIn(email, password);
     
     if (error) {
+      console.error('Sign in error:', error);
       toast({
         title: "Error signing in",
         description: error.message,
@@ -112,34 +136,21 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Country is optional, no validation needed for address fields
-    // if (!streetAddress || !city || !postalCode) {
-    //   toast({
-    //     title: "Address required",
-    //     description: "Please fill in all address fields to continue.",
-    //     variant: "destructive",
-    //   });
-    //   setLoading(false);
-    //   return;
-    // }
-
+    console.log('Handling sign up for:', email);
     const { error } = await signUp(email, password, fullName);
     
     if (error) {
+      console.error('Sign up error:', error);
       toast({
         title: "Error creating account",
         description: error.message,
         variant: "destructive",
       });
     } else {
-      // Get the user data to save address
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        // Save address information
         await saveUserAddress(user.id);
-        
-        // Send welcome email
         await sendWelcomeEmail(email, fullName);
       }
 
@@ -154,10 +165,12 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    console.log('Handling Google sign in');
     
     const { error } = await signInWithGoogle();
     
     if (error) {
+      console.error('Google sign in error:', error);
       toast({
         title: "Error signing in with Google",
         description: error.message,
@@ -244,6 +257,15 @@ const Auth = () => {
             <p className="text-muted-foreground">
               Start your gluten-free journey today
             </p>
+            {selectedPlan && (
+              <Alert className="mt-4 border-blue-500 bg-blue-50">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  You're signing up for the <strong>{selectedPlan}</strong> plan. 
+                  After authentication, you'll be redirected to complete your subscription.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
           <Card className="bg-card/50 backdrop-blur-sm border-border/50">

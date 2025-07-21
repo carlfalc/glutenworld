@@ -80,22 +80,29 @@ export const useSubscription = () => {
   };
 
   const createCheckout = async (plan: 'trial' | 'quarterly' | 'annual') => {
+    console.log('useSubscription: Creating checkout for plan:', plan);
+    
     if (!user || !session) {
-      // Store the selected plan to continue after authentication
+      // Enhanced plan storage with multiple fallbacks
       localStorage.setItem('selectedPlan', plan);
-      console.log('User not authenticated, storing plan and redirecting:', plan);
+      sessionStorage.setItem('selectedPlan', plan);
+      console.log('useSubscription: User not authenticated, storing plan and redirecting:', plan);
+      
       toast({
         title: "Sign Up Required",
         description: `Please sign up to start your ${plan === 'trial' ? 'free trial' : plan + ' subscription'}.`,
         variant: "default",
       });
-      // Redirect to auth page with signup tab
-      window.location.href = '/auth?tab=signup';
+      
+      // Redirect to auth page with signup tab and plan parameter
+      const authUrl = `/auth?tab=signup&plan=${plan}`;
+      console.log('useSubscription: Redirecting to:', authUrl);
+      window.location.href = authUrl;
       return;
     }
 
     try {
-      console.log('Creating checkout session for plan:', plan);
+      console.log('useSubscription: Creating checkout session for authenticated user');
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { plan },
         headers: {
@@ -109,8 +116,9 @@ export const useSubscription = () => {
       }
 
       if (data?.url) {
-        // Open Stripe checkout in a new tab
-        window.open(data.url, '_blank');
+        console.log('useSubscription: Redirecting to Stripe checkout:', data.url);
+        // Open Stripe checkout in same window for better UX
+        window.location.href = data.url;
         
         // Refresh subscription data after successful checkout setup
         setTimeout(() => {
@@ -151,8 +159,8 @@ export const useSubscription = () => {
       }
 
       if (data?.url) {
-        // Open customer portal in a new tab
-        window.open(data.url, '_blank');
+        // Open customer portal in same window
+        window.location.href = data.url;
       }
     } catch (error) {
       console.error('Failed to open customer portal:', error);
