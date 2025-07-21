@@ -16,7 +16,6 @@ import { FAQModal } from '@/components/FAQModal';
 import { PolicyLegalModal } from '@/components/PolicyLegalModal';
 import { GetStartedInfoModal } from '@/components/GetStartedInfoModal';
 import { StoreLocatorInfoModal } from '@/components/StoreLocatorInfoModal';
-
 const Landing = () => {
   const navigate = useNavigate();
   const {
@@ -30,7 +29,10 @@ const Landing = () => {
   const [showPolicyLegal, setShowPolicyLegal] = useState(false);
   const [showGetStartedInfo, setShowGetStartedInfo] = useState(false);
   const [showStoreLocatorInfo, setShowStoreLocatorInfo] = useState(false);
-  const { canUseStoreLocator, hasUsedTrial } = useTrialRestriction();
+  const {
+    canUseStoreLocator,
+    hasUsedTrial
+  } = useTrialRestriction();
   const handleGetStarted = () => {
     if (user) {
       navigate('/dashboard');
@@ -43,7 +45,6 @@ const Landing = () => {
   const handleSignIn = () => {
     navigate('/auth?tab=signin');
   };
-
   const handleStoreLocatorTry = () => {
     if (canUseStoreLocator()) {
       navigate('/store-locator');
@@ -51,7 +52,6 @@ const Landing = () => {
       setShowTrialRestriction(true);
     }
   };
-
   const features = [{
     icon: <ChefHat className="w-8 h-8 text-gluten-primary" />,
     title: "Recipe Conversion",
@@ -94,8 +94,7 @@ const Landing = () => {
     description: "Get started in minutes with our intuitive interface and step-by-step guidance",
     highlight: "No learning curve"
   }];
-
-   return <div className="min-h-screen bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
+  return <div className="min-h-screen bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
       {/* Header */}
       <header className="container mx-auto px-4 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -104,10 +103,7 @@ const Landing = () => {
             <Sparkles className="w-6 h-6 text-gluten-secondary" />
           </div>
           <div>
-            <h1 
-              className="text-2xl font-bold text-foreground hover:text-gluten-primary cursor-pointer transition-colors duration-200"
-              onClick={() => setShowFeatureDetails(true)}
-            >
+            <h1 className="text-2xl font-bold text-foreground hover:text-gluten-primary cursor-pointer transition-colors duration-200" onClick={() => setShowFeatureDetails(true)}>
               Gluten World
             </h1>
             <p className="text-sm text-muted-foreground">Transform your recipes, transform your life.</p>
@@ -134,7 +130,7 @@ const Landing = () => {
             <br />
             <span className="text-foreground">& <span className="text-blue-600">Scan Labels</span> to Get Precise Information</span>
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Navigate the tricky world of Gluten-laden & Allergen products with confidence. You can scan ingedient labels that will quickly illustrate whether the product is GF/VEGAN/VEGETARIAN/ DAIRY FREE 😊 'GlutenConvert' converts your favorite recipes uploaded without gluten & our 'Recipe Creator' - Creates recipes that don't contain gluten, making your favorite dishes accessible and delicious.</p>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Navigate the tricky world of Gluten-laden & Allergen products with confidence. You can scan ingedient labels that will quickly illustrate whether the product is GF/VEGAN/VEGETARIAN/ DAIRY FREE 😊 'Convert Glutent AI' Converts your favorite recipes uploaded without gluten & our 'Recipe Creator' - Creates recipes that don't contain gluten, making your favorite dishes accessible and delicious.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" onClick={handleGetStarted} className="bg-gluten-primary hover:bg-gluten-primary/90 text-lg px-8 py-4">
               Start Free Trial
@@ -201,13 +197,11 @@ const Landing = () => {
         
          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
            {features.map((feature, index) => <Card key={index} className={`text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50 ${index === 2 ? 'ring-2 ring-blue-500 border-blue-500/50' : index === 4 ? 'ring-2 ring-blue-500 border-blue-500/50' : ''} relative`}>
-               {(index === 2 || index === 4) && (
-                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+               {(index === 2 || index === 4) && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                    <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
                      {index === 2 ? 'Premium Feature' : 'Our Most Popular Feature'}
                    </div>
-                 </div>
-               )}
+                 </div>}
                <CardHeader>
                  <div className="mx-auto mb-4 p-3 bg-gluten-primary/10 rounded-full w-fit">
                    {feature.icon}
@@ -267,11 +261,7 @@ const Landing = () => {
             <p className="text-sm text-muted-foreground leading-relaxed">
               A global community helping people with gluten intolerance, celiac disease, and food allergies live confidently with AI-powered tools and support.
             </p>
-            <Button 
-              variant="link" 
-              className="p-0 h-auto text-primary hover:text-primary/80"
-              onClick={() => setShowAboutUs(true)}
-            >
+            <Button variant="link" className="p-0 h-auto text-primary hover:text-primary/80" onClick={() => setShowAboutUs(true)}>
               Learn More About Us →
             </Button>
           </div>
@@ -280,32 +270,16 @@ const Landing = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-primary">Quick Links</h4>
             <div className="space-y-2">
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowGetStartedInfo(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowGetStartedInfo(true)}>
                 Get Started
               </Button>
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowFAQ(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowFAQ(true)}>
                 FAQ
               </Button>
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowStoreLocatorInfo(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowStoreLocatorInfo(true)}>
                 Store Locator
               </Button>
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => navigate('/subscription')}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => navigate('/subscription')}>
                 Pricing
               </Button>
             </div>
@@ -315,25 +289,13 @@ const Landing = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-primary">Support</h4>
             <div className="space-y-2">
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowSupport(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowSupport(true)}>
                 Contact Support
               </Button>
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => window.location.href = 'mailto:glutenworldhelp@gmail.com'}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => window.location.href = 'mailto:glutenworldhelp@gmail.com'}>
                 glutenworldhelp@gmail.com
               </Button>
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowFAQ(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowFAQ(true)}>
                 Help Center
               </Button>
             </div>
@@ -343,32 +305,16 @@ const Landing = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-primary">Legal & Policies</h4>
             <div className="space-y-2">
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowPolicyLegal(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
                 Terms of Service
               </Button>
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowPolicyLegal(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
                 Privacy Policy
               </Button>
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowPolicyLegal(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
                 Refund Policy
               </Button>
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-muted-foreground hover:text-primary block"
-                onClick={() => setShowPolicyLegal(true)}
-              >
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
                 Liability Disclaimer
               </Button>
             </div>
@@ -382,25 +328,13 @@ const Landing = () => {
               <p>&copy; 2024 Gluten World. Transform your recipes, transform your life.</p>
             </div>
             <div className="flex gap-4">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowAboutUs(true)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setShowAboutUs(true)}>
                 About Us
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowSupport(true)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setShowSupport(true)}>
                 Support
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowFAQ(true)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setShowFAQ(true)}>
                 FAQ
               </Button>
             </div>
@@ -409,24 +343,13 @@ const Landing = () => {
       </footer>
 
       <FeatureDetailsPopup open={showFeatureDetails} onOpenChange={setShowFeatureDetails} isFromLanding={true} onStartScanning={handleGetStarted} />
-      <TrialRestrictionModal 
-        open={showTrialRestriction} 
-        onOpenChange={setShowTrialRestriction} 
-        featureName="Global Store Locator" 
-      />
+      <TrialRestrictionModal open={showTrialRestriction} onOpenChange={setShowTrialRestriction} featureName="Global Store Locator" />
       <AboutUsModal open={showAboutUs} onOpenChange={setShowAboutUs} />
       <SupportModal open={showSupport} onOpenChange={setShowSupport} />
       <FAQModal open={showFAQ} onOpenChange={setShowFAQ} />
       <PolicyLegalModal open={showPolicyLegal} onOpenChange={setShowPolicyLegal} />
-      <GetStartedInfoModal 
-        isOpen={showGetStartedInfo} 
-        onClose={() => setShowGetStartedInfo(false)} 
-      />
-      <StoreLocatorInfoModal 
-        isOpen={showStoreLocatorInfo} 
-        onClose={() => setShowStoreLocatorInfo(false)} 
-      />
+      <GetStartedInfoModal isOpen={showGetStartedInfo} onClose={() => setShowGetStartedInfo(false)} />
+      <StoreLocatorInfoModal isOpen={showStoreLocatorInfo} onClose={() => setShowStoreLocatorInfo(false)} />
     </div>;
 };
-
 export default Landing;
