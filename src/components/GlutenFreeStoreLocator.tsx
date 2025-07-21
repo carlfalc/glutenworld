@@ -9,7 +9,7 @@ import { Loader2, MapPin, Star, ExternalLink, Search, Navigation, Globe, Heart }
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTrialManagement } from '@/hooks/useTrialManagement';
+import { useTrialRestriction } from '@/hooks/useTrialRestriction';
 
 interface Store {
   id: string;
@@ -79,7 +79,7 @@ const GlutenFreeStoreLocator = () => {
   const [lastSearchParams, setLastSearchParams] = useState<any>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-  const { canAccessFeatures, getFeatureStatus } = useTrialManagement();
+  const { canUseStoreLocator, markStoreLocatorUsed } = useTrialRestriction();
 
   // Load saved default country on component mount
   useEffect(() => {
@@ -116,6 +116,16 @@ const GlutenFreeStoreLocator = () => {
       toast({
         title: "Search Required",
         description: "Please enter what type of gluten-free business you're looking for",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check trial restriction for new searches (not for loading more results)
+    if (!loadMore && !canUseStoreLocator()) {
+      toast({
+        title: "Trial Used",
+        description: "You've already used your free search. Sign up to continue using our premium features!",
         variant: "destructive",
       });
       return;
@@ -161,7 +171,10 @@ const GlutenFreeStoreLocator = () => {
       setTotalAvailable(result.totalAvailable || 0);
       setCurrentOffset(offset);
       
-      // Trial access is now handled by the new trial management system
+      // Mark trial as used for first search by unauthenticated users
+      if (isNewSearch && !user) {
+        markStoreLocatorUsed();
+      }
       
       toast({
         title: isNewSearch ? "Search Complete" : "More Results Loaded",
@@ -187,6 +200,16 @@ const GlutenFreeStoreLocator = () => {
       toast({
         title: "Search Required",
         description: "Please enter what type of gluten-free business you're looking for",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check trial restriction
+    if (!canUseStoreLocator()) {
+      toast({
+        title: "Trial Used",
+        description: "You've already used your free search. Sign up to continue using our premium features!",
         variant: "destructive",
       });
       return;
@@ -230,7 +253,10 @@ const GlutenFreeStoreLocator = () => {
           setCurrentOffset(0);
           setLastSearchParams(searchParams);
           
-          // Trial access is now handled by the new trial management system
+          // Mark trial as used for unauthenticated users
+          if (!user) {
+            markStoreLocatorUsed();
+          }
           
           toast({
             title: "Search Complete",
