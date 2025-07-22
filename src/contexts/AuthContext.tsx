@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('selectedPlan');
       sessionStorage.removeItem('selectedPlan');
       
-      // Proceed with checkout for the stored plan
+      // Proceed with checkout for the stored plan immediately
       try {
         console.log('Creating checkout session for plan:', selectedPlan);
         const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -126,22 +126,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (error) {
           console.error('Error creating checkout after authentication:', error);
-          // Show user-friendly error message
-          if (window.location.pathname !== '/subscription') {
-            window.location.href = '/subscription?error=checkout_failed';
-          }
+          window.location.href = '/subscription?error=checkout_failed';
         } else if (data?.url) {
           console.log('Redirecting to checkout URL:', data.url);
-          // Open Stripe checkout in same window for better UX
+          // Immediately redirect to Stripe checkout
           window.location.href = data.url;
         }
       } catch (error) {
         console.error('Failed to create checkout after authentication:', error);
-        // Redirect to subscription page with error
-        if (window.location.pathname !== '/subscription') {
-          window.location.href = '/subscription?error=checkout_failed';
-        }
+        window.location.href = '/subscription?error=checkout_failed';
       }
+    } else {
+      // No stored plan, check if user has active subscription/trial
+      checkUserAccess(session);
+    }
+  };
+
+  const checkUserAccess = async (session: Session) => {
+    try {
+      const { data } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
+      // If user doesn't have subscription or trial, redirect to subscription page
+      if (!data?.subscribed && !data?.is_trialing) {
+        console.log('User has no active subscription or trial, redirecting to subscription page');
+        window.location.href = '/subscription?message=subscription_required';
+      }
+    } catch (error) {
+      console.error('Failed to check user access:', error);
+      // On error, redirect to subscription page to be safe
+      window.location.href = '/subscription?message=subscription_required';
     }
   };
 
@@ -191,21 +208,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('Google sign in attempt');
     
     // Store plan in multiple locations for better reliability
-    const selectedPlan = localStorage.getItem('selectedPlan');
-    if (selectedPlan) {
-      sessionStorage.setItem('selectedPlan', selectedPlan);
-      console.log('Stored plan in sessionStorage for Google OAuth:', selectedPlan);
-    }
+    const selectedPlan = localStorage.getItem('selectedPlan') || 'trial'; // Default to trial
+    sessionStorage.setItem('selectedPlan', selectedPlan);
+    console.log('Stored plan in sessionStorage for Google OAuth:', selectedPlan);
     
-    // Use dashboard as redirect URL for consistency
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    // Always redirect to auth page after Google OAuth to handle checkout flow
+    const redirectUrl = `${window.location.origin}/auth?oauth_return=true&plan=${selectedPlan}`;
     console.log('Google OAuth redirect URL:', redirectUrl);
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
-        queryParams: selectedPlan ? { plan: selectedPlan } : undefined,
+        queryParams: { plan: selectedPlan },
       },
     });
     

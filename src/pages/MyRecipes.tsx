@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import FavoriteButton from '@/components/FavoriteButton';
 import SimpleRecipeModal from '@/components/SimpleRecipeModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,8 +36,9 @@ const MyRecipes = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gluten-primary/5 via-background to-gluten-secondary/5">
-      <Header />
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-gluten-primary/5 via-background to-gluten-secondary/5">
+        <Header />
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -321,15 +323,16 @@ const MyRecipes = () => {
         </Tabs>
       </div>
 
-      <SimpleRecipeModal
-        recipe={selectedRecipe}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedRecipe(null);
-        }}
-      />
-    </div>
+        <SimpleRecipeModal
+          recipe={selectedRecipe}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedRecipe(null);
+          }}
+        />
+      </div>
+    </ProtectedRoute>
   );
 };
 

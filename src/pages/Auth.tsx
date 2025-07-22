@@ -51,11 +51,19 @@ const Auth = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    if (user) {
+    // Handle OAuth return with immediate checkout redirect
+    const isOAuthReturn = searchParams.get('oauth_return') === 'true';
+    const planFromUrl = searchParams.get('plan');
+    
+    if (user && isOAuthReturn && planFromUrl) {
+      console.log('OAuth return detected, redirecting to checkout immediately');
+      // Don't navigate to dashboard, let the auth context handle checkout redirect
+      return;
+    } else if (user && !isOAuthReturn) {
       console.log('User authenticated, navigating to dashboard');
       navigate('/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, navigate, searchParams]);
 
   useEffect(() => {
     // Handle error parameter

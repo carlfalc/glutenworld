@@ -1,26 +1,49 @@
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import SubscriptionStatus from '@/components/SubscriptionStatus';
 import EmailPreferences from '@/components/EmailPreferences';
 import PricingCards from '@/components/PricingCards';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Subscription = () => {
   const { user, loading: authLoading } = useAuth();
   const { subscribed } = useSubscription();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  const message = searchParams.get('message');
+  const error = searchParams.get('error');
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (message === 'subscription_required') {
+      toast({
+        title: "Subscription Required",
+        description: "You need to complete your subscription to access this feature.",
+        variant: "destructive",
+      });
+    } else if (error === 'checkout_failed') {
+      toast({
+        title: "Checkout Error",
+        description: "There was an issue with the checkout process. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [message, error, toast]);
 
   if (authLoading) {
     return (
@@ -42,10 +65,29 @@ const Subscription = () => {
       <Header />
       
       <div className="container mx-auto px-4 py-8">
+        {/* Alert Messages */}
+        {message === 'subscription_required' && (
+          <Alert className="mb-6 border-amber-500 bg-amber-50 dark:bg-amber-900/20">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              You need an active subscription to access premium features. Please choose a plan below to continue.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {error === 'checkout_failed' && (
+          <Alert className="mb-6 border-red-500 bg-red-50 dark:bg-red-900/20">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              There was an issue with the checkout process. Please try selecting a plan again.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="mb-6">
           <Button
             variant="ghost"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/')}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

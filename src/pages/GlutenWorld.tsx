@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useCommunityPosts, useCommunityStats, useCommunityCategories, useLikePost } from '@/hooks/useCommunity';
 import { CommunityPostCard } from '@/components/CommunityPostCard';
 import { CreatePostModal } from '@/components/CreatePostModal';
@@ -40,7 +41,8 @@ const GlutenWorld = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
@@ -272,11 +274,12 @@ const GlutenWorld = () => {
         isOpen={showCreatePost} 
         onClose={() => setShowCreatePost(false)} 
       />
-      <UserProfileModal 
-        isOpen={showProfile} 
-        onClose={() => setShowProfile(false)} 
-      />
-    </div>
+        <UserProfileModal 
+          isOpen={showProfile} 
+          onClose={() => setShowProfile(false)} 
+        />
+      </div>
+    </ProtectedRoute>
   );
 };
 
