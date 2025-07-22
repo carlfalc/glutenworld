@@ -34,6 +34,7 @@ export const useSubscription = () => {
     }
 
     try {
+      console.log('useSubscription: Checking subscription status for user:', user.email);
       setSubscriptionData(prev => ({ ...prev, loading: true }));
       
       const { data, error } = await supabase.functions.invoke('check-subscription', {
@@ -43,7 +44,7 @@ export const useSubscription = () => {
       });
 
       if (error) {
-        console.error('Error checking subscription:', error);
+        console.error('useSubscription: Error checking subscription:', error);
         setSubscriptionData({
           subscribed: false,
           subscription_tier: null,
@@ -56,6 +57,7 @@ export const useSubscription = () => {
         return;
       }
 
+      console.log('useSubscription: Subscription data received:', data);
       setSubscriptionData({
         subscribed: data?.subscribed || false,
         subscription_tier: data?.subscription_tier || null,
@@ -66,7 +68,7 @@ export const useSubscription = () => {
         loading: false,
       });
     } catch (error) {
-      console.error('Failed to check subscription:', error);
+      console.error('useSubscription: Failed to check subscription:', error);
       setSubscriptionData({
         subscribed: false,
         subscription_tier: null,
@@ -83,10 +85,11 @@ export const useSubscription = () => {
     console.log('useSubscription: Creating checkout for plan:', plan);
     
     if (!user || !session) {
+      console.log('useSubscription: User not authenticated, storing plan and redirecting:', plan);
+      
       // Enhanced plan storage with multiple fallbacks
       localStorage.setItem('selectedPlan', plan);
       sessionStorage.setItem('selectedPlan', plan);
-      console.log('useSubscription: User not authenticated, storing plan and redirecting:', plan);
       
       toast({
         title: "Sign Up Required",
@@ -103,6 +106,7 @@ export const useSubscription = () => {
 
     try {
       console.log('useSubscription: Creating checkout session for authenticated user');
+      
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { plan },
         headers: {
@@ -111,27 +115,29 @@ export const useSubscription = () => {
       });
 
       if (error) {
-        console.error('Error creating checkout:', error);
+        console.error('useSubscription: Error creating checkout:', error);
         throw error;
       }
 
       if (data?.url) {
         console.log('useSubscription: Redirecting to Stripe checkout:', data.url);
-        // Open Stripe checkout in same window for better UX
+        // Open Stripe checkout in same window for better mobile experience
         window.location.href = data.url;
-        
-        // Refresh subscription data after successful checkout setup
-        setTimeout(() => {
-          checkSubscription();
-        }, 1000);
+      } else {
+        throw new Error('No checkout URL received');
       }
     } catch (error) {
-      console.error('Failed to create checkout:', error);
+      console.error('useSubscription: Failed to create checkout:', error);
       toast({
         title: "Checkout Failed",
-        description: "Unable to create checkout session. Please try again.",
+        description: "Unable to start the checkout process. Please try again or refresh the page.",
         variant: "destructive",
       });
+      
+      // Clear any processing state
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     }
   };
 
@@ -146,7 +152,7 @@ export const useSubscription = () => {
     }
 
     try {
-      console.log('Opening customer portal...');
+      console.log('useSubscription: Opening customer portal...');
       const { data, error } = await supabase.functions.invoke('customer-portal', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -154,19 +160,21 @@ export const useSubscription = () => {
       });
 
       if (error) {
-        console.error('Error opening customer portal:', error);
+        console.error('useSubscription: Error opening customer portal:', error);
         throw error;
       }
 
       if (data?.url) {
-        // Open customer portal in same window
+        console.log('useSubscription: Redirecting to customer portal:', data.url);
         window.location.href = data.url;
+      } else {
+        throw new Error('No portal URL received');
       }
     } catch (error) {
-      console.error('Failed to open customer portal:', error);
+      console.error('useSubscription: Failed to open customer portal:', error);
       toast({
         title: "Portal Access Failed",
-        description: "Unable to access customer portal. Please try again.",
+        description: "Unable to access the customer portal. Please try again.",
         variant: "destructive",
       });
     }
