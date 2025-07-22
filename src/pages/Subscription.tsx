@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Subscription = () => {
   const { user, loading: authLoading } = useAuth();
-  const { subscribed, is_trialing } = useSubscription();
+  const { subscribed, is_trialing, loading: subscriptionLoading } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -24,12 +24,15 @@ const Subscription = () => {
   const error = searchParams.get('error');
 
   useEffect(() => {
+    // Only redirect if auth is loaded and user is definitely not authenticated
     if (!authLoading && !user) {
-      navigate('/auth');
+      console.log('Subscription: User not authenticated, redirecting to auth');
+      navigate('/auth', { replace: true });
     }
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
+    // Handle URL messages
     if (message === 'subscription_required') {
       toast({
         title: "Complete Your Subscription",
@@ -43,8 +46,17 @@ const Subscription = () => {
         variant: "destructive",
       });
     }
+
+    // Clean up URL parameters after showing messages
+    if (message || error) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('message');
+      url.searchParams.delete('error');
+      window.history.replaceState({}, '', url.toString());
+    }
   }, [message, error, toast]);
 
+  // Show loading while auth is loading
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -56,6 +68,7 @@ const Subscription = () => {
     );
   }
 
+  // Don't render anything if user is not authenticated (will redirect)
   if (!user) {
     return null;
   }
@@ -90,7 +103,7 @@ const Subscription = () => {
         <div className="flex flex-col space-y-4">
           <Button
             variant="ghost"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/', { replace: true })}
             className="self-start"
             size="sm"
           >
@@ -222,7 +235,7 @@ const Subscription = () => {
                     }
                   </p>
                   <Button 
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/', { replace: true })}
                     className="mt-2 bg-green-600 hover:bg-green-700 text-white"
                   >
                     Start Using Gluten World

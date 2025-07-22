@@ -87,9 +87,13 @@ export const useSubscription = () => {
     if (!user || !session) {
       console.log('useSubscription: User not authenticated, storing plan and redirecting:', plan);
       
-      // Enhanced plan storage with multiple fallbacks
-      localStorage.setItem('selectedPlan', plan);
-      sessionStorage.setItem('selectedPlan', plan);
+      // Store plan with mobile-safe approach
+      try {
+        localStorage.setItem('selectedPlan', plan);
+        sessionStorage.setItem('selectedPlan', plan);
+      } catch (e) {
+        console.warn('Storage not available, using URL parameter fallback');
+      }
       
       toast({
         title: "Sign Up Required",
@@ -97,10 +101,10 @@ export const useSubscription = () => {
         variant: "default",
       });
       
-      // Redirect to auth page with signup tab and plan parameter
+      // Use replace to avoid back button issues on mobile
       const authUrl = `/auth?tab=signup&plan=${plan}`;
       console.log('useSubscription: Redirecting to:', authUrl);
-      window.location.href = authUrl;
+      window.location.replace(authUrl);
       return;
     }
 
@@ -121,8 +125,8 @@ export const useSubscription = () => {
 
       if (data?.url) {
         console.log('useSubscription: Redirecting to Stripe checkout:', data.url);
-        // Open Stripe checkout in same window for better mobile experience
-        window.location.href = data.url;
+        // Use replace for better mobile experience and to prevent back button issues
+        window.location.replace(data.url);
       } else {
         throw new Error('No checkout URL received');
       }
@@ -130,13 +134,14 @@ export const useSubscription = () => {
       console.error('useSubscription: Failed to create checkout:', error);
       toast({
         title: "Checkout Failed",
-        description: "Unable to start the checkout process. Please try again or refresh the page.",
+        description: "Unable to start the checkout process. Please try again.",
         variant: "destructive",
       });
       
-      // Clear any processing state
+      // Avoid infinite loops by not auto-reloading
       setTimeout(() => {
-        window.location.reload();
+        // Just show error state, don't reload
+        setSubscriptionData(prev => ({ ...prev, loading: false }));
       }, 2000);
     }
   };
@@ -166,7 +171,8 @@ export const useSubscription = () => {
 
       if (data?.url) {
         console.log('useSubscription: Redirecting to customer portal:', data.url);
-        window.location.href = data.url;
+        // Open customer portal in same window but use replace for mobile
+        window.location.replace(data.url);
       } else {
         throw new Error('No portal URL received');
       }

@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, Clock, CreditCard } from 'lucide-react';
+import { Shield, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
@@ -23,27 +24,30 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [hasCheckedAccess, setHasCheckedAccess] = useState(false);
 
   useEffect(() => {
+    // Only proceed when both auth and subscription loading are complete
     if (!authLoading && !subscriptionLoading) {
       setHasCheckedAccess(true);
       
       if (!user) {
+        console.log('ProtectedRoute: User not authenticated');
         toast({
           title: "Authentication Required",
           description: "Please sign in to access this feature.",
           variant: "default",
         });
-        navigate('/auth');
+        navigate('/auth', { replace: true });
         return;
       }
 
       // Check if user has active subscription or trial
       if (!subscribed && !is_trialing) {
+        console.log('ProtectedRoute: User lacks subscription access');
         toast({
           title: "Subscription Required",
           description: "You need an active subscription to access this feature.",
           variant: "destructive",
         });
-        navigate(redirectTo);
+        navigate(redirectTo, { replace: true });
         return;
       }
     }
@@ -75,7 +79,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           </CardHeader>
           <CardContent className="text-center">
             <Button 
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/auth', { replace: true })}
               className="w-full bg-gluten-primary hover:bg-gluten-primary/90"
             >
               Sign In
@@ -103,7 +107,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               Complete your subscription to continue using Gluten World
             </p>
             <Button 
-              onClick={() => navigate('/subscription')}
+              onClick={() => navigate('/subscription', { replace: true })}
               className="w-full bg-gluten-primary hover:bg-gluten-primary/90"
             >
               View Subscription Options

@@ -84,15 +84,23 @@ const PricingCards = ({ showTrialOption = true, compact = false }: PricingCardsP
       setProcessingPlan(planId);
       
       // Store the plan selection with enhanced logging
-      localStorage.setItem('selectedPlan', planId);
-      sessionStorage.setItem('selectedPlan', planId);
-      console.log('PricingCards: Stored plan in localStorage and sessionStorage:', planId);
+      try {
+        localStorage.setItem('selectedPlan', planId);
+        sessionStorage.setItem('selectedPlan', planId);
+        console.log('PricingCards: Stored plan in localStorage and sessionStorage:', planId);
+      } catch (e) {
+        console.warn('PricingCards: Storage not available, will use URL parameter fallback');
+      }
       
-      // Create checkout session
+      // Create checkout session with centralized error handling
       await createCheckout(planId);
     } catch (error) {
       console.error('PricingCards: Error during subscription process:', error);
-      setProcessingPlan(null);
+    } finally {
+      // Always clear processing state after a delay to prevent infinite processing
+      setTimeout(() => {
+        setProcessingPlan(null);
+      }, 5000);
     }
   };
 

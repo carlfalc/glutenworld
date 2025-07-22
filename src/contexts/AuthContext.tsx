@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Handle auth events with proper async operations
+        // Handle sign-in events without competing redirects
         if (event === 'SIGNED_IN' && session) {
           handleSignInEvent(session);
         }
@@ -52,11 +52,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-
-      // Check for existing session with stored plan
-      if (session) {
-        await handleExistingSession(session);
-      }
     });
 
     return () => subscription.unsubscribe();
@@ -65,100 +60,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleSignInEvent = async (session: Session) => {
     console.log('Handling sign in event for:', session.user.email);
     
-    // Defer async operations to prevent auth deadlock
+    // Defer subscription handling to prevent auth deadlock
     setTimeout(async () => {
       try {
-        // Check subscription status first
-        await supabase.functions.invoke('check-subscription', {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
+        // Check for stored plan first
+        const selectedPlan = getStoredPlan();
         
-        // Check for stored plan and handle checkout
-        await handleStoredPlanCheckout(session);
+        if (selectedPlan) {
+          console.log('Found stored plan after authentication:', selectedPlan);
+          // Clear stored plan immediately to prevent loops
+          clearStoredPlan();
+          
+          // Use centralized subscription handler
+          await handleSubscriptionFlow(selectedPlan, session);
+        } else {
+          // No stored plan, just verify subscription status
+          await verifySubscriptionStatus(session);
+        }
       } catch (error) {
         console.error('Failed to handle sign in event:', error);
+        // On error, redirect to subscription page with error message
+        window.location.href = '/subscription?error=checkout_failed';
       }
-    }, 0);
+    }, 100); // Small delay to prevent auth conflicts
   };
 
-  const handleExistingSession = async (session: Session) => {
-    console.log('Handling existing session for:', session.user.email);
-    
+  const handleSubscriptionFlow = async (plan: string, session: Session) => {
     try {
-      // Check subscription status
+      console.log('Creating checkout session for plan:', plan);
+      
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { plan },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
+      if (error) {
+        console.error('Checkout creation failed:', error);
+        throw error;
+      }
+      
+      if (data?.url) {
+        console.log('Redirecting to checkout URL:', data.url);
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Subscription flow failed:', error);
+      // Redirect to subscription page with error
+      window.location.href = '/subscription?error=checkout_failed';
+    }
+  };
+
+  const verifySubscriptionStatus = async (session: Session) => {
+    try {
       await supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       });
-      
-      // Check for stored plan (backup detection)
-      await handleStoredPlanCheckout(session);
     } catch (error) {
-      console.error('Failed to handle existing session:', error);
+      console.error('Failed to verify subscription status:', error);
     }
   };
 
-  const handleStoredPlanCheckout = async (session: Session) => {
-    // Check multiple storage locations for selected plan
-    const selectedPlan = localStorage.getItem('selectedPlan') || 
-                        sessionStorage.getItem('selectedPlan') ||
-                        getUrlParameter('plan');
-    
-    if (selectedPlan) {
-      console.log('Found stored plan after authentication:', selectedPlan);
-      
-      // Clear stored plan
-      localStorage.removeItem('selectedPlan');
-      sessionStorage.removeItem('selectedPlan');
-      
-      // Proceed with checkout for the stored plan immediately
-      try {
-        console.log('Creating checkout session for plan:', selectedPlan);
-        const { data, error } = await supabase.functions.invoke('create-checkout', {
-          body: { plan: selectedPlan },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-        
-        if (error) {
-          console.error('Error creating checkout after authentication:', error);
-          window.location.href = '/subscription?error=checkout_failed';
-        } else if (data?.url) {
-          console.log('Redirecting to checkout URL:', data.url);
-          // Immediately redirect to Stripe checkout
-          window.location.href = data.url;
-        }
-      } catch (error) {
-        console.error('Failed to create checkout after authentication:', error);
-        window.location.href = '/subscription?error=checkout_failed';
-      }
-    } else {
-      // No stored plan, check if user has active subscription/trial
-      checkUserAccess(session);
-    }
+  const getStoredPlan = (): string | null => {
+    // Check multiple storage locations
+    const plan = localStorage.getItem('selectedPlan') || 
+                 sessionStorage.getItem('selectedPlan') ||
+                 getUrlParameter('plan');
+    return plan;
   };
 
-  const checkUserAccess = async (session: Session) => {
-    try {
-      const { data } = await supabase.functions.invoke('check-subscription', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-      
-      // If user doesn't have subscription or trial, redirect to subscription page
-      if (!data?.subscribed && !data?.is_trialing) {
-        console.log('User has no active subscription or trial, redirecting to subscription page');
-        window.location.href = '/subscription?message=subscription_required';
-      }
-    } catch (error) {
-      console.error('Failed to check user access:', error);
-      // On error, redirect to subscription page to be safe
-      window.location.href = '/subscription?message=subscription_required';
+  const clearStoredPlan = () => {
+    localStorage.removeItem('selectedPlan');
+    sessionStorage.removeItem('selectedPlan');
+    // Clear URL parameter by replacing current history state
+    if (window.history.replaceState && getUrlParameter('plan')) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('plan');
+      window.history.replaceState({}, '', url.toString());
     }
   };
 
@@ -170,11 +154,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, fullName?: string) => {
     console.log('Sign up attempt for:', email);
     
-    // Check if user was redirected here for checkout
-    const selectedPlan = localStorage.getItem('selectedPlan');
-    console.log('Selected plan during signup:', selectedPlan);
+    // Store plan for post-signup handling
+    const selectedPlan = getStoredPlan() || 'trial'; // Default to trial
+    if (selectedPlan) {
+      localStorage.setItem('selectedPlan', selectedPlan);
+      sessionStorage.setItem('selectedPlan', selectedPlan);
+    }
     
-    // Use dashboard as redirect URL for consistency
     const redirectUrl = `${window.location.origin}/dashboard`;
     
     const { error } = await supabase.auth.signUp({
@@ -207,14 +193,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     console.log('Google sign in attempt');
     
-    // Store plan in multiple locations for better reliability
-    const selectedPlan = localStorage.getItem('selectedPlan') || 'trial'; // Default to trial
+    // Store plan for OAuth return handling
+    const selectedPlan = getStoredPlan() || 'trial';
     sessionStorage.setItem('selectedPlan', selectedPlan);
-    console.log('Stored plan in sessionStorage for Google OAuth:', selectedPlan);
+    console.log('Stored plan for Google OAuth:', selectedPlan);
     
-    // Always redirect to auth page after Google OAuth to handle checkout flow
-    const redirectUrl = `${window.location.origin}/auth?oauth_return=true&plan=${selectedPlan}`;
-    console.log('Google OAuth redirect URL:', redirectUrl);
+    const redirectUrl = `${window.location.origin}/dashboard`;
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -232,8 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('Sign out attempt');
     
     // Clear any stored plans on logout
-    localStorage.removeItem('selectedPlan');
-    sessionStorage.removeItem('selectedPlan');
+    clearStoredPlan();
     
     await supabase.auth.signOut();
   };
