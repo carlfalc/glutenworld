@@ -11,7 +11,7 @@ const TRIAL_KEY = 'gluten_world_trial_usage';
 
 export const useTrialRestriction = () => {
   const { user } = useAuth();
-  const { isOwner } = useUserRole();
+  const { isOwner, isTesterOrOwner } = useUserRole();
   const [trialUsage, setTrialUsage] = useState<TrialUsage>({ 
     storeLocatorUsed: false, 
     usageDate: '' 
@@ -40,8 +40,8 @@ export const useTrialRestriction = () => {
   };
 
   const canUseStoreLocator = () => {
-    // Owner always has access
-    if (isOwner) return true;
+    // Tester or owner always has access
+    if (isTesterOrOwner) return true;
     
     // Authenticated users can always use it
     if (user) return true;

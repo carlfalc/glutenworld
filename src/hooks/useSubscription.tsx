@@ -18,7 +18,7 @@ interface SubscriptionData {
 export const useSubscription = () => {
   const { user, session } = useAuth();
   const { toast } = useToast();
-  const { isOwner, loading: roleLoading } = useUserRole();
+  const { isOwner, isTesterOrOwner, loading: roleLoading } = useUserRole();
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({
     subscribed: false,
     subscription_tier: null,
@@ -38,12 +38,12 @@ export const useSubscription = () => {
       return;
     }
 
-    // Fast-path for owner - skip API call and set immediate access
-    if (isOwnerByEmail) {
-      console.log('useSubscription: Fast-path owner access, skipping subscription check');
+    // Fast-path for tester or owner - skip API call and set immediate access
+    if (isTesterOrOwner) {
+      console.log('useSubscription: Fast-path tester/owner access, skipping subscription check');
       setSubscriptionData({
         subscribed: true,
-        subscription_tier: 'owner',
+        subscription_tier: isOwner ? 'owner' : 'tester',
         subscription_end: null,
         subscription_status: 'active',
         trial_expires_at: null,
@@ -213,8 +213,8 @@ export const useSubscription = () => {
 
   return {
     ...subscriptionData,
-    // Owner bypasses subscription checks
-    subscribed: isOwner || subscriptionData.subscribed,
+    // Tester or owner bypasses subscription checks
+    subscribed: isTesterOrOwner || subscriptionData.subscribed,
     checkSubscription,
     createCheckout,
     openCustomerPortal,

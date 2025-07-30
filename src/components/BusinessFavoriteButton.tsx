@@ -2,6 +2,7 @@ import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsFavorite, useAddToFavorites, useRemoveFromFavorites } from '@/hooks/useFavorites';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Store {
   id: string;
@@ -36,10 +37,16 @@ const BusinessFavoriteButton = ({
   className = "",
   size = "sm" 
 }: BusinessFavoriteButtonProps) => {
+  const { user } = useAuth();
   const { data: isFavorite } = useIsFavorite('business', { businessName: store.name });
   const { data: favorites = [] } = useFavorites('business');
   const addToFavorites = useAddToFavorites();
   const removeFromFavorites = useRemoveFromFavorites();
+
+  // Only render heart button for authenticated users
+  if (!user) {
+    return null;
+  }
 
   const handleToggleFavorite = () => {
     if (isFavorite) {

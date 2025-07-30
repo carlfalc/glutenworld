@@ -951,6 +951,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      is_tester_or_owner: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       start_user_trial: {
         Args: { user_email: string; user_id_param: string }
         Returns: undefined

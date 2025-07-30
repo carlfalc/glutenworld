@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-export type UserRole = "owner" | "admin" | "user" | null;
+export type UserRole = "owner" | "admin" | "tester" | "user" | null;
 
 // Cache for role lookups to avoid redundant API calls
 const roleCache = new Map<string, { role: UserRole; timestamp: number }>();
@@ -71,15 +71,19 @@ export function useUserRole() {
   }, [user, isOwnerByEmail]);
 
   const isOwner = role === "owner";
+  const isTester = role === "tester";
   const isAdmin = role === "admin" || role === "owner";
   const hasElevatedAccess = role === "owner" || role === "admin";
+  const isTesterOrOwner = role === "owner" || role === "tester";
 
   return {
     role,
     loading,
     isOwner,
+    isTester,
     isAdmin,
     hasElevatedAccess,
+    isTesterOrOwner,
     refresh: () => {
       if (user) {
         setLoading(true);
