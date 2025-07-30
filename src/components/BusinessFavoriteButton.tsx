@@ -43,12 +43,11 @@ const BusinessFavoriteButton = ({
   const addToFavorites = useAddToFavorites();
   const removeFromFavorites = useRemoveFromFavorites();
 
-  // Only render heart button for authenticated users
-  if (!user) {
-    return null;
-  }
-
   const handleToggleFavorite = () => {
+    // Handle unauthenticated users gracefully
+    if (!user) {
+      return;
+    }
     if (isFavorite) {
       // Find the favorite to remove
       const favoriteToRemove = favorites.find(fav => 
