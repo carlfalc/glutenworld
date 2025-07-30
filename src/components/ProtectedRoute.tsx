@@ -24,10 +24,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const [hasCheckedAccess, setHasCheckedAccess] = useState(false);
+  
+  // Fast-path for owner - skip most loading states
+  const isOwnerByEmail = user?.email === 'falconercarlandrew@gmail.com';
+  const shouldShowLoading = authLoading || (!isOwnerByEmail && (subscriptionLoading || roleLoading)) || !hasCheckedAccess;
 
   useEffect(() => {
-    // Only proceed when auth, subscription, and role loading are complete
-    if (!authLoading && !subscriptionLoading && !roleLoading) {
+    // Fast-path for owner - grant immediate access
+    if (user && isOwnerByEmail) {
+      console.log('ProtectedRoute: Fast-path owner access granted');
+      setHasCheckedAccess(true);
+      return;
+    }
+
+    // For non-owners, wait for all loading states to complete
+    if (!authLoading && (!user || (!isOwnerByEmail && !subscriptionLoading && !roleLoading))) {
       setHasCheckedAccess(true);
       
       if (!user) {
@@ -41,8 +52,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         return;
       }
 
-      // Owner bypasses subscription checks
-      if (isOwner) {
+      // Owner bypasses subscription checks (redundant check for safety)
+      if (isOwner || isOwnerByEmail) {
         console.log('ProtectedRoute: Owner access granted');
         return;
       }
@@ -59,10 +70,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         return;
       }
     }
-  }, [user, subscribed, is_trialing, isOwner, authLoading, subscriptionLoading, roleLoading, navigate, redirectTo, toast]);
+  }, [user, subscribed, is_trialing, isOwner, isOwnerByEmail, authLoading, subscriptionLoading, roleLoading, navigate, redirectTo, toast]);
 
-  // Show loading while checking auth, subscription, and role
-  if (authLoading || subscriptionLoading || roleLoading || !hasCheckedAccess) {
+  // Use optimized loading check
+  if (shouldShowLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
         <div className="text-center">
@@ -99,7 +110,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // If user doesn't have subscription or trial (owner bypasses this check)
-  if (!isOwner && !subscribed && !is_trialing) {
+  if (!isOwner && !isOwnerByEmail && !subscribed && !is_trialing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background p-4">
         <Card className="w-full max-w-md">
