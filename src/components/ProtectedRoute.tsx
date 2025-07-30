@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,13 +20,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, loading: authLoading } = useAuth();
   const { subscribed, is_trialing, loading: subscriptionLoading } = useSubscription();
+  const { isOwner, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [hasCheckedAccess, setHasCheckedAccess] = useState(false);
 
   useEffect(() => {
-    // Only proceed when both auth and subscription loading are complete
-    if (!authLoading && !subscriptionLoading) {
+    // Only proceed when auth, subscription, and role loading are complete
+    if (!authLoading && !subscriptionLoading && !roleLoading) {
       setHasCheckedAccess(true);
       
       if (!user) {
@@ -36,6 +38,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           variant: "default",
         });
         navigate('/auth', { replace: true });
+        return;
+      }
+
+      // Owner bypasses subscription checks
+      if (isOwner) {
+        console.log('ProtectedRoute: Owner access granted');
         return;
       }
 
@@ -51,10 +59,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         return;
       }
     }
-  }, [user, subscribed, is_trialing, authLoading, subscriptionLoading, navigate, redirectTo, toast]);
+  }, [user, subscribed, is_trialing, isOwner, authLoading, subscriptionLoading, roleLoading, navigate, redirectTo, toast]);
 
-  // Show loading while checking auth and subscription
-  if (authLoading || subscriptionLoading || !hasCheckedAccess) {
+  // Show loading while checking auth, subscription, and role
+  if (authLoading || subscriptionLoading || roleLoading || !hasCheckedAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
         <div className="text-center">
@@ -90,8 +98,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // If user doesn't have subscription or trial
-  if (!subscribed && !is_trialing) {
+  // If user doesn't have subscription or trial (owner bypasses this check)
+  if (!isOwner && !subscribed && !is_trialing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background p-4">
         <Card className="w-full max-w-md">

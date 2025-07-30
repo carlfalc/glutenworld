@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from './useUserRole';
 
 interface SubscriptionData {
   subscribed: boolean;
@@ -17,6 +18,7 @@ interface SubscriptionData {
 export const useSubscription = () => {
   const { user, session } = useAuth();
   const { toast } = useToast();
+  const { isOwner } = useUserRole();
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({
     subscribed: false,
     subscription_tier: null,
@@ -193,6 +195,8 @@ export const useSubscription = () => {
 
   return {
     ...subscriptionData,
+    // Owner bypasses subscription checks
+    subscribed: isOwner || subscriptionData.subscribed,
     checkSubscription,
     createCheckout,
     openCustomerPortal,

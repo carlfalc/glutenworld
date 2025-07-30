@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface TrialUsage {
   storeLocatorUsed: boolean;
@@ -10,6 +11,7 @@ const TRIAL_KEY = 'gluten_world_trial_usage';
 
 export const useTrialRestriction = () => {
   const { user } = useAuth();
+  const { isOwner } = useUserRole();
   const [trialUsage, setTrialUsage] = useState<TrialUsage>({ 
     storeLocatorUsed: false, 
     usageDate: '' 
@@ -38,6 +40,9 @@ export const useTrialRestriction = () => {
   };
 
   const canUseStoreLocator = () => {
+    // Owner always has access
+    if (isOwner) return true;
+    
     // Authenticated users can always use it
     if (user) return true;
     

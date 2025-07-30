@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
 
 interface TrialData {
@@ -19,6 +20,7 @@ interface TrialData {
 export const useTrialManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isOwner } = useUserRole();
   const { 
     subscribed, 
     subscription_tier, 
@@ -71,6 +73,9 @@ export const useTrialManagement = () => {
   }, [subscribed, subscription_tier, trial_expires_at, is_trialing, subscription_status, subscriptionLoading]);
 
   const canAccessFeatures = (): boolean => {
+    // Owner always has access
+    if (isOwner) return true;
+    
     // User has active subscription
     if (subscribed) return true;
     
@@ -82,6 +87,14 @@ export const useTrialManagement = () => {
   };
 
   const getFeatureStatus = () => {
+    if (isOwner) {
+      return {
+        status: 'owner',
+        message: 'Owner access - Full features available',
+        canAccess: true
+      };
+    }
+    
     if (subscribed) {
       return {
         status: 'subscribed',

@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from './useSubscription';
+import { useUserRole } from './useUserRole';
 
 export const useAIGeneratorAccess = () => {
   const { user } = useAuth();
   const { subscription_tier } = useSubscription();
+  const { isOwner } = useUserRole();
   const [hasAccess, setHasAccess] = useState(false);
   const [hasPaidUpgrade, setHasPaidUpgrade] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,15 @@ export const useAIGeneratorAccess = () => {
     console.log('🔍 Subscription tier:', subscription_tier);
 
     try {
+      // Owner always has access
+      if (isOwner) {
+        console.log('✅ Owner access - granting AI generator access');
+        setHasAccess(true);
+        setHasPaidUpgrade(false);
+        setLoading(false);
+        return;
+      }
+
       // Check if user has yearly subscription (automatic access)
       if (subscription_tier === 'Annual') {
         console.log('✅ User has Annual subscription - granting access');
