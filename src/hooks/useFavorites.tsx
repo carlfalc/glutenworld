@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 export interface UserFavorite {
   id: string;
   user_id: string;
-  type: 'recipe' | 'product';
+  type: 'recipe' | 'product' | 'business';
   recipe_id?: string;
   product_name?: string;
   product_description?: string;
@@ -20,11 +20,24 @@ export interface UserFavorite {
   gluten_status?: string;
   dairy_status?: string;
   vegan_status?: string;
+  business_name?: string;
+  business_address?: string;
+  business_phone?: string;
+  business_website?: string;
+  business_rating?: number;
+  business_price_level?: number;
+  business_types?: string[];
+  business_category?: string;
+  business_photo_reference?: string;
+  business_latitude?: number;
+  business_longitude?: number;
+  business_opening_hours?: any;
+  business_google_maps_url?: string;
   created_at: string;
   updated_at: string;
 }
 
-export const useFavorites = (type?: 'recipe' | 'product') => {
+export const useFavorites = (type?: 'recipe' | 'product' | 'business') => {
   const { user } = useAuth();
 
   return useQuery({
@@ -120,11 +133,11 @@ export const useRemoveFromFavorites = () => {
   });
 };
 
-export const useIsFavorite = (type: 'recipe' | 'product', identifier: { productName?: string; itemId?: string }) => {
+export const useIsFavorite = (type: 'recipe' | 'product' | 'business', identifier: { productName?: string; itemId?: string; businessName?: string }) => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['is-favorite', user?.id, type, identifier.productName, identifier.itemId],
+    queryKey: ['is-favorite', user?.id, type, identifier.productName, identifier.itemId, identifier.businessName],
     queryFn: async () => {
       if (!user) return false;
       
@@ -138,6 +151,8 @@ export const useIsFavorite = (type: 'recipe' | 'product', identifier: { productN
         query = query.eq('recipe_id', identifier.itemId);
       } else if (type === 'product' && identifier.productName) {
         query = query.eq('product_name', identifier.productName);
+      } else if (type === 'business' && identifier.businessName) {
+        query = query.eq('business_name', identifier.businessName);
       } else {
         return false;
       }
@@ -147,7 +162,7 @@ export const useIsFavorite = (type: 'recipe' | 'product', identifier: { productN
       if (error) throw error;
       return !!data;
     },
-    enabled: !!user && ((type === 'recipe' && !!identifier.itemId) || (type === 'product' && !!identifier.productName)),
+    enabled: !!user && ((type === 'recipe' && !!identifier.itemId) || (type === 'product' && !!identifier.productName) || (type === 'business' && !!identifier.businessName)),
     retry: false, // Don't retry auth errors
   });
 };

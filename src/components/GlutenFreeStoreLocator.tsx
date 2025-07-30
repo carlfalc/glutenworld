@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialRestriction } from '@/hooks/useTrialRestriction';
+import BusinessFavoriteButton from '@/components/BusinessFavoriteButton';
 
 interface Store {
   id: string;
@@ -426,12 +427,17 @@ const GlutenFreeStoreLocator = () => {
                       <div className="space-y-2">
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="font-semibold line-clamp-2 flex-1">{store.name}</h4>
-                          <Badge 
-                            className={`text-xs font-medium shrink-0 ${getCategoryColor(store.category)}`}
-                            variant="outline"
-                          >
-                            {store.category}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <BusinessFavoriteButton store={store} />
+                            </div>
+                            <Badge 
+                              className={`text-xs font-medium shrink-0 ${getCategoryColor(store.category)}`}
+                              variant="outline"
+                            >
+                              {store.category}
+                            </Badge>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -463,12 +469,15 @@ const GlutenFreeStoreLocator = () => {
                   <DialogHeader>
                     <div className="flex items-start justify-between gap-2">
                       <DialogTitle className="line-clamp-2 flex-1">{store.name}</DialogTitle>
-                      <Badge 
-                        className={`text-xs font-medium shrink-0 ${getCategoryColor(store.category)}`}
-                        variant="outline"
-                      >
-                        {store.category}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <BusinessFavoriteButton store={store} />
+                        <Badge 
+                          className={`text-xs font-medium shrink-0 ${getCategoryColor(store.category)}`}
+                          variant="outline"
+                        >
+                          {store.category}
+                        </Badge>
+                      </div>
                     </div>
                   </DialogHeader>
                   <div className="space-y-4">

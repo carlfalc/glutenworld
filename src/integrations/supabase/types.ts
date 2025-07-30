@@ -628,6 +628,19 @@ export type Database = {
       user_favorites: {
         Row: {
           allergen_warnings: string[] | null
+          business_address: string | null
+          business_category: string | null
+          business_google_maps_url: string | null
+          business_latitude: number | null
+          business_longitude: number | null
+          business_name: string | null
+          business_opening_hours: Json | null
+          business_phone: string | null
+          business_photo_reference: string | null
+          business_price_level: number | null
+          business_rating: number | null
+          business_types: string[] | null
+          business_website: string | null
           created_at: string
           dairy_status: string | null
           gluten_status: string | null
@@ -647,6 +660,19 @@ export type Database = {
         }
         Insert: {
           allergen_warnings?: string[] | null
+          business_address?: string | null
+          business_category?: string | null
+          business_google_maps_url?: string | null
+          business_latitude?: number | null
+          business_longitude?: number | null
+          business_name?: string | null
+          business_opening_hours?: Json | null
+          business_phone?: string | null
+          business_photo_reference?: string | null
+          business_price_level?: number | null
+          business_rating?: number | null
+          business_types?: string[] | null
+          business_website?: string | null
           created_at?: string
           dairy_status?: string | null
           gluten_status?: string | null
@@ -666,6 +692,19 @@ export type Database = {
         }
         Update: {
           allergen_warnings?: string[] | null
+          business_address?: string | null
+          business_category?: string | null
+          business_google_maps_url?: string | null
+          business_latitude?: number | null
+          business_longitude?: number | null
+          business_name?: string | null
+          business_opening_hours?: Json | null
+          business_phone?: string | null
+          business_photo_reference?: string | null
+          business_price_level?: number | null
+          business_rating?: number | null
+          business_types?: string[] | null
+          business_website?: string | null
           created_at?: string
           dairy_status?: string | null
           gluten_status?: string | null

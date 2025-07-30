@@ -4,37 +4,66 @@ import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, MapPin, Globe, Phone, Heart, X } from 'lucide-react';
-
-// Define business type for now (will be replaced when database migration is applied)
-interface SavedBusiness {
-  id: string;
-  name: string;
-  address: string;
-  business_type: string;
-  phone?: string;
-  website?: string;
-  created_at: string;
-}
+import { Badge } from '@/components/ui/badge';
+import { Search, MapPin, Globe, Phone, Heart, X, Star, ExternalLink } from 'lucide-react';
+import { useFavorites, useRemoveFromFavorites } from '@/hooks/useFavorites';
+import { useToast } from '@/hooks/use-toast';
 
 const FavPlaces = () => {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Temporary placeholder data until database migration is applied
-  const savedBusinesses: SavedBusiness[] = [];
-  const isLoading = false;
+  const { toast } = useToast();
+  
+  // Fetch business favorites from database
+  const { data: businessFavorites = [], isLoading, refetch } = useFavorites('business');
+  const removeFromFavorites = useRemoveFromFavorites();
 
   // Filter businesses based on search term
-  const filteredBusinesses = savedBusinesses.filter(business =>
-    business.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    business.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    business.business_type.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBusinesses = businessFavorites.filter(business =>
+    business.business_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    business.business_address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    business.business_category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleRemoveBusiness = (businessId: string) => {
-    // TODO: Implement remove business functionality when database is ready
-    console.log('Remove business:', businessId);
+  const handleRemoveBusiness = async (favoriteId: string) => {
+    try {
+      await removeFromFavorites.mutateAsync(favoriteId);
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove business from favorites",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const renderPriceLevel = (level?: number) => {
+    if (!level) return null;
+    return (
+      <span className="text-green-600 font-bold">
+        {'$'.repeat(level)}
+        <span className="text-muted-foreground">{'$'.repeat(4 - level)}</span>
+      </span>
+    );
+  };
+
+  const formatBusinessTypes = (types: string[] = []) => {
+    return types.map(type => 
+      type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    );
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors: { [key: string]: string } = {
+      'Restaurant': 'bg-orange-100 text-orange-800 border-orange-300',
+      'Cafe': 'bg-amber-100 text-amber-800 border-amber-300',
+      'Bakery': 'bg-rose-100 text-rose-800 border-rose-300',
+      'Health Food Store': 'bg-green-100 text-green-800 border-green-300',
+      'Grocery Store': 'bg-blue-100 text-blue-800 border-blue-300',
+      'default': 'bg-gray-100 text-gray-800 border-gray-300'
+    };
+    return colors[category] || colors.default;
   };
 
   const openInMaps = (address: string) => {
@@ -110,17 +139,38 @@ const FavPlaces = () => {
                 <Card key={business.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{business.name}</CardTitle>
-                        <p className="text-sm text-brand-blue font-medium">
-                          {business.business_type}
-                        </p>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <CardTitle className="text-lg flex-1">{business.business_name}</CardTitle>
+                          <Badge 
+                            className={`text-xs font-medium shrink-0 ${getCategoryColor(business.business_category || '')}`}
+                            variant="outline"
+                          >
+                            {business.business_category}
+                          </Badge>
+                        </div>
+                        {business.business_rating && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm">{business.business_rating.toFixed(1)}</span>
+                            {renderPriceLevel(business.business_price_level)}
+                          </div>
+                        )}
+                        {business.business_types && business.business_types.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {formatBusinessTypes(business.business_types).slice(0, 2).map((type, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {type}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemoveBusiness(business.id)}
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive ml-2"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -129,13 +179,13 @@ const FavPlaces = () => {
                   <CardContent className="space-y-3">
                     <div className="flex items-start gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>{business.address}</span>
+                      <span>{business.business_address}</span>
                     </div>
                     
-                    {business.phone && (
+                    {business.business_phone && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="w-4 h-4" />
-                        <span>{business.phone}</span>
+                        <span>{business.business_phone}</span>
                       </div>
                     )}
                     
@@ -143,22 +193,34 @@ const FavPlaces = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => openInMaps(business.address)}
+                        onClick={() => openInMaps(business.business_address || '')}
                         className="flex-1"
                       >
                         <MapPin className="w-4 h-4 mr-1" />
                         Directions
                       </Button>
                       
-                      {business.website && (
+                      {business.business_website && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(business.website, '_blank')}
+                          onClick={() => window.open(business.business_website, '_blank')}
                           className="flex-1"
                         >
                           <Globe className="w-4 h-4 mr-1" />
                           Website
+                        </Button>
+                      )}
+                      
+                      {business.business_google_maps_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(business.business_google_maps_url, '_blank')}
+                          className="flex-1"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          Maps
                         </Button>
                       )}
                     </div>
