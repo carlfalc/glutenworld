@@ -20,8 +20,15 @@ const ResetPassword = () => {
     // Check if we have the necessary tokens in the URL
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
+    const type = searchParams.get('type');
     
-    if (!accessToken || !refreshToken) {
+    if (type === 'recovery' && accessToken && refreshToken) {
+      // Set the session with the tokens from the URL
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+    } else if (!accessToken || !refreshToken || type !== 'recovery') {
       toast({
         title: "Invalid reset link",
         description: "This password reset link is invalid or has expired.",
@@ -70,7 +77,7 @@ const ResetPassword = () => {
           title: "Password updated successfully",
           description: "Your password has been updated. You can now sign in with your new password.",
         });
-        navigate('/auth?tab=signin');
+        navigate('/auth');
       }
     } catch (error) {
       toast({
