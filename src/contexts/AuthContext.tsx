@@ -266,7 +266,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.setItem('selectedPlan', selectedPlan);
     console.log('Stored plan for Google OAuth:', selectedPlan);
     
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    // Use the auth page for OAuth return to ensure proper handling
+    const redirectUrl = `${window.location.origin}/auth?oauth_return=true`;
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

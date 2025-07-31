@@ -29,13 +29,14 @@ export const useAuthProviderDetection = (email?: string): AuthProviderInfo => {
     setProviderInfo(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Query auth.identities table to find authentication providers for this email
-      const { data, error } = await supabase
-        .rpc('get_user_auth_providers', { user_email: userEmail });
+      // Use the database function to get user auth providers
+      const { data, error } = await supabase.rpc('get_user_auth_providers', {
+        user_email: userEmail
+      });
 
       if (error) {
         console.warn('Error detecting auth providers:', error);
-        // If the function doesn't exist, fall back to assuming email/password
+        // Fall back to assuming email/password on error
         setProviderInfo({
           hasEmailPassword: true,
           hasGoogleOAuth: false,
@@ -47,6 +48,7 @@ export const useAuthProviderDetection = (email?: string): AuthProviderInfo => {
         return;
       }
 
+      // Data is already an array of provider strings from our function
       const providers = data || [];
       
       setProviderInfo({

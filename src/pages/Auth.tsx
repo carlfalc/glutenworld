@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import AddressForm from '@/components/AddressForm';
 import ForgotPasswordModal from '@/components/ForgotPasswordModal';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuthProviderDetection } from '@/hooks/useAuthProviderDetection';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
