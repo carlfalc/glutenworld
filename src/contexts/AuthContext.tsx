@@ -61,6 +61,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleSignInEvent = async (session: Session) => {
     console.log('Handling sign in event for:', session.user.email);
     
+    // Check if this is a password recovery session
+    if (isPasswordRecoverySession()) {
+      console.log('Password recovery session detected, skipping subscription flow');
+      return;
+    }
+    
     // Defer subscription handling to prevent auth deadlock
     setTimeout(async () => {
       try {
@@ -150,6 +156,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getUrlParameter = (name: string): string | null => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(name);
+  };
+
+  const isPasswordRecoverySession = (): boolean => {
+    // Check if we're on the reset password page
+    if (window.location.pathname === '/reset-password') {
+      return true;
+    }
+    
+    // Check URL parameters for recovery indicators
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type');
+    const accessToken = urlParams.get('access_token');
+    const refreshToken = urlParams.get('refresh_token');
+    
+    return type === 'recovery' && !!(accessToken && refreshToken);
   };
 
   const signUp = async (email: string, password: string, fullName?: string) => {
