@@ -28,8 +28,13 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      // Use signInWithOtp for password recovery to ensure PKCE flow
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false, // Don't create new users for password reset
+          emailRedirectTo: `${window.location.origin}/reset-password`,
+        },
       });
 
       if (error) {
