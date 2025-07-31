@@ -17,37 +17,20 @@ const ResetPassword = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Check if we have the necessary tokens in the URL
-    // Supabase typically puts tokens in hash fragments, so check both
-    let accessToken = searchParams.get('access_token');
-    let refreshToken = searchParams.get('refresh_token');
-    let type = searchParams.get('type');
+    // Check if we have the PKCE code from the URL
+    const code = searchParams.get('code');
     
-    // Also check hash fragments (more common for Supabase auth)
-    if (!accessToken && window.location.hash) {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      accessToken = hashParams.get('access_token');
-      refreshToken = hashParams.get('refresh_token');
-      type = hashParams.get('type');
-    }
-    
-    console.log('Reset password page loaded with tokens:', { 
-      accessToken: !!accessToken, 
-      refreshToken: !!refreshToken, 
-      type,
-      hash: window.location.hash,
+    console.log('Reset password page loaded with PKCE code:', { 
+      code: !!code,
       search: window.location.search
     });
     
-    if (type === 'recovery' && accessToken && refreshToken) {
-      // Set the session with the tokens from the URL
-      console.log('Setting session with recovery tokens');
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      }).then(({ error }) => {
+    if (code) {
+      // Exchange PKCE code for session
+      console.log('Exchanging PKCE code for session');
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {
-          console.error('Error setting session:', error);
+          console.error('Error exchanging code for session:', error);
           toast({
             title: "Session error",
             description: "There was an issue with your reset link. Please try again.",
@@ -55,11 +38,11 @@ const ResetPassword = () => {
           });
           navigate('/auth');
         } else {
-          console.log('Session set successfully for password reset');
+          console.log('Session established successfully for password reset');
         }
       });
     } else {
-      console.log('Invalid or missing reset parameters, redirecting to auth');
+      console.log('No PKCE code found, redirecting to auth');
       toast({
         title: "Invalid reset link",
         description: "This password reset link is invalid or has expired. Please request a new one.",
