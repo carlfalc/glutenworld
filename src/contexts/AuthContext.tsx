@@ -36,11 +36,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
+        
+        // Check for password recovery FIRST to prevent interference
+        if (event === 'SIGNED_IN' && isPasswordRecoverySession()) {
+          console.log('AuthContext: SIGNED_IN event is for password recovery. Preventing redirect.');
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+          return; // IMPORTANT: Exit here to prevent handleSignInEvent from running
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Handle sign-in events without competing redirects
+        // Handle sign-in events only for non-recovery sessions
         if (event === 'SIGNED_IN' && session) {
           handleSignInEvent(session);
         }
@@ -50,8 +60,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       console.log('Initial session check:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
+      
+      // Don't set session if it's a password recovery to let the ResetPassword component handle it
+      if (!isPasswordRecoverySession()) {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
       setLoading(false);
     });
 
@@ -164,7 +178,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return true;
     }
     
-    // Check URL parameters for recovery indicators
+    // Check URL hash fragment for recovery indicators (Supabase puts tokens in hash)
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1)); // Remove the '#'
+      if (hashParams.get('type') === 'recovery') {
+        return true;
+      }
+    }
+    
+    // Also check URL search parameters as fallback
     const urlParams = new URLSearchParams(window.location.search);
     const type = urlParams.get('type');
     const accessToken = urlParams.get('access_token');
