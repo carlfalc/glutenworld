@@ -170,6 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
     
+    // Check if any recovery tokens are present
     return type === 'recovery' && !!(accessToken && refreshToken);
   };
 
