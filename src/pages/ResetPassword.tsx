@@ -22,16 +22,32 @@ const ResetPassword = () => {
     const refreshToken = searchParams.get('refresh_token');
     const type = searchParams.get('type');
     
+    console.log('Reset password page loaded with params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+    
     if (type === 'recovery' && accessToken && refreshToken) {
       // Set the session with the tokens from the URL
+      console.log('Setting session with recovery tokens');
       supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
+      }).then(({ error }) => {
+        if (error) {
+          console.error('Error setting session:', error);
+          toast({
+            title: "Session error",
+            description: "There was an issue with your reset link. Please try again.",
+            variant: "destructive",
+          });
+          navigate('/auth');
+        } else {
+          console.log('Session set successfully for password reset');
+        }
       });
-    } else if (!accessToken || !refreshToken || type !== 'recovery') {
+    } else {
+      console.log('Invalid or missing reset parameters, redirecting to auth');
       toast({
         title: "Invalid reset link",
-        description: "This password reset link is invalid or has expired.",
+        description: "This password reset link is invalid or has expired. Please request a new one.",
         variant: "destructive",
       });
       navigate('/auth');
