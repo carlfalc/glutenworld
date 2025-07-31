@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialRestriction } from '@/hooks/useTrialRestriction';
@@ -21,6 +21,19 @@ const Landing = () => {
   const {
     user
   } = useAuth();
+
+  // Handle password reset redirect from email
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type');
+    const accessToken = urlParams.get('access_token');
+    const refreshToken = urlParams.get('refresh_token');
+    
+    // Check if this is a password recovery flow
+    if (type === 'recovery' && accessToken && refreshToken) {
+      navigate('/reset-password' + window.location.search, { replace: true });
+    }
+  }, [navigate]);
   const [showFeatureDetails, setShowFeatureDetails] = useState(false);
   const [showTrialRestriction, setShowTrialRestriction] = useState(false);
   const [showAboutUs, setShowAboutUs] = useState(false);
