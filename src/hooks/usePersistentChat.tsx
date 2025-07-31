@@ -1,16 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  mode?: string;
-  image?: string;
-  convertedRecipe?: string;
-}
+import { Message } from '@/types/chat';
 
 const CHAT_STORAGE_KEY = 'gluten_convert_chat_history';
 

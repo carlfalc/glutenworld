@@ -20,28 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  mode?: string;
-  image?: string;
-  convertedRecipe?: string;
-  ingredientAnalysis?: {
-    productName: string;
-    analysis: string;
-    safetyRating?: string;
-    allergenWarnings?: string[];
-    glutenStatus?: string;
-    dairyStatus?: string;
-    veganStatus?: string;
-    productCategory?: string;
-    productDescription?: string;
-    productImageUrl?: string;
-  };
-}
+import { Message } from '@/types/chat';
 
 const ChatInterface = () => {
   const { messages, setMessages, addMessage, clearChatHistory } = usePersistentChat();
