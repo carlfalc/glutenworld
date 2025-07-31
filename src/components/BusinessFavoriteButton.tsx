@@ -46,8 +46,10 @@ const BusinessFavoriteButton = ({
   const handleToggleFavorite = () => {
     // Handle unauthenticated users gracefully
     if (!user) {
+      console.log('BusinessFavoriteButton: No authenticated user');
       return;
     }
+    console.log('BusinessFavoriteButton: User authenticated:', user.id, 'isFavorite:', isFavorite);
     if (isFavorite) {
       // Find the favorite to remove
       const favoriteToRemove = favorites.find(fav => 
