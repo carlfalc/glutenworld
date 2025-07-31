@@ -19,6 +19,8 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState('');
   
   // Address form state
   const [streetAddress, setStreetAddress] = useState('');
@@ -26,7 +28,7 @@ const Auth = () => {
   const [postalCode, setPostalCode] = useState('');
   const [country, setCountry] = useState('United States');
   
-  const { signIn, signUp, signInWithGoogle, user } = useAuth();
+  const { signIn, signUp, signInWithGoogle, user, resendConfirmation } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -145,13 +147,22 @@ const Auth = () => {
     setLoading(true);
 
     console.log('Handling sign up for:', email);
-    const { error } = await signUp(email, password, fullName);
+    const { error, needsVerification } = await signUp(email, password, fullName);
     
     if (error) {
       console.error('Sign up error:', error);
+      
+      // Handle specific error messages
+      let errorMessage = error.message;
+      if (error.message.includes('User already registered')) {
+        errorMessage = 'An account with this email already exists. Please sign in instead.';
+      } else if (error.message.includes('Email rate limit exceeded')) {
+        errorMessage = 'Too many attempts. Please wait a moment before trying again.';
+      }
+      
       toast({
         title: "Error creating account",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } else {
@@ -162,9 +173,41 @@ const Auth = () => {
         await sendWelcomeEmail(email, fullName);
       }
 
+      if (needsVerification) {
+        setNeedsVerification(true);
+        setVerificationEmail(email);
+        toast({
+          title: "Account created!",
+          description: "Please check your email and click the verification link to complete your signup. You may also check your spam folder.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Account created!",
+          description: "Welcome to Gluten World! You can now start your gluten-free journey.",
+          variant: "default",
+        });
+      }
+    }
+    
+    setLoading(false);
+  };
+
+  const handleResendVerification = async () => {
+    setLoading(true);
+    
+    const { error } = await resendConfirmation(verificationEmail);
+    
+    if (error) {
       toast({
-        title: "Account created!",
-        description: "Welcome to Gluten World! Check your email to verify your account and start your gluten-free journey.",
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Email sent!",
+        description: "Please check your email for the verification link.",
       });
     }
     
@@ -271,6 +314,29 @@ const Auth = () => {
                 <AlertDescription>
                   You're signing up for the <strong>{selectedPlan}</strong> plan. 
                   After authentication, you'll be redirected to complete your subscription.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {needsVerification && (
+              <Alert className="mt-4 border-amber-500 bg-amber-50">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <p>
+                      Please check your email (<strong>{verificationEmail}</strong>) for a verification link to complete your signup.
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Don't see the email? Check your spam folder or 
+                      <button 
+                        onClick={handleResendVerification}
+                        disabled={loading}
+                        className="ml-1 text-gluten-primary hover:text-gluten-secondary underline"
+                      >
+                        resend verification email
+                      </button>
+                    </p>
+                  </div>
                 </AlertDescription>
               </Alert>
             )}

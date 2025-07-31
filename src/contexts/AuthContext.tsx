@@ -7,10 +7,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any; needsVerification?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resendConfirmation: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -163,7 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     const redirectUrl = `${window.location.origin}/dashboard`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -175,6 +176,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     
     console.log('Signup result:', error ? 'Error' : 'Success');
+    
+    // Check if user needs email verification
+    const needsVerification = !error && data.user && !data.user.email_confirmed_at;
+    
+    if (needsVerification) {
+      console.log('User needs email verification:', email);
+    }
+    
+    return { error, needsVerification };
+  };
+
+  const resendConfirmation = async (email: string) => {
+    console.log('Resending confirmation email for:', email);
+    
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+      }
+    });
+    
+    console.log('Resend confirmation result:', error ? 'Error' : 'Success');
     return { error };
   };
 
@@ -229,6 +253,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signInWithGoogle,
     signOut,
+    resendConfirmation,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
