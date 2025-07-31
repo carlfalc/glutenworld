@@ -18,11 +18,26 @@ const ResetPassword = () => {
 
   useEffect(() => {
     // Check if we have the necessary tokens in the URL
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
+    // Supabase typically puts tokens in hash fragments, so check both
+    let accessToken = searchParams.get('access_token');
+    let refreshToken = searchParams.get('refresh_token');
+    let type = searchParams.get('type');
     
-    console.log('Reset password page loaded with params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+    // Also check hash fragments (more common for Supabase auth)
+    if (!accessToken && window.location.hash) {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      accessToken = hashParams.get('access_token');
+      refreshToken = hashParams.get('refresh_token');
+      type = hashParams.get('type');
+    }
+    
+    console.log('Reset password page loaded with tokens:', { 
+      accessToken: !!accessToken, 
+      refreshToken: !!refreshToken, 
+      type,
+      hash: window.location.hash,
+      search: window.location.search
+    });
     
     if (type === 'recovery' && accessToken && refreshToken) {
       // Set the session with the tokens from the URL
