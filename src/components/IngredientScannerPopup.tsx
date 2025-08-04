@@ -2,6 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles } from "lucide-react";
+import ingredientScannerImage from "@/assets/ingredient-scanner-mobile.jpg";
 
 interface IngredientScannerPopupProps {
   isOpen: boolean;
@@ -31,24 +32,12 @@ export const IngredientScannerPopup = ({ isOpen, onClose }: IngredientScannerPop
         
         <div className="space-y-6 p-2">
           {/* Mobile UI Preview */}
-          <div className="relative mx-auto max-w-[200px]">
-            <div className="bg-gradient-to-b from-slate-900 to-slate-800 rounded-[2rem] p-2 shadow-2xl">
-              <div className="bg-white rounded-[1.5rem] p-4 min-h-[300px] flex flex-col items-center justify-center">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-primary to-primary/80 rounded-xl flex items-center justify-center mx-auto">
-                    <Sparkles className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-slate-800">Ingredient Scanner</h3>
-                  <p className="text-sm text-slate-600">Point your camera at ingredient labels</p>
-                  <Button 
-                    className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-6 py-2 text-sm font-medium shadow-lg"
-                    disabled
-                  >
-                    Scan Ingredient
-                  </Button>
-                </div>
-              </div>
-            </div>
+          <div className="relative mx-auto max-w-[240px]">
+            <img 
+              src={ingredientScannerImage} 
+              alt="Ingredient Scanner Mobile Interface"
+              className="w-full h-auto rounded-[2rem] shadow-2xl"
+            />
           </div>
 
           {/* Instructions */}
