@@ -338,6 +338,42 @@ export type Database = {
         }
         Relationships: []
       }
+      recipe_hotlist_cache: {
+        Row: {
+          created_at: string
+          id: string
+          last_saved_at: string | null
+          popularity_score: number
+          recipe_id: string
+          recipe_image_url: string | null
+          recipe_title: string
+          save_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_saved_at?: string | null
+          popularity_score?: number
+          recipe_id: string
+          recipe_image_url?: string | null
+          recipe_title: string
+          save_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_saved_at?: string | null
+          popularity_score?: number
+          recipe_id?: string
+          recipe_image_url?: string | null
+          recipe_title?: string
+          save_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       recipe_likes: {
         Row: {
           created_at: string
@@ -891,6 +927,10 @@ export type Database = {
     }
     Functions: {
       assign_owner_role: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      calculate_subscriber_recipe_hotlist: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
