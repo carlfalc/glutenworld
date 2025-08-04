@@ -156,3 +156,21 @@ export const useMostConvertedRecipes = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
+
+// Hook to get cached recipe hotlist based on subscriber saves
+export const useRecipeHotlistCache = () => {
+  return useQuery({
+    queryKey: ['recipe-hotlist-cache'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('recipe_hotlist_cache')
+        .select('*')
+        .order('save_count', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 60 * 60 * 1000, // 1 hour (since cache updates daily)
+  });
+};
