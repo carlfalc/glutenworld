@@ -63,19 +63,35 @@ const ChatMessage = ({ message, onViewRecipe }: ChatMessageProps) => {
     };
   };
 
-  const shouldShowRecipeActions = !message.isUser && isGeneratedRecipe(message.text, message.mode);
-  const recipeData = shouldShowRecipeActions ? parseRecipeFromText(message.text, message.id) : null;
+  // Enhanced recipe detection - check both convertedRecipe property and content patterns
+  const shouldShowRecipeActions = !message.isUser && (
+    !!message.convertedRecipe || isGeneratedRecipe(message.text, message.mode)
+  );
+  const recipeData = shouldShowRecipeActions ? parseRecipeFromText(
+    message.convertedRecipe || message.text, 
+    message.id
+  ) : null;
   
-  // Debug logging
+  // Enhanced debug logging for recipe persistence
   console.log('ChatMessage Debug:', {
     messageId: message.id,
     isUser: message.isUser,
     mode: message.mode,
+    hasConvertedRecipe: !!message.convertedRecipe,
     shouldShowRecipeActions,
     isMobile,
     hasRecipeData: !!recipeData,
-    textLength: message.text.length
+    textLength: message.text.length,
+    recipeDetectionMethod: message.convertedRecipe ? 'convertedRecipe property' : 'content pattern matching'
   });
+
+  // Log successful recipe persistence detection
+  if (shouldShowRecipeActions) {
+    console.log('🍳 RECIPE DISPLAY: Recipe actions will be shown for message', message.id);
+    if (message.convertedRecipe) {
+      console.log('🍳 PERSISTENCE SUCCESS: Message has convertedRecipe property - recipe persisted correctly');
+    }
+  }
 
   return (
     <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`}>

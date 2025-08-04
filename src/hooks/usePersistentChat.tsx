@@ -273,8 +273,15 @@ export const usePersistentChat = () => {
       textPreview: message.text.substring(0, 50) + '...',
       hasImage: !!message.image,
       hasIngredientAnalysis: !!message.ingredientAnalysis,
+      hasConvertedRecipe: !!message.convertedRecipe,
       mode: message.mode
     });
+    
+    // Enhanced logging for recipe persistence
+    if (message.convertedRecipe) {
+      console.log('🍳 RECIPE PERSISTENCE: Message contains convertedRecipe property - will persist in chat history');
+      console.log('🍳 Recipe text preview:', message.convertedRecipe.substring(0, 100) + '...');
+    }
     
     // Log ingredient analysis data specifically
     if (message.ingredientAnalysis) {

@@ -208,13 +208,24 @@ const ChatInterface = () => {
         context: { chatMode }
       });
 
+      const responseText = response.response || "I'm sorry, I couldn't process that request. Please try again.";
+      
+      // Enhanced recipe detection for text-based recipes
+      const isRecipeResponse = detectRecipeContent(responseText, chatMode);
+      
       const aiResponse: Message = {
         id: (Date.now() + 2).toString(),
-        text: response.response || "I'm sorry, I couldn't process that request. Please try again.",
+        text: responseText,
         isUser: false,
         timestamp: new Date(),
         mode: chatMode,
       };
+
+      // Add convertedRecipe property for recipe responses to ensure persistence
+      if (isRecipeResponse) {
+        aiResponse.convertedRecipe = responseText;
+        console.log('✅ Recipe detected in AI response - adding convertedRecipe property for persistence');
+      }
 
       console.log('Adding AI response:', aiResponse);
       addMessage(aiResponse);
@@ -228,6 +239,48 @@ const ChatInterface = () => {
       };
       addMessage(errorMessage);
     }
+  };
+
+  // Enhanced recipe detection function
+  const detectRecipeContent = (text: string, mode?: string): boolean => {
+    // Check if it's from recipe-creator mode
+    if (mode === 'recipe-creator') return true;
+    
+    // Check for recipe-like content patterns
+    const recipePatterns = [
+      /\*\*INGREDIENTS:\*\*/i,
+      /\*\*INSTRUCTIONS:\*\*/i,
+      /\*\*GLUTEN-FREE/i,
+      /\*\*SERVING INFORMATION:\*\*/i,
+      /Prep Time:/i,
+      /Cook Time:/i,
+      /Serves:/i,
+      /Difficulty:/i,
+      /## Ingredients/i,
+      /## Instructions/i,
+      /### Ingredients/i,
+      /### Instructions/i,
+      /\d+\s+cups?\s+/i,
+      /\d+\s+tablespoons?\s+/i,
+      /\d+\s+teaspoons?\s+/i,
+      /\d+\s+oz\s+/i,
+      /\d+\s+lbs?\s+/i
+    ];
+    
+    // Count how many patterns match
+    const patternMatches = recipePatterns.filter(pattern => pattern.test(text)).length;
+    
+    // If we have multiple recipe indicators, it's likely a recipe
+    const isLikelyRecipe = patternMatches >= 2 || mode === 'recipe-creator' || mode === 'conversion';
+    
+    console.log('🔍 Recipe detection:', {
+      mode,
+      patternMatches,
+      isLikelyRecipe,
+      textPreview: text.substring(0, 100) + '...'
+    });
+    
+    return isLikelyRecipe;
   };
 
   const parseIngredientAnalysis = (text: string) => {
