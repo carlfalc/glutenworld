@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles } from "lucide-react";
-import ingredientScannerImage from "@/assets/ingredient-scanner-mobile.jpg";
+const ingredientScannerImage = "/lovable-uploads/8f98f501-52b9-47a9-a181-f21c1a7cd378.png";
 
 interface IngredientScannerPopupProps {
   isOpen: boolean;
@@ -61,12 +61,6 @@ export const IngredientScannerPopup = ({ isOpen, onClose }: IngredientScannerPop
 
           {/* Call to Action */}
           <div className="text-center space-y-3">
-            <Button 
-              onClick={onClose}
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 rounded-lg font-medium shadow-lg"
-            >
-              See the Scanner
-            </Button>
             <Button 
               onClick={onClose}
               variant="outline"

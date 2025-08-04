@@ -403,8 +403,7 @@ const Landing = () => {
          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
            {features.map((feature, index) => <Card 
              key={index} 
-             className={`text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50 ${index === 2 ? 'ring-2 ring-blue-500 border-blue-500/50' : index === 4 ? 'ring-2 ring-blue-500 border-blue-500/50 cursor-pointer' : ''} relative`}
-             onClick={() => index === 4 ? setShowIngredientScannerPopup(true) : undefined}
+             className={`text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50 ${index === 2 ? 'ring-2 ring-blue-500 border-blue-500/50' : index === 4 ? 'ring-2 ring-blue-500 border-blue-500/50' : ''} relative`}
            >
                {(index === 2 || index === 4) && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                    <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
@@ -421,6 +420,16 @@ const Landing = () => {
                  <CardDescription className="text-base">
                    {feature.description}
                  </CardDescription>
+                 {index === 4 && (
+                   <div className="mt-4">
+                     <Button 
+                       onClick={() => setShowIngredientScannerPopup(true)}
+                       className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium shadow-lg"
+                     >
+                       See the Scanner
+                     </Button>
+                   </div>
+                 )}
                </CardContent>
              </Card>)}
          </div>
