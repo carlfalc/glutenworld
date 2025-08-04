@@ -16,6 +16,7 @@ import { FAQModal } from '@/components/FAQModal';
 import { PolicyLegalModal } from '@/components/PolicyLegalModal';
 import { GetStartedInfoModal } from '@/components/GetStartedInfoModal';
 import { StoreLocatorInfoModal } from '@/components/StoreLocatorInfoModal';
+import { CookieConsentModal, CookiePreferences } from '@/components/CookieConsentModal';
 const Landing = () => {
   const navigate = useNavigate();
   const {
@@ -34,6 +35,47 @@ const Landing = () => {
       navigate('/reset-password' + window.location.search, { replace: true });
     }
   }, [navigate]);
+
+  // Check for cookie consent on page load
+  useEffect(() => {
+    const cookieConsent = localStorage.getItem('gluten-world-cookie-consent');
+    if (!cookieConsent) {
+      // Show cookie banner after a brief delay
+      const timer = setTimeout(() => {
+        setShowCookieConsent(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      setCookiePreferences(JSON.parse(cookieConsent));
+    }
+  }, []);
+
+  const handleAcceptAllCookies = () => {
+    const allAccepted = {
+      necessary: true,
+      analytics: true,
+      marketing: true,
+      functional: true
+    };
+    localStorage.setItem('gluten-world-cookie-consent', JSON.stringify(allAccepted));
+    setCookiePreferences(allAccepted);
+  };
+
+  const handleAcceptSelectedCookies = (preferences: CookiePreferences) => {
+    localStorage.setItem('gluten-world-cookie-consent', JSON.stringify(preferences));
+    setCookiePreferences(preferences);
+  };
+
+  const handleRejectAllCookies = () => {
+    const necessaryOnly = {
+      necessary: true,
+      analytics: false,
+      marketing: false,
+      functional: false
+    };
+    localStorage.setItem('gluten-world-cookie-consent', JSON.stringify(necessaryOnly));
+    setCookiePreferences(necessaryOnly);
+  };
   const [showFeatureDetails, setShowFeatureDetails] = useState(false);
   const [showTrialRestriction, setShowTrialRestriction] = useState(false);
   const [showAboutUs, setShowAboutUs] = useState(false);
@@ -42,6 +84,8 @@ const Landing = () => {
   const [showPolicyLegal, setShowPolicyLegal] = useState(false);
   const [showGetStartedInfo, setShowGetStartedInfo] = useState(false);
   const [showStoreLocatorInfo, setShowStoreLocatorInfo] = useState(false);
+  const [showCookieConsent, setShowCookieConsent] = useState(false);
+  const [cookiePreferences, setCookiePreferences] = useState<CookiePreferences | null>(null);
   const {
     canUseStoreLocator,
     hasUsedTrial
@@ -108,6 +152,25 @@ const Landing = () => {
     highlight: "No learning curve"
   }];
   return <div className="min-h-screen bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background">
+      {/* Medical Disclaimer Banner */}
+      <div className="bg-orange-50 dark:bg-orange-950/30 border-b border-orange-200 dark:border-orange-800">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-center gap-2 text-center">
+            <span className="text-orange-600 text-sm">⚠️</span>
+            <p className="text-orange-800 dark:text-orange-200 text-sm">
+              <strong>Medical Disclaimer:</strong> This platform provides information only. Always consult healthcare professionals before making dietary changes.
+              <Button 
+                variant="link" 
+                className="p-0 h-auto ml-1 text-orange-700 dark:text-orange-300 underline text-sm"
+                onClick={() => setShowPolicyLegal(true)}
+              >
+                Learn more
+              </Button>
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <header className="container mx-auto px-4 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -127,10 +190,17 @@ const Landing = () => {
           <Button variant="ghost" onClick={handleSignIn} className="text-foreground hover:text-gluten-primary">
             Sign In
           </Button>
-          <Button onClick={handleGetStarted} className="bg-blue-600 hover:bg-blue-700 flex flex-col h-auto py-2 px-4">
-            <span className="text-white font-medium">Sign up</span>
-            <span className="text-white text-xs font-medium">FREE 5 DAY TRIAL</span>
-          </Button>
+            <Button onClick={handleGetStarted} className="bg-blue-600 hover:bg-blue-700 flex flex-col h-auto py-2 px-4">
+              <span className="text-white font-medium">Sign up</span>
+              <span className="text-white text-xs font-medium">FREE 5 DAY TRIAL</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/contact')}
+              className="text-foreground hover:text-gluten-primary"
+            >
+              Contact
+            </Button>
         </div>
       </header>
 
@@ -154,6 +224,35 @@ const Landing = () => {
           })} className="text-lg px-8 py-4 border-gluten-primary text-gluten-primary hover:bg-gluten-primary/10">
               Learn More
             </Button>
+          </div>
+          
+          {/* App Store Links */}
+          <div className="mt-12 text-center">
+            <p className="text-muted-foreground mb-4">Get the mobile app for the best experience</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 px-6 py-3"
+                disabled
+              >
+                <div className="w-6 h-6 bg-gray-400 rounded"></div>
+                <div className="text-left">
+                  <div className="text-xs text-muted-foreground">Coming Soon to</div>
+                  <div className="font-medium">App Store</div>
+                </div>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 px-6 py-3"
+                disabled
+              >
+                <div className="w-6 h-6 bg-gray-400 rounded"></div>
+                <div className="text-left">
+                  <div className="text-xs text-muted-foreground">Coming Soon to</div>
+                  <div className="font-medium">Google Play</div>
+                </div>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -302,8 +401,11 @@ const Landing = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-primary">Support</h4>
             <div className="space-y-2">
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => navigate('/contact')}>
+                Contact Us
+              </Button>
               <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowSupport(true)}>
-                Contact Support
+                Support Categories
               </Button>
               <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => window.location.href = 'mailto:glutenworldhelp@gmail.com'}>
                 glutenworldhelp@gmail.com
@@ -325,10 +427,47 @@ const Landing = () => {
                 Privacy Policy
               </Button>
               <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
+                Cookie Policy
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
                 Refund Policy
               </Button>
               <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
                 Liability Disclaimer
+              </Button>
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
+                Accessibility
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* App Store Links */}
+        <div className="border-t border-border/50 py-6">
+          <div className="text-center">
+            <h4 className="text-lg font-semibold text-primary mb-4">Download Our Mobile App</h4>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 px-6 py-3"
+                disabled
+              >
+                <div className="w-6 h-6 bg-gray-400 rounded"></div>
+                <div className="text-left">
+                  <div className="text-xs text-muted-foreground">Coming Soon to</div>
+                  <div className="font-medium">App Store</div>
+                </div>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 px-6 py-3"
+                disabled
+              >
+                <div className="w-6 h-6 bg-gray-400 rounded"></div>
+                <div className="text-left">
+                  <div className="text-xs text-muted-foreground">Coming Soon to</div>
+                  <div className="font-medium">Google Play</div>
+                </div>
               </Button>
             </div>
           </div>
@@ -338,7 +477,7 @@ const Landing = () => {
         <div className="border-t border-border/50 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-center md:text-left text-muted-foreground">
-              <p>&copy; 2024 Gluten World. Transform your recipes, transform your life.</p>
+              <p>&copy; 2025 Gluten World. Transform your recipes, transform your life.</p>
             </div>
             <div className="flex gap-4">
               <Button variant="outline" size="sm" onClick={() => setShowAboutUs(true)}>
@@ -363,6 +502,13 @@ const Landing = () => {
       <PolicyLegalModal open={showPolicyLegal} onOpenChange={setShowPolicyLegal} />
       <GetStartedInfoModal isOpen={showGetStartedInfo} onClose={() => setShowGetStartedInfo(false)} />
       <StoreLocatorInfoModal isOpen={showStoreLocatorInfo} onClose={() => setShowStoreLocatorInfo(false)} />
+      <CookieConsentModal 
+        open={showCookieConsent} 
+        onOpenChange={setShowCookieConsent}
+        onAcceptAll={handleAcceptAllCookies}
+        onAcceptSelected={handleAcceptSelectedCookies}
+        onRejectAll={handleRejectAllCookies}
+      />
     </div>;
 };
 export default Landing;

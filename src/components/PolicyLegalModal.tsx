@@ -16,11 +16,14 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
         </DialogHeader>
         <ScrollArea className="h-[70vh] pr-4">
           <Tabs defaultValue="liability" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="liability">Liability</TabsTrigger>
               <TabsTrigger value="payment">Payment</TabsTrigger>
               <TabsTrigger value="refunds">Refunds</TabsTrigger>
               <TabsTrigger value="terms">Terms</TabsTrigger>
+              <TabsTrigger value="privacy">Privacy</TabsTrigger>
+              <TabsTrigger value="cookies">Cookies</TabsTrigger>
+              <TabsTrigger value="accessibility">Access</TabsTrigger>
             </TabsList>
 
             <TabsContent value="liability" className="space-y-6 mt-6">
@@ -293,6 +296,365 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
                       <strong>Contact:</strong> For questions about these terms, contact glutenworldhelp@gmail.com
                     </p>
                   </div>
+                </div>
+              </section>
+            </TabsContent>
+
+            <TabsContent value="privacy" className="space-y-6 mt-6">
+              <section>
+                <h3 className="text-xl font-semibold mb-3 text-primary">Privacy Policy & GDPR Compliance</h3>
+                <div className="space-y-4 text-muted-foreground">
+                  <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">🔒 Your Privacy is Our Priority</h4>
+                    <p className="text-green-700 dark:text-green-300">
+                      We are committed to protecting your personal data and respecting your privacy rights under GDPR and other applicable data protection laws.
+                    </p>
+                  </div>
+
+                  <h4 className="font-semibold text-foreground mb-3">Data We Collect</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Account Information:</strong> Email, name, subscription details</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Usage Data:</strong> Recipes converted, features used, app interactions</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Content Data:</strong> Recipes you save, photos you upload, community posts</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Technical Data:</strong> Device info, IP address, cookies, analytics</span>
+                    </li>
+                  </ul>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">How We Use Your Data</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500">✓</span>
+                      <span>Provide and improve our recipe conversion and store locator services</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500">✓</span>
+                      <span>Personalize your experience and remember your preferences</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500">✓</span>
+                      <span>Process payments and manage your subscription</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500">✓</span>
+                      <span>Send important updates about your account and our services</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500">✓</span>
+                      <span>Analyze usage patterns to improve our AI algorithms</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500">✓</span>
+                      <span>Ensure security and prevent fraud or abuse</span>
+                    </li>
+                  </ul>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Legal Basis for Processing</h4>
+                  <div className="space-y-3">
+                    <div className="border-l-4 border-blue-500 pl-4">
+                      <p><strong>Contract Performance:</strong> Processing necessary to provide our services</p>
+                    </div>
+                    <div className="border-l-4 border-green-500 pl-4">
+                      <p><strong>Legitimate Interest:</strong> Improving services, security, and communications</p>
+                    </div>
+                    <div className="border-l-4 border-purple-500 pl-4">
+                      <p><strong>Consent:</strong> Marketing communications, analytics cookies, optional features</p>
+                    </div>
+                    <div className="border-l-4 border-orange-500 pl-4">
+                      <p><strong>Legal Obligation:</strong> Compliance with laws, tax requirements, safety</p>
+                    </div>
+                  </div>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Data Sharing</h4>
+                  <p className="mb-3">We do not sell your personal data. We may share data with:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Service Providers:</strong> Stripe (payments), cloud hosting, email services</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Legal Requirements:</strong> When required by law or to protect rights</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Business Transfers:</strong> In case of merger, acquisition, or sale</span>
+                    </li>
+                  </ul>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">International Data Transfers</h4>
+                  <p>
+                    Your data may be processed in countries outside your region. We ensure appropriate safeguards are in place, including adequacy decisions, standard contractual clauses, or other approved transfer mechanisms.
+                  </p>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Data Retention</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Account Data:</strong> Until you delete your account or as required by law</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Usage Analytics:</strong> Aggregated and anonymized data may be retained longer</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Financial Records:</strong> 7 years for tax and legal compliance</span>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </TabsContent>
+
+            <TabsContent value="cookies" className="space-y-6 mt-6">
+              <section>
+                <h3 className="text-xl font-semibold mb-3 text-primary">Cookie Policy</h3>
+                <div className="space-y-4 text-muted-foreground">
+                  <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 p-4 rounded-lg">
+                    <h4 className="font-semibold text-orange-800 dark:text-orange-200 mb-2">🍪 What are Cookies?</h4>
+                    <p className="text-orange-700 dark:text-orange-300">
+                      Cookies are small text files stored on your device when you visit our website. They help us provide you with a better experience and understand how our platform is used.
+                    </p>
+                  </div>
+
+                  <h4 className="font-semibold text-foreground mb-3">Types of Cookies We Use</h4>
+                  
+                  <div className="space-y-4">
+                    <div className="border border-green-200 dark:border-green-800 p-4 rounded-lg">
+                      <h5 className="font-semibold text-green-700 dark:text-green-300 mb-2">Essential Cookies (Required)</h5>
+                      <p className="text-sm mb-2">These cookies are necessary for the website to function properly:</p>
+                      <ul className="text-sm space-y-1">
+                        <li>• Authentication and login sessions</li>
+                        <li>• Security and fraud prevention</li>
+                        <li>• Basic website functionality</li>
+                        <li>• Your cookie preferences</li>
+                      </ul>
+                    </div>
+
+                    <div className="border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+                      <h5 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">Analytics Cookies (Optional)</h5>
+                      <p className="text-sm mb-2">Help us understand how you use our platform:</p>
+                      <ul className="text-sm space-y-1">
+                        <li>• Page views and user interactions</li>
+                        <li>• Popular features and content</li>
+                        <li>• Error tracking and performance monitoring</li>
+                        <li>• Aggregated usage statistics</li>
+                      </ul>
+                    </div>
+
+                    <div className="border border-purple-200 dark:border-purple-800 p-4 rounded-lg">
+                      <h5 className="font-semibold text-purple-700 dark:text-purple-300 mb-2">Marketing Cookies (Optional)</h5>
+                      <p className="text-sm mb-2">Used to show you relevant content and advertisements:</p>
+                      <ul className="text-sm space-y-1">
+                        <li>• Personalized content recommendations</li>
+                        <li>• Targeted promotions and offers</li>
+                        <li>• Social media integration</li>
+                        <li>• Third-party advertising networks</li>
+                      </ul>
+                    </div>
+
+                    <div className="border border-orange-200 dark:border-orange-800 p-4 rounded-lg">
+                      <h5 className="font-semibold text-orange-700 dark:text-orange-300 mb-2">Functional Cookies (Optional)</h5>
+                      <p className="text-sm mb-2">Remember your preferences and enhance functionality:</p>
+                      <ul className="text-sm space-y-1">
+                        <li>• Language and region preferences</li>
+                        <li>• UI customizations and settings</li>
+                        <li>• Saved recipes and favorites</li>
+                        <li>• Chat history and AI interactions</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Managing Your Cookie Preferences</h4>
+                  <p className="mb-3">You can control your cookie preferences in several ways:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Cookie Banner:</strong> Accept or reject cookies when you first visit</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Account Settings:</strong> Update preferences anytime in your account</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Browser Settings:</strong> Configure cookie settings in your browser</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Contact Us:</strong> Email us at glutenworldhelp@gmail.com for assistance</span>
+                    </li>
+                  </ul>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Third-Party Cookies</h4>
+                  <p className="mb-3">Some cookies are set by third-party services we use:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Stripe:</strong> Payment processing and fraud prevention</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Analytics Services:</strong> Website usage and performance tracking</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>CDN Services:</strong> Content delivery and caching</span>
+                    </li>
+                  </ul>
+
+                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-4 rounded-lg mt-6">
+                    <p className="text-blue-700 dark:text-blue-300 text-sm">
+                      <strong>Note:</strong> Disabling certain cookies may affect your experience on our platform. Essential cookies cannot be disabled as they are required for basic functionality.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </TabsContent>
+
+            <TabsContent value="accessibility" className="space-y-6 mt-6">
+              <section>
+                <h3 className="text-xl font-semibold mb-3 text-primary">Accessibility Statement</h3>
+                <div className="space-y-4 text-muted-foreground">
+                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">♿ Commitment to Accessibility</h4>
+                    <p className="text-blue-700 dark:text-blue-300">
+                      Gluten World is committed to ensuring digital accessibility for people with disabilities. We continually improve the user experience for everyone and apply relevant accessibility standards.
+                    </p>
+                  </div>
+
+                  <h4 className="font-semibold text-foreground mb-3">Accessibility Standards</h4>
+                  <p className="mb-3">We strive to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards, which include:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span><strong>Perceivable:</strong> Information presented in ways users can perceive</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span><strong>Operable:</strong> Interface components that users can operate</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span><strong>Understandable:</strong> Information and UI operation must be understandable</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span><strong>Robust:</strong> Content must be robust enough for assistive technologies</span>
+                    </li>
+                  </ul>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Accessibility Features</h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <h5 className="font-semibold text-sm">Keyboard Navigation</h5>
+                      <ul className="text-sm space-y-1">
+                        <li>• Full keyboard accessibility</li>
+                        <li>• Logical tab order</li>
+                        <li>• Visible focus indicators</li>
+                        <li>• Skip navigation links</li>
+                      </ul>
+                    </div>
+                    <div className="space-y-3">
+                      <h5 className="font-semibold text-sm">Screen Reader Support</h5>
+                      <ul className="text-sm space-y-1">
+                        <li>• Semantic HTML structure</li>
+                        <li>• Alt text for images</li>
+                        <li>• ARIA labels and descriptions</li>
+                        <li>• Proper heading hierarchy</li>
+                      </ul>
+                    </div>
+                    <div className="space-y-3">
+                      <h5 className="font-semibold text-sm">Visual Design</h5>
+                      <ul className="text-sm space-y-1">
+                        <li>• High contrast color ratios</li>
+                        <li>• Scalable text and UI elements</li>
+                        <li>• Dark/light mode toggle</li>
+                        <li>• Clear visual hierarchy</li>
+                      </ul>
+                    </div>
+                    <div className="space-y-3">
+                      <h5 className="font-semibold text-sm">Content</h5>
+                      <ul className="text-sm space-y-1">
+                        <li>• Clear, simple language</li>
+                        <li>• Descriptive link text</li>
+                        <li>• Error identification</li>
+                        <li>• Form labels and instructions</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Assistive Technology Compatibility</h4>
+                  <p className="mb-3">Our platform is designed to work with common assistive technologies, including:</p>
+                  <div className="grid md:grid-cols-2 gap-2">
+                    <ul className="space-y-1 text-sm">
+                      <li>• JAWS (Windows)</li>
+                      <li>• NVDA (Windows)</li>
+                      <li>• VoiceOver (macOS/iOS)</li>
+                      <li>• TalkBack (Android)</li>
+                    </ul>
+                    <ul className="space-y-1 text-sm">
+                      <li>• Dragon NaturallySpeaking</li>
+                      <li>• Switch navigation devices</li>
+                      <li>• Eye-tracking systems</li>
+                      <li>• Voice control software</li>
+                    </ul>
+                  </div>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Known Limitations</h4>
+                  <p className="mb-3">We are actively working to address the following accessibility challenges:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500">⚠</span>
+                      <span>Some AI-generated recipe images may lack detailed alt text</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500">⚠</span>
+                      <span>Complex data visualizations may need additional description</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500">⚠</span>
+                      <span>Camera capture features require manual operation</span>
+                    </li>
+                  </ul>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Feedback and Support</h4>
+                  <p className="mb-3">We welcome your feedback on accessibility. If you encounter barriers or have suggestions for improvement:</p>
+                  <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        <span><strong>Email:</strong> glutenworldhelp@gmail.com</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        <span><strong>Subject Line:</strong> "Accessibility Feedback"</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        <span><strong>Response Time:</strong> We aim to respond within 2 business days</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Continuous Improvement</h4>
+                  <p>
+                    We regularly review and test our platform with users who have disabilities and assistive technology experts. Our accessibility efforts are ongoing, and we update this statement as we make improvements.
+                  </p>
+
+                  <p className="text-sm text-muted-foreground/80 mt-6">
+                    <strong>Last Updated:</strong> January 2025
+                  </p>
                 </div>
               </section>
             </TabsContent>

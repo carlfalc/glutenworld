@@ -130,10 +130,10 @@ const Header = () => {
                      <NavigationMenuItem>
                        <NavigationMenuLink
                          className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
-                         onClick={() => setShowSupportModal(true)}
+                         onClick={() => navigate('/contact')}
                        >
                          <HelpCircle className="w-4 h-4" />
-                         Support
+                         Contact
                        </NavigationMenuLink>
                      </NavigationMenuItem>
                   </NavigationMenuList>
@@ -213,10 +213,10 @@ const Header = () => {
                        <Button 
                          variant="ghost" 
                          className="justify-start text-lg flex items-center gap-2"
-                         onClick={() => setShowSupportModal(true)}
+                         onClick={() => navigate('/contact')}
                        >
                          <HelpCircle className="w-4 h-4" />
-                         Support
+                         Contact
                        </Button>
                       
                       <div className="border-t pt-4 mt-4">
