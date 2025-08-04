@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles } from "lucide-react";
-const ingredientScannerImage = "/lovable-uploads/8f98f501-52b9-47a9-a181-f21c1a7cd378.png";
+import ingredientScannerImage from "@/assets/ingredient-scanner-mobile.jpg";
 
 interface IngredientScannerPopupProps {
   isOpen: boolean;
