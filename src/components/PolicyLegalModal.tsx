@@ -90,7 +90,7 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary">•</span>
-                      <span><strong>Monthly Premium:</strong> Full access to all features, billed monthly</span>
+                      <span><strong>Quarterly Premium:</strong> Full access to all features, billed quarterly</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary">•</span>
@@ -107,7 +107,7 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
                       <span className="text-primary">•</span>
-                      <span>Monthly subscriptions are billed every 30 days from your signup date</span>
+                      <span>Quarterly subscriptions are billed every 3 months from your signup date</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary">•</span>
@@ -144,24 +144,24 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
                   <p>
                     New users receive a 5-day free trial of premium features. No credit card is required to start the trial. You can cancel anytime during the trial period with no charges applied to your account.
                   </p>
-
-                  <h4 className="font-semibold text-foreground mt-6 mb-3">Subscription Refunds</h4>
-                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
-                    <h5 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">15-Day Satisfaction Guarantee</h5>
-                    <p className="text-blue-700 dark:text-blue-300">
-                      If you're not satisfied with Gluten World Premium within the first 15 days of your subscription, we offer a full refund with no questions asked.
+                  
+                  <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 p-4 rounded-lg mt-4">
+                    <h5 className="font-semibold text-orange-800 dark:text-orange-200 mb-2">⚠️ Trial Billing Notice</h5>
+                    <p className="text-orange-700 dark:text-orange-300">
+                      If you do not cancel before your trial ends, you will be automatically charged for a quarterly subscription.
                     </p>
                   </div>
+
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Subscription Refunds</h4>
+                  <p>
+                    All subscription payments are final. We do not offer refunds for subscription fees once charged, except in cases of technical issues preventing use of paid features or billing errors.
+                  </p>
 
                   <h4 className="font-semibold text-foreground mt-6 mb-3">Refund Eligibility</h4>
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
                       <span className="text-green-500">✓</span>
-                      <span><strong>Eligible:</strong> Requests made within 15 days of initial subscription or renewal</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500">✓</span>
-                      <span><strong>Eligible:</strong> Technical issues preventing use of paid features</span>
+                      <span><strong>Eligible:</strong> Technical issues preventing use of paid features if not resolved</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-green-500">✓</span>
@@ -169,7 +169,7 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500">✗</span>
-                      <span><strong>Not Eligible:</strong> Requests after 15 days from billing date</span>
+                      <span><strong>Not Eligible:</strong> Dissatisfaction with service or change of mind</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500">✗</span>
@@ -205,9 +205,9 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
                     </li>
                   </ol>
 
-                  <h4 className="font-semibold text-foreground mt-6 mb-3">Annual Subscription Refunds</h4>
+                  <h4 className="font-semibold text-foreground mt-6 mb-3">Subscription Cancellation</h4>
                   <p>
-                    Annual subscriptions are eligible for full refunds within 15 days of purchase. After this period, we do not offer partial refunds for unused portions of annual subscriptions, but you can cancel to prevent future renewals.
+                    You can cancel your subscription at any time through your account settings. Cancellation prevents future renewals but does not result in refunds for the current billing period. You will retain access to premium features until your current subscription period expires.
                   </p>
                 </div>
               </section>
