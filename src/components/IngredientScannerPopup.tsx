@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles } from "lucide-react";
-import ingredientScannerImage from "@/assets/ingredient-scanner-mobile.jpg";
+
 
 interface IngredientScannerPopupProps {
   isOpen: boolean;
@@ -48,7 +48,7 @@ export const IngredientScannerPopup = ({ isOpen, onClose }: IngredientScannerPop
               </div>
             ) : (
               <img 
-                src={ingredientScannerImage} 
+                src="https://hfuyqkcbpkrcragnytdv.supabase.co/storage/v1/object/public/product-images/Screenshot 2025-08-04 214139.png" 
                 alt="Ingredient Scanner Mobile Interface"
                 className="w-full h-auto rounded-lg shadow-2xl"
                 onError={handleImageError}
