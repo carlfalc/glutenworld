@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles } from "lucide-react";
-const ingredientScannerImage = "/lovable-uploads/2aae7361-c767-46f0-8a0d-9b6fd7aa6703.png";
+import ingredientScannerImage from "@/assets/ingredient-scanner-mobile.jpg";
 
 interface IngredientScannerPopupProps {
   isOpen: boolean;
@@ -10,6 +10,12 @@ interface IngredientScannerPopupProps {
 }
 
 export const IngredientScannerPopup = ({ isOpen, onClose }: IngredientScannerPopupProps) => {
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md mx-auto bg-gradient-to-br from-background to-secondary/20 border-primary/20">
@@ -33,11 +39,21 @@ export const IngredientScannerPopup = ({ isOpen, onClose }: IngredientScannerPop
         <div className="space-y-6 p-2">
           {/* Mobile UI Preview */}
           <div className="relative mx-auto max-w-[300px]">
-            <img 
-              src={ingredientScannerImage} 
-              alt="Ingredient Scanner Mobile Interface"
-              className="w-full h-auto rounded-lg shadow-2xl"
-            />
+            {imageError ? (
+              <div className="w-full h-[500px] bg-muted/50 rounded-lg shadow-2xl flex items-center justify-center border-2 border-dashed border-muted-foreground/30">
+                <div className="text-center space-y-2">
+                  <Sparkles className="h-12 w-12 text-muted-foreground mx-auto" />
+                  <p className="text-sm text-muted-foreground">Ingredient Scanner Interface</p>
+                </div>
+              </div>
+            ) : (
+              <img 
+                src={ingredientScannerImage} 
+                alt="Ingredient Scanner Mobile Interface"
+                className="w-full h-auto rounded-lg shadow-2xl"
+                onError={handleImageError}
+              />
+            )}
           </div>
 
           {/* Instructions */}
