@@ -8,6 +8,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, CreditCard, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { SubscriptionRetentionModal } from './SubscriptionRetentionModal';
 
 interface MyAccountModalProps {
   open: boolean;
@@ -15,6 +16,9 @@ interface MyAccountModalProps {
 }
 
 export const MyAccountModal = ({ open, onOpenChange }: MyAccountModalProps) => {
+  const [showRetentionModal, setShowRetentionModal] = useState(false);
+  const [onProceedCallback, setOnProceedCallback] = useState<(() => void) | null>(null);
+  
   const { user } = useAuth();
   const { 
     subscribed, 
@@ -36,8 +40,18 @@ export const MyAccountModal = ({ open, onOpenChange }: MyAccountModalProps) => {
     }
   };
 
-  const handleManageSubscription = async () => {
-    await openCustomerPortal();
+  const handleManageSubscription = () => {
+    if (subscribed) {
+      // Show retention modal first for active subscribers
+      setShowRetentionModal(true);
+      setOnProceedCallback(() => () => {
+        setShowRetentionModal(false);
+        openCustomerPortal();
+      });
+    } else {
+      // Direct access for non-subscribers
+      openCustomerPortal();
+    }
   };
 
   return (
@@ -146,6 +160,12 @@ export const MyAccountModal = ({ open, onOpenChange }: MyAccountModalProps) => {
           </Card>
         </div>
       </DialogContent>
+      
+      <SubscriptionRetentionModal
+        open={showRetentionModal}
+        onOpenChange={setShowRetentionModal}
+        onProceedWithCancellation={onProceedCallback || (() => {})}
+      />
     </Dialog>
   );
 };
