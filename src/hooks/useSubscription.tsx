@@ -166,7 +166,7 @@ export const useSubscription = () => {
     }
   };
 
-  const openCustomerPortal = async () => {
+  const openCustomerPortal = async (showRetentionModal?: (onProceed: () => void) => void) => {
     if (!user || !session) {
       toast({
         title: "Authentication Required",
@@ -176,6 +176,19 @@ export const useSubscription = () => {
       return;
     }
 
+    // If retention modal callback is provided, show it first
+    if (showRetentionModal) {
+      showRetentionModal(() => {
+        // User chose to proceed with cancellation after seeing retention offer
+        proceedToCustomerPortal();
+      });
+      return;
+    }
+
+    proceedToCustomerPortal();
+  };
+
+  const proceedToCustomerPortal = async () => {
     try {
       console.log('useSubscription: Opening customer portal...');
       const { data, error } = await supabase.functions.invoke('customer-portal', {
