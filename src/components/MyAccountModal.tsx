@@ -42,14 +42,14 @@ export const MyAccountModal = ({ open, onOpenChange }: MyAccountModalProps) => {
 
   const handleManageSubscription = () => {
     if (subscribed) {
-      // Show retention modal first for active subscribers
+      // Show retention modal first for active paid subscribers (eligible for retention offers)
       setShowRetentionModal(true);
       setOnProceedCallback(() => () => {
         setShowRetentionModal(false);
         openCustomerPortal();
       });
     } else {
-      // Direct access for non-subscribers
+      // Direct access for non-subscribers and trial users (no retention offer needed)
       openCustomerPortal();
     }
   };

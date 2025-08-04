@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ChefHat, Sparkles, User, LogOut, Settings, Crown, AlignJustify, Brain, MapPin } from 'lucide-react';
+import { ChefHat, Sparkles, User, LogOut, Crown, AlignJustify, Brain, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -217,13 +217,6 @@ const Header = () => {
                         </Button>
                         <Button 
                           variant="ghost" 
-                          className="justify-start text-lg w-full"
-                        >
-                          <Settings className="w-4 h-4 mr-2" />
-                          Settings
-                        </Button>
-                        <Button 
-                          variant="ghost" 
                           className="justify-start text-lg w-full text-destructive"
                           onClick={handleSignOut}
                         >
@@ -255,10 +248,6 @@ const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/subscription')}>
                       <Crown className="w-4 h-4 mr-2" />
                       Subscription
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="w-4 h-4 mr-2" />
-                      Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
