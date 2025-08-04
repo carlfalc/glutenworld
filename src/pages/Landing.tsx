@@ -5,7 +5,7 @@ import { useTrialRestriction } from '@/hooks/useTrialRestriction';
 import { TrialRestrictionModal } from '@/components/TrialRestrictionModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock, Info, MapPin, Globe, ExternalLink } from 'lucide-react';
+import { ChefHat, Sparkles, Users, BookOpen, Heart, ArrowRight, Zap, Shield, Clock, Info, MapPin, Globe, ExternalLink, Mail, Bell, Camera, Smartphone } from 'lucide-react';
 import FeatureDetailsPopup from '@/components/FeatureDetailsPopup';
 import PricingCards from '@/components/PricingCards';
 import ReviewsSection from '@/components/ReviewsSection';
@@ -17,6 +17,7 @@ import { PolicyLegalModal } from '@/components/PolicyLegalModal';
 import { GetStartedInfoModal } from '@/components/GetStartedInfoModal';
 import { StoreLocatorInfoModal } from '@/components/StoreLocatorInfoModal';
 import { CookieConsentModal, CookiePreferences } from '@/components/CookieConsentModal';
+import MobileAppBanner from '@/components/MobileAppBanner';
 const Landing = () => {
   const navigate = useNavigate();
   const {
@@ -86,6 +87,8 @@ const Landing = () => {
   const [showStoreLocatorInfo, setShowStoreLocatorInfo] = useState(false);
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [cookiePreferences, setCookiePreferences] = useState<CookiePreferences | null>(null);
+  const [emailForNotifications, setEmailForNotifications] = useState('');
+  const [emailSignupSuccess, setEmailSignupSuccess] = useState(false);
   const {
     canUseStoreLocator,
     hasUsedTrial
@@ -107,6 +110,26 @@ const Landing = () => {
       navigate('/store-locator');
     } else {
       setShowTrialRestriction(true);
+    }
+  };
+
+  const handleEmailSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (emailForNotifications && emailForNotifications.includes('@')) {
+      // Store email for launch notifications
+      localStorage.setItem('app-launch-email', emailForNotifications);
+      
+      // Track analytics event (future implementation)
+      if (cookiePreferences?.analytics) {
+        // Analytics tracking will be implemented here
+        console.log('App launch email signup:', emailForNotifications);
+      }
+      
+      setEmailSignupSuccess(true);
+      setTimeout(() => {
+        setEmailSignupSuccess(false);
+        setEmailForNotifications('');
+      }, 3000);
     }
   };
   const features = [{
@@ -214,6 +237,22 @@ const Landing = () => {
             <span className="text-foreground">& <span className="text-blue-600">Scan Labels</span> to Get Precise Information</span>
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Navigate the tricky world of Gluten-laden & Allergen products with confidence. You can scan ingedient labels that will quickly illustrate whether the product is GF/VEGAN/VEGETARIAN/ DAIRY FREE 😊 Our trained 'Convert Glutent AI' Converts your favorite recipes uploaded without gluten & our 'Recipe Creator' - Creates recipes that don't contain gluten, making your favorite dishes accessible and delicious.</p>
+          
+          {/* Benefit Highlights */}
+          <div className="flex flex-wrap justify-center gap-6 mb-8">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Camera className="w-5 h-5 text-blue-600" />
+              <span>Scan labels instantly with your camera</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Zap className="w-5 h-5 text-gluten-primary" />
+              <span>AI-powered recipe conversion in seconds</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="w-5 h-5 text-blue-600" />
+              <span>Find gluten-free stores worldwide</span>
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" onClick={handleGetStarted} className="bg-gluten-primary hover:bg-gluten-primary/90 text-lg px-8 py-4">
               Start Free Trial
@@ -226,32 +265,84 @@ const Landing = () => {
             </Button>
           </div>
           
-          {/* App Store Links */}
+          {/* Enhanced App Store Section */}
           <div className="mt-12 text-center">
-            <p className="text-muted-foreground mb-4">Get the mobile app for the best experience</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 px-6 py-3"
-                disabled
-              >
-                <div className="w-6 h-6 bg-gray-400 rounded"></div>
-                <div className="text-left">
-                  <div className="text-xs text-muted-foreground">Coming Soon to</div>
-                  <div className="font-medium">App Store</div>
-                </div>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 px-6 py-3"
-                disabled
-              >
-                <div className="w-6 h-6 bg-gray-400 rounded"></div>
-                <div className="text-left">
-                  <div className="text-xs text-muted-foreground">Coming Soon to</div>
-                  <div className="font-medium">Google Play</div>
-                </div>
-              </Button>
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Smartphone className="w-5 h-5 text-blue-600" />
+                <p className="text-lg font-medium text-foreground">Mobile App Coming Soon</p>
+              </div>
+              <p className="text-muted-foreground mb-6">Get instant notifications when our mobile app launches with exclusive early access features!</p>
+              
+              {/* Email Signup for Launch Notifications */}
+              <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 mb-6">
+                <form onSubmit={handleEmailSignup} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                  <div className="flex-1">
+                    <input
+                      type="email"
+                      placeholder="Enter your email for launch updates"
+                      value={emailForNotifications}
+                      onChange={(e) => setEmailForNotifications(e.target.value)}
+                      className="w-full px-4 py-2 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                    disabled={emailSignupSuccess}
+                  >
+                    {emailSignupSuccess ? (
+                      <span className="flex items-center gap-2">
+                        <Heart className="w-4 h-4" />
+                        Thanks!
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Bell className="w-4 h-4" />
+                        Notify Me
+                      </span>
+                    )}
+                  </Button>
+                </form>
+                {emailSignupSuccess && (
+                  <p className="text-green-600 text-sm mt-2 animate-fade-in">
+                    🎉 You'll be the first to know when we launch!
+                  </p>
+                )}
+              </div>
+              
+              {/* App Store Buttons with Real Icons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-3 px-6 py-4 hover:scale-105 transition-transform duration-200 border-2 hover:border-blue-500 group"
+                  disabled
+                >
+                  {/* Apple App Store Icon */}
+                  <svg className="w-8 h-8 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  <div className="text-left">
+                    <div className="text-xs text-muted-foreground">Coming Soon to</div>
+                    <div className="font-medium">App Store</div>
+                  </div>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-3 px-6 py-4 hover:scale-105 transition-transform duration-200 border-2 hover:border-green-500 group"
+                  disabled
+                >
+                  {/* Google Play Store Icon */}
+                  <svg className="w-8 h-8 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 20.5v-17c0-.35.15-.65.39-.84l9.83 9.83L3.39 21.34c-.24-.19-.39-.49-.39-.84M16.83 12.83l-3.53 3.53-9.83-9.83 9.83-9.83 3.53 3.53L14.69 2.25l-8.22 8.22L14.69 21.75l2.14-8.92M21.35 12.83l-1.56.89-1.56-.89 1.56-.89 1.56.89z"/>
+                  </svg>
+                  <div className="text-left">
+                    <div className="text-xs text-muted-foreground">Coming Soon to</div>
+                    <div className="font-medium">Google Play</div>
+                  </div>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -442,17 +533,24 @@ const Landing = () => {
           </div>
         </div>
 
-        {/* App Store Links */}
-        <div className="border-t border-border/50 py-6">
+        {/* Enhanced App Store Links in Footer */}
+        <div className="border-t border-border/50 py-8">
           <div className="text-center">
-            <h4 className="text-lg font-semibold text-primary mb-4">Download Our Mobile App</h4>
+            <h4 className="text-lg font-semibold text-primary mb-4 flex items-center justify-center gap-2">
+              <Smartphone className="w-5 h-5" />
+              Mobile App Coming Soon
+            </h4>
+            <p className="text-muted-foreground mb-4">Experience the full power of Gluten World on your mobile device</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 px-6 py-3"
+                className="flex items-center gap-3 px-6 py-3 hover:scale-105 transition-transform duration-200 border-2 hover:border-blue-500 group"
                 disabled
               >
-                <div className="w-6 h-6 bg-gray-400 rounded"></div>
+                {/* Apple App Store Icon */}
+                <svg className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                </svg>
                 <div className="text-left">
                   <div className="text-xs text-muted-foreground">Coming Soon to</div>
                   <div className="font-medium">App Store</div>
@@ -460,10 +558,13 @@ const Landing = () => {
               </Button>
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 px-6 py-3"
+                className="flex items-center gap-3 px-6 py-3 hover:scale-105 transition-transform duration-200 border-2 hover:border-green-500 group"
                 disabled
               >
-                <div className="w-6 h-6 bg-gray-400 rounded"></div>
+                {/* Google Play Store Icon */}
+                <svg className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 20.5v-17c0-.35.15-.65.39-.84l9.83 9.83L3.39 21.34c-.24-.19-.39-.49-.39-.84M16.83 12.83l-3.53 3.53-9.83-9.83 9.83-9.83 3.53 3.53L14.69 2.25l-8.22 8.22L14.69 21.75l2.14-8.92M21.35 12.83l-1.56.89-1.56-.89 1.56-.89 1.56.89z"/>
+                </svg>
                 <div className="text-left">
                   <div className="text-xs text-muted-foreground">Coming Soon to</div>
                   <div className="font-medium">Google Play</div>
@@ -509,6 +610,14 @@ const Landing = () => {
         onAcceptSelected={handleAcceptSelectedCookies}
         onRejectAll={handleRejectAllCookies}
       />
+      
+      {/* Mobile App Banner for mobile users */}
+      <MobileAppBanner onEmailSignup={(email) => {
+        localStorage.setItem('app-launch-email', email);
+        if (cookiePreferences?.analytics) {
+          console.log('Mobile banner email signup:', email);
+        }
+      }} />
     </div>;
 };
 export default Landing;
