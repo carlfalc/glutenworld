@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ChefHat, Sparkles, User, LogOut, Crown, AlignJustify, Brain, MapPin } from 'lucide-react';
+import { ChefHat, Sparkles, User, LogOut, Crown, AlignJustify, Brain, MapPin, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -31,6 +31,7 @@ import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { MyAccountModal } from '@/components/MyAccountModal';
+import { SupportModal } from '@/components/SupportModal';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -38,6 +39,7 @@ const Header = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showMyAccount, setShowMyAccount] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -116,15 +118,24 @@ const Header = () => {
                         AI Recipe Generator
                       </NavigationMenuLink>
                     </NavigationMenuItem>
-                    <NavigationMenuItem>
-                      <NavigationMenuLink
-                        className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1", subscribed ? "text-gluten-primary" : "")}
-                        onClick={() => navigate('/subscription')}
-                      >
-                        {subscribed && <Crown className="w-4 h-4" />}
-                        Subscription
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                     <NavigationMenuItem>
+                       <NavigationMenuLink
+                         className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1", subscribed ? "text-gluten-primary" : "")}
+                         onClick={() => navigate('/subscription')}
+                       >
+                         {subscribed && <Crown className="w-4 h-4" />}
+                         Subscription
+                       </NavigationMenuLink>
+                     </NavigationMenuItem>
+                     <NavigationMenuItem>
+                       <NavigationMenuLink
+                         className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
+                         onClick={() => setShowSupportModal(true)}
+                       >
+                         <HelpCircle className="w-4 h-4" />
+                         Support
+                       </NavigationMenuLink>
+                     </NavigationMenuItem>
                   </NavigationMenuList>
                 </NavigationMenu>
               )}
@@ -191,14 +202,22 @@ const Header = () => {
                         <Brain className="w-4 h-4" />
                         AI Recipe Generator
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="justify-start text-lg flex items-center gap-2"
-                        onClick={() => navigate('/subscription')}
-                      >
-                        {subscribed && <Crown className="w-4 h-4" />}
-                        Subscription
-                      </Button>
+                       <Button 
+                         variant="ghost" 
+                         className="justify-start text-lg flex items-center gap-2"
+                         onClick={() => navigate('/subscription')}
+                       >
+                         {subscribed && <Crown className="w-4 h-4" />}
+                         Subscription
+                       </Button>
+                       <Button 
+                         variant="ghost" 
+                         className="justify-start text-lg flex items-center gap-2"
+                         onClick={() => setShowSupportModal(true)}
+                       >
+                         <HelpCircle className="w-4 h-4" />
+                         Support
+                       </Button>
                       
                       <div className="border-t pt-4 mt-4">
                         <div className="flex items-center gap-2 mb-4 px-3">
@@ -272,6 +291,10 @@ const Header = () => {
       <MyAccountModal 
         open={showMyAccount} 
         onOpenChange={setShowMyAccount} 
+      />
+      <SupportModal 
+        open={showSupportModal} 
+        onOpenChange={setShowSupportModal} 
       />
     </header>
   );
