@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Info, BookOpen, Heart } from 'lucide-react';
+import { Menu, Info, BookOpen, Heart, Home, Globe, MapPin, Store, Settings, LogOut, User } from 'lucide-react';
 import Header from '@/components/Header';
 import ChatInterface from '@/components/ChatInterface';
 import RecipeHotlist from '@/components/RecipeHotlist';
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/sheet';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { trialData, canAccessFeatures, startTrial, refreshTrialData } = useTrialManagement();
@@ -67,6 +67,14 @@ const Dashboard = () => {
     }
   }, [refreshTrialData]);
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full space-y-6">
@@ -115,27 +123,98 @@ const Dashboard = () => {
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:w-80 bg-card/95 backdrop-blur-md border-border/50 overflow-y-auto">
               <div className="p-4 space-y-6">
-                {/* My Recipes link at the top */}
-                <div className="border-b border-border/50 pb-4 space-y-2">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
-                    onClick={() => navigate('/my-recipes')}
-                  >
-                    <BookOpen className="w-5 h-5 mr-2 text-gluten-primary" />
-                    My Recipes
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
-                    onClick={() => navigate('/dashboard')}
-                  >
-                    <Heart className="w-5 h-5 mr-2 text-red-500" />
-                    My Favorites
-                  </Button>
+                {/* Navigation Section */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-2">
+                    Navigation
+                  </h3>
+                  <div className="space-y-1">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                      onClick={() => navigate('/dashboard')}
+                    >
+                      <Home className="w-5 h-5 mr-2 text-gluten-primary" />
+                      Home
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                      onClick={() => navigate('/gluten-world')}
+                    >
+                      <Globe className="w-5 h-5 mr-2 text-gluten-primary" />
+                      Gluten World
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                      onClick={() => navigate('/my-recipes')}
+                    >
+                      <BookOpen className="w-5 h-5 mr-2 text-gluten-primary" />
+                      My Recipes
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                      onClick={() => navigate('/fav-places')}
+                    >
+                      <MapPin className="w-5 h-5 mr-2 text-gluten-primary" />
+                      Fav Places
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                      onClick={() => navigate('/store-locator')}
+                    >
+                      <Store className="w-5 h-5 mr-2 text-gluten-primary" />
+                      Store Locator
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                      onClick={() => navigate('/subscription')}
+                    >
+                      <Settings className="w-5 h-5 mr-2 text-gluten-primary" />
+                      Subscription
+                    </Button>
+                  </div>
                 </div>
-                <SidebarContent />
+
+                {/* Account Section */}
+                <div className="border-t border-border/50 pt-4 space-y-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-2">
+                    Account
+                  </h3>
+                  <div className="space-y-1">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                      onClick={() => navigate('/dashboard')}
+                    >
+                      <Heart className="w-5 h-5 mr-2 text-red-500" />
+                      My Favorites
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left font-medium text-foreground hover:bg-background/60"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="w-5 h-5 mr-2 text-muted-foreground" />
+                      Sign Out
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Existing Sidebar Content */}
+                <div className="border-t border-border/50 pt-6">
+                  <SidebarContent />
+                </div>
               </div>
             </SheetContent>
           </Sheet>
