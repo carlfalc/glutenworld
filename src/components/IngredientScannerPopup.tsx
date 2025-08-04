@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles } from "lucide-react";
-import ingredientScannerImage from "@/assets/ingredient-scanner-mobile.jpg";
+import ingredientScannerImage from "@/assets/ingredient-scanner-popup.png";
 
 interface IngredientScannerPopupProps {
   isOpen: boolean;
@@ -32,11 +32,11 @@ export const IngredientScannerPopup = ({ isOpen, onClose }: IngredientScannerPop
         
         <div className="space-y-6 p-2">
           {/* Mobile UI Preview */}
-          <div className="relative mx-auto max-w-[240px]">
+          <div className="relative mx-auto max-w-[300px]">
             <img 
               src={ingredientScannerImage} 
               alt="Ingredient Scanner Mobile Interface"
-              className="w-full h-auto rounded-[2rem] shadow-2xl"
+              className="w-full h-auto rounded-lg shadow-2xl"
             />
           </div>
 
@@ -60,10 +60,17 @@ export const IngredientScannerPopup = ({ isOpen, onClose }: IngredientScannerPop
           </div>
 
           {/* Call to Action */}
-          <div className="text-center">
+          <div className="text-center space-y-3">
             <Button 
               onClick={onClose}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white px-8 py-2 rounded-lg font-medium shadow-lg"
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 rounded-lg font-medium shadow-lg"
+            >
+              See the Scanner
+            </Button>
+            <Button 
+              onClick={onClose}
+              variant="outline"
+              className="w-full"
             >
               Get Started Now
             </Button>
