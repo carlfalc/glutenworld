@@ -17,6 +17,7 @@ import { PolicyLegalModal } from '@/components/PolicyLegalModal';
 import { GetStartedInfoModal } from '@/components/GetStartedInfoModal';
 import { StoreLocatorInfoModal } from '@/components/StoreLocatorInfoModal';
 import { CookieConsentModal, CookiePreferences } from '@/components/CookieConsentModal';
+import { IngredientScannerPopup } from '@/components/IngredientScannerPopup';
 import MobileAppBanner from '@/components/MobileAppBanner';
 const Landing = () => {
   const navigate = useNavigate();
@@ -85,6 +86,7 @@ const Landing = () => {
   const [showPolicyLegal, setShowPolicyLegal] = useState(false);
   const [showGetStartedInfo, setShowGetStartedInfo] = useState(false);
   const [showStoreLocatorInfo, setShowStoreLocatorInfo] = useState(false);
+  const [showIngredientScannerPopup, setShowIngredientScannerPopup] = useState(false);
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [cookiePreferences, setCookiePreferences] = useState<CookiePreferences | null>(null);
   const [emailForNotifications, setEmailForNotifications] = useState('');
@@ -399,7 +401,11 @@ const Landing = () => {
         </div>
         
          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
-           {features.map((feature, index) => <Card key={index} className={`text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50 ${index === 2 ? 'ring-2 ring-blue-500 border-blue-500/50' : index === 4 ? 'ring-2 ring-blue-500 border-blue-500/50' : ''} relative`}>
+           {features.map((feature, index) => <Card 
+             key={index} 
+             className={`text-center hover:shadow-lg transition-all duration-300 hover:scale-105 bg-card/50 backdrop-blur-sm border-border/50 ${index === 2 ? 'ring-2 ring-blue-500 border-blue-500/50' : index === 4 ? 'ring-2 ring-blue-500 border-blue-500/50 cursor-pointer' : ''} relative`}
+             onClick={() => index === 4 ? setShowIngredientScannerPopup(true) : undefined}
+           >
                {(index === 2 || index === 4) && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                    <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
                      {index === 2 ? 'Premium Feature' : 'Our Most Popular Feature'}
@@ -603,6 +609,7 @@ const Landing = () => {
       <PolicyLegalModal open={showPolicyLegal} onOpenChange={setShowPolicyLegal} />
       <GetStartedInfoModal isOpen={showGetStartedInfo} onClose={() => setShowGetStartedInfo(false)} />
       <StoreLocatorInfoModal isOpen={showStoreLocatorInfo} onClose={() => setShowStoreLocatorInfo(false)} />
+      <IngredientScannerPopup isOpen={showIngredientScannerPopup} onClose={() => setShowIngredientScannerPopup(false)} />
       <CookieConsentModal 
         open={showCookieConsent} 
         onOpenChange={setShowCookieConsent}
