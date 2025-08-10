@@ -20,6 +20,7 @@ import StoreLocator from "./pages/StoreLocator";
 import FavPlaces from "./pages/FavPlaces";
 import AddProduct from "./pages/AddProduct";
 import Contact from "./pages/Contact";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -33,12 +34,20 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Isolated reset password route - no AuthProvider/ChatProvider to prevent interference */}
+            {/* Isolated routes - no AuthProvider/ChatProvider to prevent interference */}
             <Route 
               path="/reset-password" 
               element={
                 <MinimalLayout>
                   <ResetPassword />
+                </MinimalLayout>
+              } 
+            />
+            <Route 
+              path="/privacy-policy" 
+              element={
+                <MinimalLayout>
+                  <PrivacyPolicy />
                 </MinimalLayout>
               } 
             />
