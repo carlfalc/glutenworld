@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,6 +12,7 @@ interface PolicyLegalModalProps {
 }
 
 export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) => {
+  const navigate = useNavigate();
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
 
@@ -33,7 +35,7 @@ export const PolicyLegalModal = ({ open, onOpenChange }: PolicyLegalModalProps) 
                 </p>
                 <Button 
                   variant="outline" 
-                  onClick={() => setPrivacyOpen(true)}
+                  onClick={() => navigate('/privacy-policy')}
                   className="w-full"
                 >
                   View Full Privacy Policy

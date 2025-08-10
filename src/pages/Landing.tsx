@@ -529,7 +529,7 @@ const Landing = () => {
               <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
                 Terms of Service
               </Button>
-              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
+              <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => navigate('/privacy-policy')}>
                 Privacy Policy
               </Button>
               <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary block" onClick={() => setShowPolicyLegal(true)}>
