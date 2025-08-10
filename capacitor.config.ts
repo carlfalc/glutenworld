@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.glutenworld.app',
-  appName: 'GlutenWorld',
+  appId: 'com.glutenscanner.app',
+  appName: 'GlutenScanner',
   webDir: 'dist',
   bundledWebRuntime: false,
   // Production build - remove server config to use built files
