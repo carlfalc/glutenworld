@@ -58,7 +58,7 @@ const App = () => {
                 <ChatProvider>
                   <Routes>
                     <Route path="/" element={<Landing />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/app" element={<Dashboard />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/gluten-world" element={<GlutenWorld />} />
                     <Route path="/my-recipes" element={<MyRecipes />} />

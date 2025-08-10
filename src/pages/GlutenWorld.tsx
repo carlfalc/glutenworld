@@ -51,7 +51,7 @@ const GlutenWorld = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/app')}
                 className="text-primary-foreground hover:bg-primary-foreground/20"
               >
                 <ArrowLeft className="h-4 w-4" />
