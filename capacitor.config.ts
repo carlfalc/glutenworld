@@ -6,10 +6,10 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   bundledWebRuntime: false,
   // Production build - remove server config to use built files
-  server: {
-    url: 'https://f766b849-5442-4d85-910f-517fa17ebb2e.lovableproject.com?forceHideBadge=true',
-    cleartext: true
-  },
+  // server: {
+  //   url: 'https://f766b849-5442-4d85-910f-517fa17ebb2e.lovableproject.com?forceHideBadge=true',
+  //   cleartext: true
+  // },
   plugins: {
     SplashScreen: {
       launchShowDuration: 3000,
@@ -24,9 +24,9 @@ const config: CapacitorConfig = {
     }
   },
   android: {
-    allowMixedContent: true,
+    allowMixedContent: false,
     captureInput: true,
-    webContentsDebuggingEnabled: true,
+    webContentsDebuggingEnabled: false,
     // Enable screenshots and screen recording
     useLegacyBridge: false,
     // Security settings that allow screenshots
