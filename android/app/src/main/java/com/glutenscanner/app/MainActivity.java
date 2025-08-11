@@ -1,4 +1,4 @@
-package app.lovable.f766b84954424d85910f517fa17ebb2e;
+package com.glutenscanner.app;
 
 import android.os.Bundle;
 import android.view.WindowManager;

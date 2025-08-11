@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.lovable.f766b84954424d85910f517fa17ebb2e">
+    package="com.glutenscanner.app">
 
     <application
         android:allowBackup="true"
