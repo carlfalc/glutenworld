@@ -206,11 +206,24 @@ const BlogPost = () => {
                   }
                   // Handle regular paragraphs with improved formatting
                   else {
+                    // Handle Free Trial CTAs - convert to buttons
+                    if (line.includes('Free Trial') && line.includes('](/auth)')) {
+                      const match = line.match(/\*\*\[([^\]]+)\]\(\/auth\)\*\*/);
+                      if (match) {
+                        const buttonText = match[1];
+                        return `<div class="text-center my-8">
+                          <button onclick="window.location.href='/auth'" class="bg-gradient-to-r from-gluten-primary to-gluten-primary/80 hover:from-gluten-primary/90 hover:to-gluten-primary/70 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-0">
+                            ${buttonText}
+                          </button>
+                        </div>`;
+                      }
+                    }
+                    
                     // Replace **bold** text
                     let formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>');
                     // Replace *italic* text
                     formattedLine = formattedLine.replace(/\*(.*?)\*/g, '<em>$1</em>');
-                    // Handle links
+                    // Handle regular links (not Free Trial CTAs)
                     formattedLine = formattedLine.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary hover:text-primary/80 underline">$1</a>');
                     
                     return `<p class="mb-4 leading-relaxed text-foreground">${formattedLine}</p>`;
