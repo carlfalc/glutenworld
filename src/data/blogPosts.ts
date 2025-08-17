@@ -279,7 +279,7 @@ Living gluten-free doesn't mean living in fear – it means being informed. Thes
 
 Remember Sarah from earlier? She's been gluten-free incident-free for 18 months now. Her secret? *"I scan everything. Even products I've bought before. It takes 2 seconds and saves weeks of suffering."*
 
-**[✅ Free Trial - Start Protecting Yourself](/auth)**
+
 
 ---
 
