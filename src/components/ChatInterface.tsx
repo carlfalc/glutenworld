@@ -290,16 +290,17 @@ const ChatInterface = () => {
     let analysis: any = null;
     
     if (text.includes('Product:') || text.includes('Safety Rating:') || text.includes('Gluten Status:') || 
-        text.includes('PRODUCT IDENTIFICATION:') || text.includes('GLUTEN STATUS:') || text.includes('INGREDIENT ANALYSIS')) {
+        text.includes('PRODUCT IDENTIFICATION:') || text.includes('GLUTEN STATUS:') || 
+        text.includes('INGREDIENT ANALYSIS') || text.includes('COMPREHENSIVE INGREDIENT ANALYSIS')) {
       
       analysis = {
         productName: extractValue(text, 'Product Name:') || extractValue(text, 'Product:') || 'Unknown Product',
         analysis: text,
-        safetyRating: extractValue(text, 'Safety Rating:') || extractValue(text, 'Celiac Safety Level:'),
-        glutenStatus: extractValue(text, 'Gluten Status:') || extractValue(text, 'GLUTEN STATUS:'),
-        dairyStatus: extractValue(text, 'Dairy Status:') || extractValue(text, 'DAIRY STATUS:'),
-        veganStatus: extractValue(text, 'Vegan Status:') || extractValue(text, 'VEGAN STATUS:'),
-        allergenWarnings: extractAllergens(text),
+        safetyRating: extractValue(text, 'Celiac Safety:') || extractValue(text, 'Safety Rating:') || extractValue(text, 'Celiac Safety Level:'),
+        glutenStatus: extractValue(text, 'GLUTEN STATUS:') || extractValue(text, 'Gluten Status:'),
+        dairyStatus: extractValue(text, 'DAIRY STATUS:') || extractValue(text, 'Dairy Status:'),
+        veganStatus: extractValue(text, 'VEGAN STATUS:') || extractValue(text, 'Vegan Status:'),
+        allergenWarnings: extractComprehensiveAllergens(text),
         productCategory: extractValue(text, 'Product Type:') || extractValue(text, 'Category:'),
         productDescription: extractValue(text, 'Brand:'),
       };
@@ -318,13 +319,54 @@ const ChatInterface = () => {
     return match ? match[1].trim().replace(/^[•\-\*]\s*/, '') : undefined;
   };
 
-  const extractAllergens = (text: string): string[] => {
-    const allergenMatch = text.match(/(?:Allergens?|Contains|May Contain)[:\s]+([^\n]+)/i);
-    if (allergenMatch) {
-      return allergenMatch[1].split(',').map(a => a.trim()).filter(a => a);
+  const extractComprehensiveAllergens = (text: string): string[] => {
+    const allergens: string[] = [];
+    const allergenSection = text.match(/COMPREHENSIVE ALLERGEN ALERT:(.*?)(?=\*\*|$)/is);
+    
+    if (allergenSection) {
+      const allergenText = allergenSection[1];
+      
+      // Extract from each of the 14 major allergen categories
+      const categories = [
+        'Gluten/Wheat', 'Dairy/Milk', 'Eggs', 'Tree Nuts', 'Peanuts', 
+        'Soy', 'Fish', 'Shellfish', 'Sesame', 'Sulfites', 
+        'Mustard', 'Celery', 'Lupin', 'Mollusks'
+      ];
+      
+      categories.forEach(category => {
+        const categoryRegex = new RegExp(`${category}:\\s*([^\\n•]+)`, 'i');
+        const match = allergenText.match(categoryRegex);
+        if (match && !match[1].toLowerCase().includes('not detected') && !match[1].toLowerCase().includes('none')) {
+          allergens.push(`${category}: ${match[1].trim()}`);
+        }
+      });
+      
+      // Also look for traditional "Contains:" and "May Contain:" sections for backward compatibility
+      const containsMatch = allergenText.match(/Contains:\s*([^\n•]+)/i);
+      if (containsMatch) {
+        const containsItems = containsMatch[1].split(',').map(item => item.trim());
+        allergens.push(...containsItems);
+      }
+      
+      const mayContainMatch = allergenText.match(/May Contain:\s*([^\n•]+)/i);
+      if (mayContainMatch) {
+        const mayContainItems = mayContainMatch[1].split(',').map(item => item.trim());
+        allergens.push(...mayContainItems.map(item => `May contain ${item}`));
+      }
     }
-    return [];
+    
+    // Fallback to original allergen extraction for backward compatibility
+    if (allergens.length === 0) {
+      const allergenMatch = text.match(/(?:Allergens?|Contains|May Contain)[:\s]+([^\n]+)/i);
+      if (allergenMatch) {
+        return allergenMatch[1].split(',').map(a => a.trim()).filter(a => a);
+      }
+    }
+    
+    return allergens.filter(allergen => allergen && allergen !== 'None');
   };
+
+  const extractAllergens = extractComprehensiveAllergens;
 
   const handleRecipeImageCapture = async (imageBase64: string, source: 'camera' | 'upload' | 'screenshot') => {
     console.log('Recipe image captured:', source, 'Image size:', imageBase64.length);
