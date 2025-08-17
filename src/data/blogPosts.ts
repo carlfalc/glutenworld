@@ -90,7 +90,7 @@ Based on number of safe options, celiac reviews, and contamination reports:
 - **47** dedicated GF kitchens
 - **Best areas:** Manhattan (especially West Village), Brooklyn
 - **Must-visit:** Senza Gluten (100% GF Italian), Friedman's, Noglu
-- **Insider tip:** Download our offline NYC map before visiting
+- **Insider tip:** Check our app for real-time updates before visiting
 
 **2. Los Angeles, USA** ☀️
 - **987** GF locations
@@ -324,12 +324,12 @@ Based on analysis of 10,000+ contamination reports, never eat at restaurants tha
 
 ### The Game-Changing Features You Need
 
-**1. Offline Maps** 📱
-Download entire cities before traveling. Our users report this saves them in:
-- Subway systems without signal
-- Rural areas
-- International roaming situations
+**1. Smart Location Search** 📱
+Find restaurants instantly with intelligent filters. Our users report this helps them with:
+- Quick safe dining decisions
 - Emergency "need food now" moments
+- Discovering new celiac-friendly options
+- Real-time availability updates
 
 **2. Real-Time Updates** 🔄
 - Closure alerts
@@ -423,7 +423,7 @@ Don't let food fears limit your life. Here's what to do right now:
 
 **[Start Your 5-Day Free Trial - Find Safe Restaurants Worldwide](/locations)**
 
-*No credit card required • Works offline • 50,000+ verified locations*
+*No credit card required • Updated daily • 50,000+ verified locations*
 
 ---
 
