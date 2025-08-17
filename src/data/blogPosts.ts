@@ -66,6 +66,8 @@ Most people with celiac disease know to check food labels, but **medications are
 ### Real User Story
 > *"I was taking a daily vitamin for three months and couldn't figure out why I felt sick constantly. Our scanner app detected gluten in the 'natural coating' – it was wheat-derived. I had been poisoning myself daily."* - Sarah M., app user
 
+**[Free Trial - Scan Your Medications Now](/auth)**
+
 **Pro Tip:** Always scan medication barcodes or photograph ingredient lists before taking anything new. Even if you've taken a medication before, manufacturers can change formulations without notice.
 
 ---
@@ -129,6 +131,8 @@ Malt vinegar is made from barley and is NOT gluten-free, despite what some websi
 31. **Marinades** - Pre-made varieties
 
 ---
+
+**[⚡ Free Trial - Never Miss Hidden Gluten Again](/auth)**
 
 <a id="beauty"></a>
 ## Beauty & Personal Care: Yes, This Matters
@@ -271,6 +275,8 @@ Living gluten-free doesn't mean living in fear – it means being informed. Thes
 
 Remember Sarah from earlier? She's been gluten-free incident-free for 18 months now. Her secret? *"I scan everything. Even products I've bought before. It takes 2 seconds and saves weeks of suffering."*
 
+**[✅ Free Trial - Start Protecting Yourself](/auth)**
+
 ---
 
 ## Take Action Today
@@ -287,6 +293,8 @@ Don't wait for your next accidental exposure. Here's what to do right now:
 Join 500,000+ people who never worry about hidden gluten again.
 
 **[Get Your Free 5-Day Trial - Start Now](/auth)**
+
+**[🚀 FREE TRIAL](/auth)**
 
 *No credit card required • Cancel anytime*
 
