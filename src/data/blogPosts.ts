@@ -243,8 +243,9 @@ Here are the scientific names that hide gluten on labels:
 This is exactly why we built GlutenWorld's scanner. It:
 - **Identifies all 47 hidden ingredients** in seconds
 - **Updates daily** with manufacturer changes
-- **Works offline** so you're never caught without it
 - **Warns about cross-contamination** risks
+
+**[Start Your Free 5-Day Trial - No Credit Card Required](/auth)**
 
 ### 3. Create Your Safe List
 
@@ -277,13 +278,15 @@ Remember Sarah from earlier? She's been gluten-free incident-free for 18 months 
 Don't wait for your next accidental exposure. Here's what to do right now:
 
 1. **Save this list** - Bookmark it or print it out
-2. **Download our scanner** - Start your free trial
+2. **Download our scanner** - [Start your free trial](/auth)
 3. **Check your medicine cabinet** - Scan all medications today
 4. **Share this article** - Help others avoid hidden gluten
 
 ### Start Scanning in 30 Seconds
 
 Join 500,000+ people who never worry about hidden gluten again.
+
+**[Get Your Free 5-Day Trial - Start Now](/auth)**
 
 *No credit card required • Cancel anytime*
 

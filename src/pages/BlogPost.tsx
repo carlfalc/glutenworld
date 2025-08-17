@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { blogPosts } from '@/data/blogPosts';
+import FreeTrialButton from '@/components/FreeTrialButton';
 import { useToast } from '@/hooks/use-toast';
 
 const BlogPost = () => {
@@ -122,6 +123,18 @@ const BlogPost = () => {
                 Share
               </Button>
             </div>
+            
+            {/* Strategic Free Trial CTA */}
+            <div className="bg-gradient-to-r from-gluten-primary/10 to-gluten-secondary/10 p-6 rounded-lg border border-gluten-primary/20 mb-8">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-foreground mb-2">Never Get Glutened Again</h3>
+                <p className="text-muted-foreground mb-4">Join 500,000+ people protecting themselves with our scanner</p>
+                <FreeTrialButton size="lg" className="px-8 py-3">
+                  Start Free 5-Day Trial
+                </FreeTrialButton>
+                <p className="text-xs text-muted-foreground mt-2">No credit card required • Cancel anytime</p>
+              </div>
+            </div>
           </header>
 
           {/* Article Content */}
@@ -207,6 +220,29 @@ const BlogPost = () => {
                 .join('')
             }}
           />
+          
+          {/* Strategic Free Trial CTAs throughout content */}
+          <div className="mt-12 space-y-8">
+            <div className="bg-gradient-to-r from-gluten-primary/5 to-gluten-secondary/5 p-6 rounded-xl border border-gluten-primary/10 text-center">
+              <h3 className="text-xl font-bold text-foreground mb-3">Ready to Protect Yourself?</h3>
+              <p className="text-muted-foreground mb-4">Start scanning products immediately with our free trial</p>
+              <FreeTrialButton size="lg" className="px-8 py-3">
+                Get Free Trial Now
+              </FreeTrialButton>
+            </div>
+            
+            <div className="bg-muted/30 p-6 rounded-xl border border-border">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">Don't risk another exposure</h4>
+                  <p className="text-sm text-muted-foreground">99.7% accuracy • Works offline • Updated daily</p>
+                </div>
+                <FreeTrialButton variant="outline" className="shrink-0">
+                  Try Scanner Free
+                </FreeTrialButton>
+              </div>
+            </div>
+          </div>
         </article>
       </main>
     </div>
