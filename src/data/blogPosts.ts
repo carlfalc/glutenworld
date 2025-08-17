@@ -66,7 +66,7 @@ Most people with celiac disease know to check food labels, but **medications are
 ### Real User Story
 > *"I was taking a daily vitamin for three months and couldn't figure out why I felt sick constantly. Our scanner app detected gluten in the 'natural coating' – it was wheat-derived. I had been poisoning myself daily."* - Sarah M., app user
 
-**[Free Trial - Scan Your Medications Now](/auth)**
+**[Free Trial](/auth)** - Scan Your Medications Now
 
 **Pro Tip:** Always scan medication barcodes or photograph ingredient lists before taking anything new. Even if you've taken a medication before, manufacturers can change formulations without notice.
 
@@ -95,6 +95,8 @@ While most celiacs know to avoid bread and pasta, these processed foods frequent
 ### The French Fry Conspiracy
 
 Here's something that shocks most people: **McDonald's french fries in the US contain wheat** (they're gluten-free in many other countries). The "natural beef flavor" contains hydrolyzed wheat protein. We've detected this in:
+
+**[Free Trial](/auth)** - Check Fast Food Items
 
 16. **Fast Food French Fries** - Seasoning and coating issues
 17. **Frozen Hash Browns** - Wheat-based crisping agents
@@ -125,6 +127,8 @@ That collection of condiments in your fridge? It's probably full of gluten. Our 
 ### The Malt Vinegar Problem
 
 Malt vinegar is made from barley and is NOT gluten-free, despite what some websites claim. It's hidden in:
+
+**[Free Trial](/auth)** - Scan Condiments & Sauces
 
 29. **Pickles** - Especially British-style
 30. **Chutneys** - Traditional recipes
