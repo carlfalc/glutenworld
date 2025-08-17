@@ -126,33 +126,84 @@ const BlogPost = () => {
 
           {/* Article Content */}
           <div 
-            className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-a:text-gluten-primary hover:prose-a:text-gluten-primary/80"
+            className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-a:text-primary hover:prose-a:text-primary/80"
             dangerouslySetInnerHTML={{ 
               __html: post.content
                 .split('\n')
-                .map(line => {
+                .map((line, index, array) => {
+                  // Handle anchor links
+                  if (line.startsWith('<a id=')) {
+                    return line;
+                  }
+                  // Handle horizontal rules
+                  if (line.trim() === '---') {
+                    return '<hr class="my-8 border-border">';
+                  }
+                  // Handle headers with improved styling
                   if (line.startsWith('# ')) {
-                    return `<h1 class="text-3xl font-bold mt-8 mb-4">${line.slice(2)}</h1>`;
+                    return `<h1 class="text-4xl font-bold mt-12 mb-6 text-foreground">${line.slice(2)}</h1>`;
                   } else if (line.startsWith('## ')) {
-                    return `<h2 class="text-2xl font-bold mt-6 mb-3">${line.slice(3)}</h2>`;
+                    return `<h2 class="text-3xl font-bold mt-10 mb-5 text-foreground">${line.slice(3)}</h2>`;
                   } else if (line.startsWith('### ')) {
-                    return `<h3 class="text-xl font-bold mt-4 mb-2">${line.slice(4)}</h3>`;
-                  } else if (line.startsWith('- **') && line.includes('**')) {
-                    const match = line.match(/- \*\*(.*?)\*\* - (.+)/);
+                    return `<h3 class="text-2xl font-bold mt-8 mb-4 text-foreground">${line.slice(4)}</h3>`;
+                  }
+                  // Handle blockquotes for testimonials
+                  else if (line.startsWith('> ')) {
+                    return `<blockquote class="border-l-4 border-primary bg-muted/30 p-4 my-6 italic">${line.slice(2)}</blockquote>`;
+                  }
+                  // Handle metadata lines (italic with asterisks)
+                  else if (line.startsWith('*') && line.endsWith('*') && !line.includes('**')) {
+                    return `<p class="text-muted-foreground text-sm italic mb-6 border-b border-border pb-4">${line.slice(1, -1)}</p>`;
+                  }
+                  // Handle bold callouts
+                  else if (line.startsWith('**') && line.endsWith('**')) {
+                    return `<p class="text-lg font-bold text-primary bg-primary/5 p-4 rounded-lg my-6">${line.slice(2, -2)}</p>`;
+                  }
+                  // Handle numbered lists with better styling
+                  else if (/^\d+\.\s\*\*/.test(line)) {
+                    const match = line.match(/^(\d+)\.\s\*\*(.*?)\*\*\s-\s(.+)/);
                     if (match) {
-                      return `<li class="mb-2"><strong class="text-gluten-primary">${match[1]}</strong> - ${match[2]}</li>`;
+                      return `<div class="mb-3 p-3 bg-muted/20 rounded-lg"><strong class="text-primary">${match[1]}. ${match[2]}</strong> - ${match[3]}</div>`;
+                    }
+                    return `<p class="mb-3">${line}</p>`;
+                  }
+                  // Handle bullet points with bold items
+                  else if (line.startsWith('- **') && line.includes('**')) {
+                    const match = line.match(/- \*\*(.*?)\*\*\s?-?\s?(.+)/);
+                    if (match) {
+                      return `<li class="mb-3 p-2 bg-muted/10 rounded"><strong class="text-primary">${match[1]}</strong>${match[2] ? ' - ' + match[2] : ''}</li>`;
                     }
                     return `<li class="mb-2">${line.slice(2)}</li>`;
-                  } else if (line.startsWith('- ')) {
-                    return `<li class="mb-1">${line.slice(2)}</li>`;
-                  } else if (line.trim() === '') {
-                    return '<br>';
-                  } else if (line.startsWith('*') && line.endsWith('*')) {
-                    return `<p class="italic text-muted-foreground text-sm mt-6">${line.slice(1, -1)}</p>`;
-                  } else {
-                    return `<p class="mb-4 leading-relaxed">${line}</p>`;
+                  }
+                  // Handle regular bullet points
+                  else if (line.startsWith('- ')) {
+                    return `<li class="mb-2">${line.slice(2)}</li>`;
+                  }
+                  // Handle FAQ questions (bold Q:)
+                  else if (line.startsWith('**Q:')) {
+                    return `<h4 class="text-lg font-bold text-primary mt-6 mb-2">${line.replace(/\*\*/g, '')}</h4>`;
+                  }
+                  // Handle FAQ answers (A:)
+                  else if (line.startsWith('A:')) {
+                    return `<p class="mb-4 pl-4 border-l-2 border-primary/30 bg-muted/20 p-3 rounded-r-lg">${line.slice(2).trim()}</p>`;
+                  }
+                  // Handle empty lines
+                  else if (line.trim() === '') {
+                    return '';
+                  }
+                  // Handle regular paragraphs with improved formatting
+                  else {
+                    // Replace **bold** text
+                    let formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>');
+                    // Replace *italic* text
+                    formattedLine = formattedLine.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    // Handle links
+                    formattedLine = formattedLine.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary hover:text-primary/80 underline">$1</a>');
+                    
+                    return `<p class="mb-4 leading-relaxed text-foreground">${formattedLine}</p>`;
                   }
                 })
+                .filter(html => html.trim() !== '')
                 .join('')
             }}
           />
