@@ -285,7 +285,7 @@ Don't wait for your next accidental exposure. Here's what to do right now:
 
 Join 500,000+ people who never worry about hidden gluten again.
 
-*No credit card required • Works offline • Cancel anytime*
+*No credit card required • Cancel anytime*
 
 ---
 
