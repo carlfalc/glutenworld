@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -972,31 +972,31 @@ export type Database = {
       get_most_converted_recipes: {
         Args: { limit_count?: number }
         Returns: {
-          id: string
-          title: string
-          original_recipe: string
-          converted_recipe: string
-          ingredients: Json
-          instructions: string[]
-          prep_time: number
-          cook_time: number
-          servings: number
-          difficulty_level: string
-          cuisine_type: string
+          average_rating: number
           calories_per_serving: number
-          protein_g: number
           carbs_g: number
+          cholesterol_mg: number
+          conversion_count: number
+          converted_recipe: string
+          cook_time: number
+          created_at: string
+          cuisine_type: string
+          difficulty_level: string
           fat_g: number
           fiber_g: number
-          sugar_g: number
-          sodium_mg: number
-          cholesterol_mg: number
+          id: string
           image_url: string
-          average_rating: number
-          rating_count: number
-          conversion_count: number
+          ingredients: Json
+          instructions: string[]
           last_converted_at: string
-          created_at: string
+          original_recipe: string
+          prep_time: number
+          protein_g: number
+          rating_count: number
+          servings: number
+          sodium_mg: number
+          sugar_g: number
+          title: string
         }[]
       }
       get_user_auth_providers: {
@@ -1009,8 +1009,8 @@ export type Database = {
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
