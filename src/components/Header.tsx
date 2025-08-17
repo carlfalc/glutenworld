@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ChefHat, Sparkles, User, LogOut, Crown, AlignJustify, Brain, MapPin, HelpCircle } from 'lucide-react';
+import { ChefHat, Sparkles, User, LogOut, Crown, AlignJustify, Brain, MapPin, HelpCircle, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -99,15 +99,24 @@ const Header = () => {
                         Fav Places
                       </NavigationMenuLink>
                     </NavigationMenuItem>
-                    <NavigationMenuItem>
-                      <NavigationMenuLink
-                        className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
-                        onClick={() => navigate('/store-locator')}
-                      >
-                        <MapPin className="w-4 h-4" />
-                        Store Locator
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                     <NavigationMenuItem>
+                       <NavigationMenuLink
+                         className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
+                         onClick={() => navigate('/store-locator')}
+                       >
+                         <MapPin className="w-4 h-4" />
+                         Store Locator
+                       </NavigationMenuLink>
+                     </NavigationMenuItem>
+                     <NavigationMenuItem>
+                       <NavigationMenuLink
+                         className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1")}
+                         onClick={() => navigate('/blog')}
+                       >
+                         <BookOpen className="w-4 h-4" />
+                         Blog
+                       </NavigationMenuLink>
+                     </NavigationMenuItem>
                     <NavigationMenuItem>
                       <NavigationMenuLink
                         className={cn(navigationMenuTriggerStyle(), "cursor-pointer flex items-center gap-1 text-gluten-primary")}
@@ -185,14 +194,22 @@ const Header = () => {
                       >
                         Fav Places
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="justify-start text-lg flex items-center gap-2"
-                        onClick={() => navigate('/store-locator')}
-                      >
-                        <MapPin className="w-4 h-4" />
-                        Store Locator
-                      </Button>
+                       <Button 
+                         variant="ghost" 
+                         className="justify-start text-lg flex items-center gap-2"
+                         onClick={() => navigate('/store-locator')}
+                       >
+                         <MapPin className="w-4 h-4" />
+                         Store Locator
+                       </Button>
+                       <Button 
+                         variant="ghost" 
+                         className="justify-start text-lg flex items-center gap-2"
+                         onClick={() => navigate('/blog')}
+                       >
+                         <BookOpen className="w-4 h-4" />
+                         Blog
+                       </Button>
                       <Button 
                         variant="ghost" 
                         className="justify-start text-lg flex items-center gap-2 text-gluten-primary"

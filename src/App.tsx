@@ -21,6 +21,8 @@ import FavPlaces from "./pages/FavPlaces";
 import AddProduct from "./pages/AddProduct";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -65,9 +67,11 @@ const App = () => {
                     <Route path="/recipe-menu" element={<RecipeMenu />} />
                     <Route path="/store-locator" element={<StoreLocator />} />
                     <Route path="/fav-places" element={<FavPlaces />} />
-                    <Route path="/add-product" element={<AddProduct />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/subscription" element={<Subscription />} />
+                     <Route path="/add-product" element={<AddProduct />} />
+                     <Route path="/contact" element={<Contact />} />
+                     <Route path="/blog" element={<Blog />} />
+                     <Route path="/blog/:slug" element={<BlogPost />} />
+                     <Route path="/subscription" element={<Subscription />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
