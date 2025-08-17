@@ -296,9 +296,6 @@ Don't wait for your next accidental exposure. Here's what to do right now:
 
 Join 500,000+ people who never worry about hidden gluten again.
 
-**[Get Your Free 5-Day Trial - Start Now](/auth)**
-
-**[🚀 FREE TRIAL](/auth)**
 
 *No credit card required • Cancel anytime*
 
