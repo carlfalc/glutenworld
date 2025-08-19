@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +15,7 @@ export const useAIGeneratorAccess = () => {
 
   const checkAccess = async () => {
     setLoading(true);
-    
+
     if (!user) {
       console.log('🔒 No user logged in');
       setHasAccess(false);
@@ -37,7 +38,7 @@ export const useAIGeneratorAccess = () => {
         return;
       }
 
-      // Check if user has yearly subscription (automatic access)
+      // Annual subscription has automatic access
       if (subscription_tier === 'Annual') {
         console.log('✅ User has Annual subscription - granting access');
         setHasAccess(true);
@@ -46,44 +47,20 @@ export const useAIGeneratorAccess = () => {
         return;
       }
 
-      console.log('💳 Checking paid upgrade in database...');
-      
-      // First check by user_id, then by email as fallback
-      let accessData = null;
-      
-      const { data: userIdData, error: userIdError } = await supabase
+      console.log('💳 Checking paid upgrade in database (by user_id only due to RLS)...');
+
+      // With new RLS policies, users can only read rows where user_id = auth.uid()
+      const { data: accessRow, error } = await supabase
         .from('ai_generator_access')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (userIdError) {
-        console.error('❌ Database error checking by user_id:', userIdError.message);
+      if (error) {
+        console.error('❌ Database error checking ai_generator_access:', error.message);
       }
 
-      if (userIdData && userIdData.paid === true) {
-        accessData = userIdData;
-        console.log('✅ Found paid upgrade by user_id');
-      } else {
-        // Fallback to email check
-        console.log('🔍 No result by user_id, trying by email...');
-        const { data: emailData, error: emailError } = await supabase
-          .from('ai_generator_access')
-          .select('*')
-          .eq('email', user.email)
-          .maybeSingle();
-        
-        if (emailError) {
-          console.error('❌ Database error checking by email:', emailError.message);
-        }
-        
-        if (emailData && emailData.paid === true) {
-          accessData = emailData;
-          console.log('✅ Found paid upgrade by email');
-        }
-      }
-
-      if (accessData && accessData.paid === true) {
+      if (accessRow && accessRow.paid === true) {
         console.log('✅ Granting AI generator access - user has paid');
         setHasAccess(true);
         setHasPaidUpgrade(true);
@@ -105,24 +82,21 @@ export const useAIGeneratorAccess = () => {
     if (!user) return;
 
     console.log('🛒 Starting AI generator upgrade purchase...');
-    
-    try {
-      console.log('📞 Calling ai-generator-upgrade function...');
-      const { data, error } = await supabase.functions.invoke('ai-generator-upgrade');
-      
-      console.log('📋 Function response:', { data, error });
-      
-      if (error) throw error;
-      
-      if (data?.url) {
-        console.log('🌐 Redirecting to Stripe checkout:', data.url);
-        window.open(data.url, '_blank');
-      } else {
-        console.error('❌ No checkout URL received');
-      }
-    } catch (error) {
+
+    // This calls an Edge Function that operates with the service role to create/update records securely
+    const { data, error } = await supabase.functions.invoke('ai-generator-upgrade');
+    console.log('📋 Function response:', { data, error });
+
+    if (error) {
       console.error('💥 Error purchasing AI generator upgrade:', error);
       throw error;
+    }
+
+    if (data?.url) {
+      console.log('🌐 Redirecting to Stripe checkout:', data.url);
+      window.open(data.url, '_blank');
+    } else {
+      console.error('❌ No checkout URL received');
     }
   };
 
@@ -135,6 +109,6 @@ export const useAIGeneratorAccess = () => {
     hasPaidUpgrade,
     loading,
     purchaseUpgrade,
-    checkAccess
+    checkAccess,
   };
 };
