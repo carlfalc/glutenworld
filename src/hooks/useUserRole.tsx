@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,10 +13,6 @@ export function useUserRole() {
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
   
-  // Fast-path for owner - check email immediately without API call
-  const isOwnerByEmail = useMemo(() => {
-    return user?.email === 'falconercarlandrew@gmail.com';
-  }, [user?.email]);
 
   useEffect(() => {
     async function fetchUserRole() {
@@ -26,13 +22,6 @@ export function useUserRole() {
         return;
       }
 
-      // Fast-path for owner - set immediately and skip API call
-      if (isOwnerByEmail) {
-        console.log('useUserRole: Fast-path owner access granted');
-        setRole("owner");
-        setLoading(false);
-        return;
-      }
 
       // Check cache first
       const cached = roleCache.get(user.id);
@@ -68,7 +57,7 @@ export function useUserRole() {
     }
 
     fetchUserRole();
-  }, [user, isOwnerByEmail]);
+  }, [user]);
 
   const isOwner = role === "owner";
   const isTester = role === "tester";

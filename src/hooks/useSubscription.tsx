@@ -29,8 +29,6 @@ export const useSubscription = () => {
     loading: true,
   });
 
-  // Fast-path for owner - skip subscription checks entirely
-  const isOwnerByEmail = user?.email === 'falconercarlandrew@gmail.com';
 
   const checkSubscription = async () => {
     if (!user || !session) {

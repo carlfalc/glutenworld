@@ -652,6 +652,30 @@ export type Database = {
         }
         Relationships: []
       }
+      system_config: {
+        Row: {
+          config_key: string
+          config_value: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          config_key: string
+          config_value: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          config_key?: string
+          config_value?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_addresses: {
         Row: {
           city: string
@@ -999,6 +1023,10 @@ export type Database = {
           title: string
         }[]
       }
+      get_owner_email: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_auth_providers: {
         Args: { user_email: string }
         Returns: string[]
@@ -1008,6 +1036,13 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role_secure: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string

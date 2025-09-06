@@ -26,19 +26,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [hasCheckedAccess, setHasCheckedAccess] = useState(false);
   
   // Fast-path for owner - skip most loading states
-  const isOwnerByEmail = user?.email === 'falconercarlandrew@gmail.com';
-  const shouldShowLoading = authLoading || (!isOwnerByEmail && (subscriptionLoading || roleLoading)) || !hasCheckedAccess;
+  const shouldShowLoading = authLoading || (subscriptionLoading || roleLoading) || !hasCheckedAccess;
 
   useEffect(() => {
-    // Fast-path for owner - grant immediate access
-    if (user && isOwnerByEmail) {
-      console.log('ProtectedRoute: Fast-path owner access granted');
-      setHasCheckedAccess(true);
-      return;
-    }
 
     // For non-owners, wait for all loading states to complete
-    if (!authLoading && (!user || (!isOwnerByEmail && !subscriptionLoading && !roleLoading))) {
+    if (!authLoading && (!user || (!subscriptionLoading && !roleLoading))) {
       setHasCheckedAccess(true);
       
       if (!user) {
@@ -52,8 +45,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         return;
       }
 
-      // Owner bypasses subscription checks (redundant check for safety)
-      if (isOwner || isOwnerByEmail) {
+      // Owner bypasses subscription checks
+      if (isOwner) {
         console.log('ProtectedRoute: Owner access granted');
         return;
       }
@@ -70,7 +63,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         return;
       }
     }
-  }, [user, subscribed, is_trialing, isOwner, isOwnerByEmail, authLoading, subscriptionLoading, roleLoading, navigate, redirectTo, toast]);
+  }, [user, subscribed, is_trialing, isOwner, authLoading, subscriptionLoading, roleLoading, navigate, redirectTo, toast]);
 
   // Use optimized loading check
   if (shouldShowLoading) {
@@ -110,7 +103,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // If user doesn't have subscription or trial (owner bypasses this check)
-  if (!isOwner && !isOwnerByEmail && !subscribed && !is_trialing) {
+  if (!isOwner && !subscribed && !is_trialing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gluten-primary/10 via-gluten-secondary/5 to-background p-4">
         <Card className="w-full max-w-md">
